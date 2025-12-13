@@ -39,3 +39,12 @@ You are an expert in TypeScript, Angular, and scalable web application developme
 - Design services around a single responsibility
 - Use the `providedIn: 'root'` option for singleton services
 - Use the `inject()` function instead of constructor injection
+
+## Documentation & Commit Rules
+- Before each commit, consolidate all `.md` files in each folder into a single file named `{folder-name}.md`
+  - Root folder: all `.md` files → `mvp-finance.md`
+  - Dashboard folder: all `.md` files → `dashboard.md`
+- **Exceptions:** Never touch `CLAUDE.md` or `README.md` files
+- Remove all image references from consolidated markdown files
+- Delete redundant source `.md` files after consolidation
+- Images are excluded from commits (stored in Google Workspace instead)

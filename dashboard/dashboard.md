@@ -1,3 +1,29 @@
+# MVP Finance Dashboard - Design & Structural Specifications
+
+## Main Layout Structure
+
+### Layout (Flex Column, 100vh height)
+
+#### 1. Top Bar (MatToolbar - Primary color, sticky top)
+- Menu Button (MatIconButton, Icon: 'menu') -> Toggles the Sidenav signal
+- Title Text: "MVP Finance"
+- Spacer (CSS flex-grow)
+
+#### 2. Sidenav Container (MatSidenavContainer - flex-grow to fill remaining space)
+
+**A. The Sidebar (MatSidenav)**
+- **Settings:** Mode="side", Opened="true" (bound to signal)
+- **Content:**
+    - MatNavList
+        - Link: Home (Icon: home)
+        - Link: Settings (Icon: settings)
+
+**B. The Main Content Area (MatSidenavContent - flex column)**
+- **Body wrapper:** (flex-grow, padding: 20px)
+    - `<router-outlet></router-outlet>` (Placeholder for page content)
+
+---
+
 # MVP Finance - Design & Structural Specifications
 
 ## Core (MVP) Pages

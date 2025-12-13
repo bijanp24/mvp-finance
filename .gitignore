@@ -23,6 +23,14 @@ dashboard/.vscode/
 .claude/settings.local.json
 dashboard/.claude/settings.local.json
 
+# Development images (mockups, screenshots, etc.)
+*.png
+*.jpg
+*.jpeg
+*.gif
+!**/public/**
+!**/favicon.ico
+
 # OS
 .DS_Store
 Thumbs.db
