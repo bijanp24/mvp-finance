@@ -1,0 +1,30 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinanceEngine", "FinanceEngine\FinanceEngine.csproj", "{4D79A465-AD1D-DF71-4A4A-A1647149D30C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinanceEngine.Tests", "FinanceEngine.Tests\FinanceEngine.Tests.csproj", "{01644A15-9EEC-F1AE-024A-A8701890310D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4D79A465-AD1D-DF71-4A4A-A1647149D30C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D79A465-AD1D-DF71-4A4A-A1647149D30C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D79A465-AD1D-DF71-4A4A-A1647149D30C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D79A465-AD1D-DF71-4A4A-A1647149D30C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{01644A15-9EEC-F1AE-024A-A8701890310D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{01644A15-9EEC-F1AE-024A-A8701890310D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{01644A15-9EEC-F1AE-024A-A8701890310D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{01644A15-9EEC-F1AE-024A-A8701890310D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C53BB8EE-3A35-4148-BF65-7FFC95ED9A71}
+	EndGlobalSection
+EndGlobal

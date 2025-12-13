@@ -1,0 +1,31 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.spacer {
+  flex-grow: 1;
+}
+
+mat-sidenav-container {
+  flex-grow: 1;
+}
+
+mat-sidenav {
+  width: 240px;
+}
+
+mat-sidenav-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.content-wrapper {
+  flex-grow: 1;
+  padding: 20px;
+}
+
+.active {
+  background-color: rgba(255, 255, 255, 0.08);
+}

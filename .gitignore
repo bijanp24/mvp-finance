@@ -1,0 +1,24 @@
+# .NET
+bin/
+obj/
+*.db
+*.db-shm
+*.db-wal
+
+# Angular
+dashboard/node_modules/
+dashboard/dist/
+dashboard/.angular/
+dashboard/.vscode/
+
+# IDE
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# OS
+.DS_Store
+Thumbs.db
