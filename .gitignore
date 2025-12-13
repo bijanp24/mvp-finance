@@ -19,6 +19,10 @@ dashboard/.vscode/
 *.userosscache
 *.sln.docstates
 
+# Claude Code
+.claude/settings.local.json
+dashboard/.claude/settings.local.json
+
 # OS
 .DS_Store
 Thumbs.db
