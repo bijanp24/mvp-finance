@@ -6,6 +6,7 @@ export interface Account {
   initialBalance: number;
   annualPercentageRate?: number;
   minimumPayment?: number;
+  currentBalance: number;
 }
 
 export interface CreateAccountRequest {

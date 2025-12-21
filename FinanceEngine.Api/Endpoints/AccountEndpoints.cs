@@ -22,23 +22,49 @@ public static class AccountEndpoints
     {
         var accounts = await db.Accounts
             .Where(a => a.IsActive)
-            .Select(a => new AccountDto(
-                a.Id,
-                a.Name,
-                a.Type.ToString(),
-                a.InitialBalance,
-                a.AnnualPercentageRate,
-                a.MinimumPayment
-            ))
+            .Include(a => a.Events)
             .ToListAsync();
 
-        return Results.Ok(accounts);
+        var accountDtos = accounts.Select(a => new AccountDto(
+            a.Id,
+            a.Name,
+            a.Type.ToString(),
+            a.InitialBalance,
+            a.AnnualPercentageRate,
+            a.MinimumPayment,
+            CalculateBalance(a)
+        )).ToList();
+
+        return Results.Ok(accountDtos);
+    }
+
+    private static decimal CalculateBalance(AccountEntity account)
+    {
+        var balance = account.InitialBalance;
+        foreach (var evt in account.Events)
+        {
+            balance += evt.Type switch
+            {
+                EventType.Income => evt.Amount,
+                EventType.Expense => -evt.Amount,
+                EventType.DebtCharge => evt.Amount,
+                EventType.DebtPayment => -evt.Amount,
+                EventType.InterestFee => evt.Amount,
+                EventType.SavingsContribution => evt.Amount,
+                EventType.InvestmentContribution => evt.Amount,
+                _ => 0
+            };
+        }
+        return balance;
     }
 
     private static async Task<IResult> GetAccountById(int id, FinanceDbContext db)
     {
-        var account = await db.Accounts.FindAsync(id);
-        if (account is null || !account.IsActive)
+        var account = await db.Accounts
+            .Include(a => a.Events)
+            .FirstOrDefaultAsync(a => a.Id == id && a.IsActive);
+
+        if (account is null)
             return Results.NotFound();
 
         return Results.Ok(new AccountDto(
@@ -47,7 +73,8 @@ public static class AccountEndpoints
             account.Type.ToString(),
             account.InitialBalance,
             account.AnnualPercentageRate,
-            account.MinimumPayment
+            account.MinimumPayment,
+            CalculateBalance(account)
         ));
     }
 
@@ -74,14 +101,18 @@ public static class AccountEndpoints
             account.Type.ToString(),
             account.InitialBalance,
             account.AnnualPercentageRate,
-            account.MinimumPayment
+            account.MinimumPayment,
+            account.InitialBalance  // New account has no events yet, so current = initial
         ));
     }
 
     private static async Task<IResult> UpdateAccount(int id, UpdateAccountRequest request, FinanceDbContext db)
     {
-        var account = await db.Accounts.FindAsync(id);
-        if (account is null || !account.IsActive)
+        var account = await db.Accounts
+            .Include(a => a.Events)
+            .FirstOrDefaultAsync(a => a.Id == id && a.IsActive);
+
+        if (account is null)
             return Results.NotFound();
 
         account.Name = request.Name ?? account.Name;
@@ -96,7 +127,8 @@ public static class AccountEndpoints
             account.Type.ToString(),
             account.InitialBalance,
             account.AnnualPercentageRate,
-            account.MinimumPayment
+            account.MinimumPayment,
+            CalculateBalance(account)
         ));
     }
 
@@ -149,7 +181,8 @@ public record AccountDto(
     string Type,
     decimal InitialBalance,
     decimal? AnnualPercentageRate,
-    decimal? MinimumPayment
+    decimal? MinimumPayment,
+    decimal CurrentBalance
 );
 
 public record CreateAccountRequest(

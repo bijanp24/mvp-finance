@@ -1,0 +1,129 @@
+.transactions-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.transactions-layout {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 20px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.quick-add-card {
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+
+  @media (max-width: 1024px) {
+    position: static;
+  }
+}
+
+mat-card-header {
+  margin-bottom: 20px;
+
+  mat-card-title {
+    font-size: 20px;
+    font-weight: 500;
+  }
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.type-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+
+  mat-button-toggle {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 0;
+
+    ::ng-deep .mat-button-toggle-label-content {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px;
+      font-size: 12px;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.recent-transactions-card {
+  min-height: 400px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: rgba(0, 0, 0, 0.54);
+
+  mat-icon {
+    font-size: 72px;
+    width: 72px;
+    height: 72px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+  }
+
+  p {
+    font-size: 16px;
+  }
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.transactions-table {
+  width: 100%;
+
+  th {
+    font-weight: 600;
+  }
+
+  td, th {
+    padding: 12px 8px;
+  }
+
+  mat-chip {
+    font-size: 11px;
+  }
+
+  .positive {
+    color: #2e7d32;
+    font-weight: 500;
+  }
+
+  .negative {
+    color: #c62828;
+    font-weight: 500;
+  }
+}

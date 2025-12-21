@@ -1,0 +1,52 @@
+.accounts-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+mat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+
+  mat-card-title {
+    font-size: 24px;
+    font-weight: 500;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: rgba(0, 0, 0, 0.54);
+
+  mat-icon {
+    font-size: 72px;
+    width: 72px;
+    height: 72px;
+    margin-bottom: 16px;
+    opacity: 0.3;
+  }
+
+  p {
+    font-size: 16px;
+    margin-bottom: 24px;
+  }
+}
+
+.accounts-table {
+  width: 100%;
+
+  th {
+    font-weight: 600;
+  }
+
+  td, th {
+    padding: 12px 8px;
+  }
+
+  mat-chip {
+    font-size: 12px;
+  }
+}
