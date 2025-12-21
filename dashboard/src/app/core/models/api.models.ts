@@ -125,37 +125,6 @@ export interface DebtPayment {
   remainingBalance: number;
 }
 
-export interface SimulationRequest {
-  startDate: string;
-  endDate: string;
-  initialCash: number;
-  debts?: DebtInfo[];
-  events?: SimulationEventInput[];
-}
-
-export interface SimulationEventInput {
-  date: string;
-  type: string;
-  description: string;
-  amount: number;
-  relatedDebtName?: string;
-}
-
-export interface SimulationResult {
-  debtFreeDate?: string;
-  finalCashBalance: number;
-  finalDebtBalances: Record<string, number>;
-  totalInterestPaid: number;
-  snapshots: SimulationSnapshot[];
-}
-
-export interface SimulationSnapshot {
-  date: string;
-  cashBalance: number;
-  totalDebt: number;
-  debtBalances: Record<string, number>;
-}
-
 // Settings models
 export interface UserSettings {
   payFrequency: 'Weekly' | 'BiWeekly' | 'SemiMonthly' | 'Monthly';
