@@ -15,6 +15,20 @@ public class AccountEntity
     public decimal InitialBalance { get; set; }
     public decimal? AnnualPercentageRate { get; set; }  // For debt accounts
     public decimal? MinimumPayment { get; set; }        // For debt accounts
+
+    // Promotional APR fields
+    public decimal? PromotionalAnnualPercentageRate { get; set; }  // e.g., 0.00 for 0% promo
+    public DateTime? PromotionalPeriodEndDate { get; set; }        // When promo expires
+
+    // Balance transfer fee
+    public decimal? BalanceTransferFeePercentage { get; set; }     // e.g., 5.00 for 5%
+
+    // Statement and due date fields (hybrid: day-of-month with optional override)
+    public int? StatementDayOfMonth { get; set; }                  // 1-31, default recurring date
+    public DateTime? StatementDateOverride { get; set; }           // Optional specific date override
+    public int? PaymentDueDayOfMonth { get; set; }                 // 1-31, default recurring date
+    public DateTime? PaymentDueDateOverride { get; set; }          // Optional specific date override
+
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsActive { get; set; } = true;
 

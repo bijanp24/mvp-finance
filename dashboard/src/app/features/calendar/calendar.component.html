@@ -1,0 +1,65 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title>Cash Flow Calendar</mat-card-title>
+    <div class="calendar-controls">
+      <button mat-icon-button (click)="previousMonth()" aria-label="Previous month">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <button mat-button (click)="today()">{{ monthName() }}</button>
+      <button mat-icon-button (click)="nextMonth()" aria-label="Next month">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="calendar-grid">
+      <!-- Weekday headers -->
+      <div class="calendar-header">
+        <div class="calendar-weekday">Sun</div>
+        <div class="calendar-weekday">Mon</div>
+        <div class="calendar-weekday">Tue</div>
+        <div class="calendar-weekday">Wed</div>
+        <div class="calendar-weekday">Thu</div>
+        <div class="calendar-weekday">Fri</div>
+        <div class="calendar-weekday">Sat</div>
+      </div>
+
+      <!-- Calendar days -->
+      @for (week of calendarGrid(); track $index) {
+        <div class="calendar-week">
+          @for (day of week; track day.date.getTime()) {
+            <div class="calendar-day"
+                 [class.other-month]="!day.isCurrentMonth"
+                 [class.today]="isToday(day.date)">
+              <div class="day-number">{{ day.date.getDate() }}</div>
+
+              <!-- Paycheck indicators -->
+              @for (paycheck of day.paychecks; track $index) {
+                <div class="event paycheck"
+                     [matTooltip]="'Paycheck: ' + formatCurrency(paycheck)">
+                  <mat-icon>attach_money</mat-icon>
+                </div>
+              }
+
+              <!-- Debt payment indicators -->
+              @for (payment of day.debtPayments; track payment.accountName) {
+                <div class="event debt-payment"
+                     [matTooltip]="payment.accountName + ': ' + formatCurrency(payment.minimumPayment)">
+                  <mat-icon>credit_card</mat-icon>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    @if (!settings()?.nextPaycheckDate) {
+      <div class="calendar-warning">
+        <mat-icon>info</mat-icon>
+        <p>Set your next paycheck date in Settings to see future paychecks.</p>
+      </div>
+    }
+  </mat-card-content>
+</mat-card>

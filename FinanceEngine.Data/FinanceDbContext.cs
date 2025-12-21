@@ -12,6 +12,7 @@ public class FinanceDbContext : DbContext
     public DbSet<AccountEntity> Accounts => Set<AccountEntity>();
     public DbSet<FinancialEventEntity> Events => Set<FinancialEventEntity>();
     public DbSet<IncomeScheduleEntity> IncomeSchedules => Set<IncomeScheduleEntity>();
+    public DbSet<UserSettingsEntity> UserSettings => Set<UserSettingsEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -25,6 +26,11 @@ public class FinanceDbContext : DbContext
             entity.Property(e => e.InitialBalance).HasPrecision(18, 2);
             entity.Property(e => e.AnnualPercentageRate).HasPrecision(8, 4);
             entity.Property(e => e.MinimumPayment).HasPrecision(18, 2);
+
+            // Promotional APR and balance transfer fee precision
+            entity.Property(e => e.PromotionalAnnualPercentageRate).HasPrecision(8, 4);
+            entity.Property(e => e.BalanceTransferFeePercentage).HasPrecision(8, 4);
+
             entity.HasIndex(e => e.Type);
         });
 
@@ -59,6 +65,15 @@ public class FinanceDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(e => e.TargetAccountId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // UserSettings configuration
+        modelBuilder.Entity<UserSettingsEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.PaycheckAmount).HasPrecision(18, 2);
+            entity.Property(e => e.SafetyBuffer).HasPrecision(18, 2);
+            entity.HasIndex(e => e.IsActive);
         });
     }
 }

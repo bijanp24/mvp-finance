@@ -60,7 +60,60 @@
       </mat-card>
     </div>
 
-    <!-- Section 3: Recent Activity -->
+    <!-- Section 3: Projection Charts -->
+    <div class="projections-section">
+      <div class="projection-cards">
+        <!-- Debt Projection -->
+        <mat-card appearance="outlined">
+          <mat-card-header>
+            <mat-card-title>Debt Projection</mat-card-title>
+            <a mat-button routerLink="/projections" class="view-details">
+              View Details
+              <mat-icon>arrow_forward</mat-icon>
+            </a>
+          </mat-card-header>
+          <mat-card-content>
+            @if (projectionsLoading()) {
+              <div class="loading">Loading projections...</div>
+            } @else if (debtChartData()) {
+              <app-debt-projection-chart
+                [data]="debtChartData()"
+                [height]="'200px'"
+                [compact]="true">
+              </app-debt-projection-chart>
+            } @else {
+              <div class="empty-state">No debt accounts to project</div>
+            }
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Investment Projection -->
+        <mat-card appearance="outlined">
+          <mat-card-header>
+            <mat-card-title>Investment Growth</mat-card-title>
+            <a mat-button routerLink="/projections" class="view-details">
+              View Details
+              <mat-icon>arrow_forward</mat-icon>
+            </a>
+          </mat-card-header>
+          <mat-card-content>
+            @if (projectionsLoading()) {
+              <div class="loading">Loading projections...</div>
+            } @else if (investmentChartData()) {
+              <app-investment-projection-chart
+                [data]="investmentChartData()"
+                [height]="'200px'"
+                [compact]="true">
+              </app-investment-projection-chart>
+            } @else {
+              <div class="empty-state">No investment accounts to project</div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- Section 4: Recent Activity -->
     <mat-card class="recent-activity" appearance="outlined">
       <mat-card-header>
         <mat-card-title>Recent Transactions</mat-card-title>
@@ -94,5 +147,8 @@
         <a mat-button color="primary" routerLink="/transactions">View All</a>
       </mat-card-actions>
     </mat-card>
+
+    <!-- Section 5: Calendar -->
+    <app-calendar></app-calendar>
   }
 </div>

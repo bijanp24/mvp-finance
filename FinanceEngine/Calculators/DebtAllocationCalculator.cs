@@ -62,8 +62,9 @@ public static class DebtAllocationCalculator
 
     private static Dictionary<string, DebtPayment> AllocateAvalanche(List<Debt> debts, decimal extraPayment)
     {
-        // Sort by APR descending (highest first)
-        var sortedDebts = debts.OrderByDescending(d => d.AnnualPercentageRate).ToList();
+        // Sort by effective APR descending (highest first)
+        // EffectiveAPR automatically uses promotional APR when active, regular APR when expired
+        var sortedDebts = debts.OrderByDescending(d => d.EffectiveAPR).ToList();
         return AllocateWithPriority(sortedDebts, extraPayment);
     }
 

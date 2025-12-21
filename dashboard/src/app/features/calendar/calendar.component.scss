@@ -1,0 +1,142 @@
+mat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+}
+
+.calendar-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calendar-grid {
+  display: grid;
+  gap: 1px;
+  background: #e0e0e0;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.calendar-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: #f5f5f5;
+}
+
+.calendar-weekday {
+  padding: 8px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.6);
+  text-transform: uppercase;
+}
+
+.calendar-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar-day {
+  background: white;
+  min-height: 80px;
+  padding: 4px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+
+  &.other-month {
+    background: #fafafa;
+
+    .day-number {
+      color: rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  &.today {
+    background: #e3f2fd;
+
+    .day-number {
+      color: #1976d2;
+      font-weight: 600;
+    }
+  }
+}
+
+.day-number {
+  font-size: 14px;
+  margin-bottom: 4px;
+  text-align: center;
+}
+
+.event {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 11px;
+  padding: 2px 4px;
+  border-radius: 2px;
+  margin-bottom: 2px;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+
+  &.paycheck {
+    background: #c8e6c9;
+    color: #2e7d32;
+  }
+
+  &.debt-payment {
+    background: #ffcdd2;
+    color: #c62828;
+  }
+}
+
+.calendar-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  background: #fff3cd;
+  border-radius: 4px;
+  margin-top: 16px;
+
+  mat-icon {
+    color: #856404;
+  }
+
+  p {
+    margin: 0;
+    color: #856404;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .calendar-day {
+    min-height: 60px;
+    padding: 2px;
+  }
+
+  .day-number {
+    font-size: 12px;
+  }
+
+  .event {
+    font-size: 10px;
+    padding: 1px 2px;
+
+    mat-icon {
+      font-size: 12px;
+      width: 12px;
+      height: 12px;
+    }
+  }
+}

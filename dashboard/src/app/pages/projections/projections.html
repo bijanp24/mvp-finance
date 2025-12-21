@@ -1,0 +1,91 @@
+<div class="projections-page">
+  <mat-card class="header-card" appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Financial Projections</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-button-toggle-group
+        [value]="timeRangeMonths()"
+        (change)="onTimeRangeChange($event.value)"
+        aria-label="Time range selection">
+        <mat-button-toggle [value]="3">3 Months</mat-button-toggle>
+        <mat-button-toggle [value]="6">6 Months</mat-button-toggle>
+        <mat-button-toggle [value]="12">1 Year</mat-button-toggle>
+        <mat-button-toggle [value]="24">2 Years</mat-button-toggle>
+        <mat-button-toggle [value]="60">5 Years</mat-button-toggle>
+      </mat-button-toggle-group>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Debt Projection -->
+  <mat-card class="projection-card" appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Debt Projection</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @if (loading()) {
+        <div class="loading">Calculating projections...</div>
+      } @else if (debtChartData()) {
+        <app-debt-projection-chart
+          [data]="debtChartData()"
+          [height]="'600px'"
+          [compact]="false">
+        </app-debt-projection-chart>
+
+        @if (debtProjection()) {
+          <div class="summary">
+            <h3>Summary</h3>
+            <div class="summary-stats">
+              <div class="stat">
+                <span class="label">Projected Debt-Free Date:</span>
+                <span class="value">{{ formatDate(debtProjection()!.debtFreeDate) }}</span>
+              </div>
+              <div class="stat">
+                <span class="label">Total Interest to be Paid:</span>
+                <span class="value">{{ formatCurrency(debtProjection()!.totalInterestPaid) }}</span>
+              </div>
+            </div>
+          </div>
+        }
+      } @else {
+        <div class="empty-state">No debt accounts to project</div>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Investment Projection -->
+  <mat-card class="projection-card" appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Investment Growth</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @if (loading()) {
+        <div class="loading">Calculating projections...</div>
+      } @else if (investmentChartData()) {
+        <app-investment-projection-chart
+          [data]="investmentChartData()"
+          [height]="'600px'"
+          [compact]="false">
+        </app-investment-projection-chart>
+
+        @if (investmentProjection()) {
+          <div class="summary">
+            <h3>Summary</h3>
+            <div class="summary-stats">
+              <div class="stat">
+                <span class="label">Projected Value:</span>
+                <span class="value">{{ formatCurrency(investmentProjection()!.finalNominalValue) }}</span>
+              </div>
+              <div class="stat">
+                <span class="label">Total Growth:</span>
+                <span class="value">{{ formatCurrency(investmentProjection()!.totalNominalGrowth) }}</span>
+              </div>
+            </div>
+          </div>
+        }
+      } @else {
+        <div class="empty-state">No investment accounts to project</div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

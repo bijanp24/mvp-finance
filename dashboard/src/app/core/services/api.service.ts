@@ -11,7 +11,11 @@ import {
   DebtAllocationRequest,
   DebtAllocationResult,
   SimulationRequest,
-  SimulationResult
+  SimulationResult,
+  InvestmentProjectionRequest,
+  InvestmentProjectionResult,
+  UserSettings,
+  UpdateSettingsRequest
 } from '../models/api.models';
 
 @Injectable({
@@ -81,5 +85,21 @@ export class ApiService {
 
   runSimulation(request: SimulationRequest): Observable<SimulationResult> {
     return this.http.post<SimulationResult>(`${this.baseUrl}/calculators/simulation`, request);
+  }
+
+  calculateInvestmentProjection(request: InvestmentProjectionRequest): Observable<InvestmentProjectionResult> {
+    return this.http.post<InvestmentProjectionResult>(
+      `${this.baseUrl}/calculators/investment-projection`,
+      request
+    );
+  }
+
+  // Settings endpoints
+  getSettings(): Observable<UserSettings> {
+    return this.http.get<UserSettings>(`${this.baseUrl}/settings`);
+  }
+
+  updateSettings(request: UpdateSettingsRequest): Observable<UserSettings> {
+    return this.http.put<UserSettings>(`${this.baseUrl}/settings`, request);
   }
 }

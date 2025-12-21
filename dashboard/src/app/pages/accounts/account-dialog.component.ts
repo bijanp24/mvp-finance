@@ -49,6 +49,9 @@ export interface AccountDialogData {
           @if (form.get('type')?.hasError('required') && form.get('type')?.touched) {
             <mat-error>Account type is required</mat-error>
           }
+          @if (data.mode === 'edit') {
+            <mat-hint>Account type cannot be changed after creation</mat-hint>
+          }
         </mat-form-field>
 
         <mat-form-field appearance="outline">
@@ -57,6 +60,9 @@ export interface AccountDialogData {
           <span matTextPrefix>$&nbsp;</span>
           @if (form.get('initialBalance')?.hasError('required') && form.get('initialBalance')?.touched) {
             <mat-error>Initial balance is required</mat-error>
+          }
+          @if (data.mode === 'edit') {
+            <mat-hint>Initial balance cannot be changed - use transactions to adjust balance</mat-hint>
           }
         </mat-form-field>
 
@@ -88,8 +94,59 @@ export interface AccountDialogData {
         @if (showMinimumPayment()) {
           <mat-form-field appearance="outline">
             <mat-label>Minimum Payment (Optional)</mat-label>
-            <input matInput type="number" formControlName="minimumPayment" placeholder="0.00">
+            <input matInput type="number" formControlName="minimumPayment" placeholder="Auto-calculated if left empty">
             <span matTextPrefix>$&nbsp;</span>
+            <mat-hint>Leave empty for auto-calculation: 2% for 0% promo, 4% otherwise</mat-hint>
+          </mat-form-field>
+        }
+
+        @if (showDebtFeatures()) {
+          <div class="section-divider">
+            <h3>Additional Debt Features (Optional)</h3>
+          </div>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Promotional APR (%)</mat-label>
+            <input matInput type="number" formControlName="promotionalAnnualPercentageRate" placeholder="0.00">
+            <span matTextSuffix>%</span>
+            <mat-hint>Intro rate (e.g., 0% for 12 months)</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Promo End Date</mat-label>
+            <input matInput type="date" formControlName="promotionalPeriodEndDate">
+            <mat-hint>When promotional APR expires</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Balance Transfer Fee (%)</mat-label>
+            <input matInput type="number" formControlName="balanceTransferFeePercentage" placeholder="0.00">
+            <span matTextSuffix>%</span>
+            <mat-hint>Typically 3-5%</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Statement Day of Month</mat-label>
+            <input matInput type="number" formControlName="statementDayOfMonth" placeholder="1-31" min="1" max="31">
+            <mat-hint>1-31, recurring monthly</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Statement Override (Optional)</mat-label>
+            <input matInput type="date" formControlName="statementDateOverride">
+            <mat-hint>One-time specific date override</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Payment Due Day of Month</mat-label>
+            <input matInput type="number" formControlName="paymentDueDayOfMonth" placeholder="1-31" min="1" max="31">
+            <mat-hint>1-31, recurring monthly</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Due Date Override (Optional)</mat-label>
+            <input matInput type="date" formControlName="paymentDueDateOverride">
+            <mat-hint>One-time specific date override</mat-hint>
           </mat-form-field>
         }
       </form>
@@ -108,7 +165,9 @@ export interface AccountDialogData {
   `,
   styles: [`
     mat-dialog-content {
-      min-width: 400px;
+      min-width: 500px;
+      max-height: 70vh;
+      overflow-y: auto;
       padding-top: 20px;
     }
 
@@ -120,6 +179,21 @@ export interface AccountDialogData {
 
     mat-form-field {
       width: 100%;
+    }
+
+    .section-divider {
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(0, 0, 0, 0.12);
+    }
+
+    .section-divider h3 {
+      margin: 0 0 8px 0;
+      font-size: 14px;
+      font-weight: 500;
+      color: rgba(0, 0, 0, 0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     mat-dialog-actions {
@@ -145,13 +219,26 @@ export class AccountDialogComponent {
     return this.form.get('type')?.value === 'Debt';
   }
 
+  showDebtFeatures(): boolean {
+    return this.form.get('type')?.value === 'Debt';
+  }
+
   constructor() {
+    // Convert decimal to percentage for display (0.18 -> 18%)
+    const account = this.data.account;
     this.form = this.fb.group({
-      name: [this.data.account?.name || '', Validators.required],
-      type: [this.data.account?.type || '', Validators.required],
-      initialBalance: [this.data.account?.initialBalance || 0, Validators.required],
-      annualPercentageRate: [this.data.account?.annualPercentageRate || null],
-      minimumPayment: [this.data.account?.minimumPayment || null]
+      name: [account?.name || '', Validators.required],
+      type: [account?.type || '', Validators.required],
+      initialBalance: [account?.initialBalance || 0, Validators.required],
+      annualPercentageRate: [account?.annualPercentageRate != null ? account.annualPercentageRate * 100 : null],
+      minimumPayment: [account?.minimumPayment || null],
+      promotionalAnnualPercentageRate: [account?.promotionalAnnualPercentageRate != null ? account.promotionalAnnualPercentageRate * 100 : null],
+      promotionalPeriodEndDate: [account?.promotionalPeriodEndDate || null],
+      balanceTransferFeePercentage: [account?.balanceTransferFeePercentage != null ? account.balanceTransferFeePercentage * 100 : null],
+      statementDayOfMonth: [account?.statementDayOfMonth || null],
+      statementDateOverride: [account?.statementDateOverride || null],
+      paymentDueDayOfMonth: [account?.paymentDueDayOfMonth || null],
+      paymentDueDateOverride: [account?.paymentDueDateOverride || null]
     });
 
     // Watch type changes to conditionally validate fields
@@ -172,9 +259,30 @@ export class AccountDialogComponent {
       // Minimum payment is only for Debt (and it's optional)
       minPaymentControl?.clearValidators();
 
+      // Add validation for new debt fields
+      if (type === 'Debt') {
+        const statementDayControl = this.form.get('statementDayOfMonth');
+        const paymentDueDayControl = this.form.get('paymentDueDayOfMonth');
+        const btFeeControl = this.form.get('balanceTransferFeePercentage');
+
+        statementDayControl?.setValidators([Validators.min(1), Validators.max(31)]);
+        paymentDueDayControl?.setValidators([Validators.min(1), Validators.max(31)]);
+        btFeeControl?.setValidators([Validators.min(0), Validators.max(100)]);
+
+        statementDayControl?.updateValueAndValidity();
+        paymentDueDayControl?.updateValueAndValidity();
+        btFeeControl?.updateValueAndValidity();
+      }
+
       aprControl?.updateValueAndValidity();
       minPaymentControl?.updateValueAndValidity();
     });
+
+    // Disable type and initialBalance fields in edit mode
+    if (this.data.mode === 'edit') {
+      this.form.get('type')?.disable();
+      this.form.get('initialBalance')?.disable();
+    }
   }
 
   onCancel(): void {
@@ -184,11 +292,33 @@ export class AccountDialogComponent {
   onSave(): void {
     if (this.form.valid) {
       this.saving.set(true);
-      const request: CreateAccountRequest = this.form.value;
+
+      // Convert percentage fields to decimal (18% -> 0.18) for backend
+      const formData = { ...this.form.value };
+      if (formData.annualPercentageRate != null) {
+        formData.annualPercentageRate = formData.annualPercentageRate / 100;
+      }
+      if (formData.promotionalAnnualPercentageRate != null) {
+        formData.promotionalAnnualPercentageRate = formData.promotionalAnnualPercentageRate / 100;
+      }
+      if (formData.balanceTransferFeePercentage != null) {
+        formData.balanceTransferFeePercentage = formData.balanceTransferFeePercentage / 100;
+      }
 
       const operation = this.data.mode === 'create'
-        ? this.apiService.createAccount(request)
-        : this.apiService.updateAccount(this.data.account!.id, request);
+        ? this.apiService.createAccount(formData)
+        : this.apiService.updateAccount(this.data.account!.id, {
+            name: formData.name,
+            annualPercentageRate: formData.annualPercentageRate,
+            minimumPayment: formData.minimumPayment,
+            promotionalAnnualPercentageRate: formData.promotionalAnnualPercentageRate,
+            promotionalPeriodEndDate: formData.promotionalPeriodEndDate,
+            balanceTransferFeePercentage: formData.balanceTransferFeePercentage,
+            statementDayOfMonth: formData.statementDayOfMonth,
+            statementDateOverride: formData.statementDateOverride,
+            paymentDueDayOfMonth: formData.paymentDueDayOfMonth,
+            paymentDueDateOverride: formData.paymentDueDateOverride
+          });
 
       operation.subscribe({
         next: () => {

@@ -7,6 +7,14 @@ export interface Account {
   annualPercentageRate?: number;
   minimumPayment?: number;
   currentBalance: number;
+  promotionalAnnualPercentageRate?: number;
+  promotionalPeriodEndDate?: string;
+  balanceTransferFeePercentage?: number;
+  statementDayOfMonth?: number;
+  statementDateOverride?: string;
+  paymentDueDayOfMonth?: number;
+  paymentDueDateOverride?: string;
+  effectiveAnnualPercentageRate?: number;
 }
 
 export interface CreateAccountRequest {
@@ -15,6 +23,13 @@ export interface CreateAccountRequest {
   initialBalance: number;
   annualPercentageRate?: number;
   minimumPayment?: number;
+  promotionalAnnualPercentageRate?: number;
+  promotionalPeriodEndDate?: string;
+  balanceTransferFeePercentage?: number;
+  statementDayOfMonth?: number;
+  statementDateOverride?: string;
+  paymentDueDayOfMonth?: number;
+  paymentDueDateOverride?: string;
 }
 
 // Event models
@@ -92,6 +107,8 @@ export interface DebtInfo {
   balance: number;
   annualPercentageRate: number;
   minimumPayment: number;
+  promotionalAnnualPercentageRate?: number;
+  promotionalPeriodEndDate?: string;
 }
 
 export interface DebtAllocationResult {
@@ -137,4 +154,104 @@ export interface SimulationSnapshot {
   cashBalance: number;
   totalDebt: number;
   debtBalances: Record<string, number>;
+}
+
+// Settings models
+export interface UserSettings {
+  payFrequency: 'Weekly' | 'BiWeekly' | 'SemiMonthly' | 'Monthly';
+  paycheckAmount: number;
+  safetyBuffer: number;
+  nextPaycheckDate?: string;
+}
+
+export interface UpdateSettingsRequest {
+  payFrequency: string;
+  paycheckAmount: number;
+  safetyBuffer: number;
+  nextPaycheckDate?: string;
+}
+
+// Investment Projection Models
+export interface InvestmentProjectionRequest {
+  initialBalance: number;
+  startDate: string;
+  endDate: string;
+  nominalAnnualReturn: number;
+  inflationRate: number;
+  useMonthly: boolean;
+  contributions?: ContributionDto[];
+}
+
+export interface ContributionDto {
+  date: string;
+  amount: number;
+}
+
+export interface InvestmentProjectionResult {
+  finalNominalValue: number;
+  finalRealValue: number;
+  totalContributions: number;
+  totalNominalGrowth: number;
+  totalRealGrowth: number;
+  projections: InvestmentProjectionPoint[];
+}
+
+export interface InvestmentProjectionPoint {
+  date: string;
+  nominalValue: number;
+  realValue: number;
+}
+
+// Simulation Models (for debt)
+export interface SimulationRequest {
+  startDate: string;
+  endDate: string;
+  initialCash: number;
+  debts?: SimDebtDto[];
+  events?: SimEventDto[];
+}
+
+export interface SimDebtDto {
+  name: string;
+  balance: number;
+  annualPercentageRate: number;
+  minimumPayment: number;
+  promotionalAnnualPercentageRate?: number;
+  promotionalPeriodEndDate?: string;
+}
+
+export interface SimEventDto {
+  date: string;
+  type: string;
+  description: string;
+  amount: number;
+  relatedDebtName?: string;
+}
+
+export interface SimulationResult {
+  debtFreeDate?: string;
+  finalCashBalance: number;
+  finalDebtBalances: Record<string, number>;
+  totalInterestPaid: number;
+  snapshots: SimulationSnapshot[];
+}
+
+export interface SimulationSnapshot {
+  date: string;
+  cashBalance: number;
+  totalDebt: number;
+  debtBalances: Record<string, number>;
+}
+
+// Chart-specific models
+export interface DebtChartData {
+  dates: string[];
+  debtBalances: number[];
+  interestPaid?: number[];
+}
+
+export interface InvestmentChartData {
+  dates: string[];
+  values: number[];
+  contributions?: number[];
 }

@@ -57,7 +57,7 @@ export class AccountsPage {
 
   openCreateDialog(): void {
     const dialogRef = this.dialog.open(AccountDialogComponent, {
-      width: '500px',
+      width: '600px',
       data: { mode: 'create' }
     });
 
@@ -71,7 +71,7 @@ export class AccountsPage {
 
   openEditDialog(account: Account): void {
     const dialogRef = this.dialog.open(AccountDialogComponent, {
-      width: '500px',
+      width: '600px',
       data: { mode: 'edit', account }
     });
 
@@ -118,5 +118,16 @@ export class AccountsPage {
   formatPercent(value: number | null | undefined): string {
     if (value == null) return '-';
     return `${value.toFixed(2)}%`;
+  }
+
+  formatAPR(account: Account): string {
+    if (account.effectiveAnnualPercentageRate != null) {
+      const isPromo = account.promotionalPeriodEndDate &&
+                      new Date(account.promotionalPeriodEndDate) > new Date();
+      // Convert decimal to percentage (0.18 -> 18%)
+      const rate = (account.effectiveAnnualPercentageRate * 100).toFixed(2);
+      return isPromo ? `${rate}% (promo)` : `${rate}%`;
+    }
+    return '-';
   }
 }

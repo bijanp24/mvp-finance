@@ -101,6 +101,42 @@
   }
 }
 
+// Projection Charts
+.projections-section {
+  grid-column: 1 / -1;
+
+  .projection-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    mat-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .view-details {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-left: auto;
+      }
+    }
+
+    .loading,
+    .empty-state {
+      padding: 60px 20px;
+      text-align: center;
+      color: rgba(0, 0, 0, 0.6);
+      font-size: 14px;
+    }
+  }
+}
+
 // Recent Activity
 .recent-activity {
   grid-column: 1 / -1;
@@ -174,5 +210,14 @@
 
   mat-card-actions {
     padding: 8px 16px 16px;
+  }
+}
+
+// Calendar - Full width on mobile, 2 columns on desktop
+app-calendar {
+  grid-column: 1 / -1;
+
+  @media (min-width: 1200px) {
+    grid-column: span 2;
   }
 }

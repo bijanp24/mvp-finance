@@ -89,7 +89,13 @@ public static class CalculatorEndpoints
     private static IResult CalculateDebtAllocation(DebtAllocationRequest request)
     {
         var debts = request.Debts
-            .Select(d => new Debt(d.Name, d.Balance, d.AnnualPercentageRate, d.MinimumPayment))
+            .Select(d => new Debt(
+                d.Name,
+                d.Balance,
+                d.AnnualPercentageRate,
+                d.MinimumPayment,
+                d.PromotionalAnnualPercentageRate,
+                d.PromotionalPeriodEndDate))
             .ToList();
 
         if (!Enum.TryParse<AllocationStrategy>(request.Strategy, true, out var strategy))
@@ -139,7 +145,13 @@ public static class CalculatorEndpoints
     private static IResult RunSimulation(SimulationRequest request)
     {
         var debts = request.Debts?
-            .Select(d => new DebtAccount(d.Name, d.Balance, d.AnnualPercentageRate, d.MinimumPayment))
+            .Select(d => new DebtAccount(
+                d.Name,
+                d.Balance,
+                d.AnnualPercentageRate,
+                d.MinimumPayment,
+                d.PromotionalAnnualPercentageRate,
+                d.PromotionalPeriodEndDate))
             .ToList() ?? new List<DebtAccount>();
 
         var events = request.Events?
@@ -205,7 +217,14 @@ public record DebtAllocationRequest(
     string Strategy = "Avalanche"
 );
 
-public record DebtDto(string Name, decimal Balance, decimal AnnualPercentageRate, decimal MinimumPayment);
+public record DebtDto(
+    string Name,
+    decimal Balance,
+    decimal AnnualPercentageRate,
+    decimal MinimumPayment,
+    decimal? PromotionalAnnualPercentageRate = null,
+    DateTime? PromotionalPeriodEndDate = null
+);
 
 public record InvestmentProjectionRequest(
     decimal InitialBalance,
@@ -227,5 +246,12 @@ public record SimulationRequest(
     List<SimEventDto>? Events = null
 );
 
-public record SimDebtDto(string Name, decimal Balance, decimal AnnualPercentageRate, decimal MinimumPayment);
+public record SimDebtDto(
+    string Name,
+    decimal Balance,
+    decimal AnnualPercentageRate,
+    decimal MinimumPayment,
+    decimal? PromotionalAnnualPercentageRate = null,
+    DateTime? PromotionalPeriodEndDate = null
+);
 public record SimEventDto(DateTime Date, string Type, string Description, decimal Amount, string? RelatedDebtName = null);
