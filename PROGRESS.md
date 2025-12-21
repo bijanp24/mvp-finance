@@ -1,7 +1,7 @@
 # MVP Finance - Current Progress
 
-**Last Updated:** December 20, 2024
-**Current Commit:** `4af678f` - Accounts and transactions management complete
+**Last Updated:** December 21, 2025
+**Current Commit:** `f0b366b` - Projections feature complete
 
 ---
 
@@ -91,9 +91,53 @@ npm start
 - `dashboard/src/app/core/services/api.service.ts`
 - `dashboard/src/app/core/models/api.models.ts`
 
-### 5. **Navigation**
+### 5. **Projections** (`/projections`)
+- ✅ Debt projection visualization with interactive charts
+- ✅ Investment growth projection with compound interest
+- ✅ Time range selector (3mo, 6mo, 1yr, 2yr, 5yr)
+- ✅ Debt-free date calculation
+- ✅ Total interest projection
+- ✅ Final investment value projection
+- ✅ Responsive design for mobile/tablet
+- ✅ ngx-echarts integration with zoom and tooltips
+
+**Files:**
+- `dashboard/src/app/pages/projections/projections.ts` - Main component
+- `dashboard/src/app/pages/projections/projections.html` - Template
+- `dashboard/src/app/pages/projections/projections.scss` - Responsive styles
+- `dashboard/src/app/features/charts/debt-projection-chart.component.ts` - Debt chart
+- `dashboard/src/app/features/charts/investment-projection-chart.component.ts` - Investment chart
+- `dashboard/src/app/core/services/projection.service.ts` - Projection calculations
+- `FinanceEngine.Api/Endpoints/CalculatorEndpoints.cs` - Simulation & projection APIs
+
+### 6. **Calendar** (`/calendar`)
+- ✅ Monthly calendar view with paycheck indicators
+- ✅ Debt payment due date markers
+- ✅ Navigation between months
+- ✅ Today highlighting
+- ✅ Integration with user settings for pay frequency
+- ✅ Responsive mobile design
+
+**Files:**
+- `dashboard/src/app/features/calendar/calendar.component.ts` - Calendar component
+- `dashboard/src/app/features/calendar/calendar.component.html` - Template
+- `dashboard/src/app/features/calendar/calendar.component.scss` - Calendar styles
+- `dashboard/src/app/core/services/calendar.service.ts` - Date calculations
+
+### 7. **Settings API** (Backend Complete)
+- ✅ GET/PUT user settings endpoints
+- ✅ Pay frequency configuration (Weekly, BiWeekly, SemiMonthly, Monthly)
+- ✅ Paycheck amount and next paycheck date
+- ✅ Safety buffer setting
+- ✅ Database entity and migrations
+
+**Files:**
+- `FinanceEngine.Api/Endpoints/SettingsEndpoints.cs` - Settings API
+- `FinanceEngine.Data/Entities/UserSettingsEntity.cs` - Database entity
+
+### 8. **Navigation**
 - ✅ Sidebar navigation with icons
-- ✅ Routes: Dashboard, Transactions, Accounts, Settings
+- ✅ Routes: Dashboard, Transactions, Accounts, Calendar, Projections, Settings
 - ✅ Active route highlighting
 
 ---
