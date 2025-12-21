@@ -110,13 +110,13 @@ export class ProjectionService {
     const initialCash = 0;
 
     // Convert accounts to simulation debt format
-    // Note: APR is stored as percentage (18 for 18%) but backend expects decimal (0.18)
+    // APR is stored as decimal (0.18 for 18%)
     const debts: SimDebtDto[] = debtAccounts.map(a => ({
       name: a.name,
       balance: a.currentBalance,
-      annualPercentageRate: (a.annualPercentageRate || 0) / 100,
+      annualPercentageRate: a.annualPercentageRate || 0,
       minimumPayment: a.minimumPayment || 0,
-      promotionalAnnualPercentageRate: a.promotionalAnnualPercentageRate ? a.promotionalAnnualPercentageRate / 100 : undefined,
+      promotionalAnnualPercentageRate: a.promotionalAnnualPercentageRate ?? undefined,
       promotionalPeriodEndDate: a.promotionalPeriodEndDate
     }));
 

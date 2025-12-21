@@ -13,15 +13,15 @@ public class AccountEntity
     public string Name { get; set; } = string.Empty;
     public AccountType Type { get; set; }
     public decimal InitialBalance { get; set; }
-    public decimal? AnnualPercentageRate { get; set; }  // For debt accounts
+    public decimal? AnnualPercentageRate { get; set; }  // Stored as decimal (0.18 = 18%)
     public decimal? MinimumPayment { get; set; }        // For debt accounts
 
     // Promotional APR fields
-    public decimal? PromotionalAnnualPercentageRate { get; set; }  // e.g., 0.00 for 0% promo
+    public decimal? PromotionalAnnualPercentageRate { get; set; }  // Stored as decimal (0.00 = 0% promo)
     public DateTime? PromotionalPeriodEndDate { get; set; }        // When promo expires
 
     // Balance transfer fee
-    public decimal? BalanceTransferFeePercentage { get; set; }     // e.g., 5.00 for 5%
+    public decimal? BalanceTransferFeePercentage { get; set; }     // Stored as decimal (0.05 = 5%)
 
     // Statement and due date fields (hybrid: day-of-month with optional override)
     public int? StatementDayOfMonth { get; set; }                  // 1-31, default recurring date

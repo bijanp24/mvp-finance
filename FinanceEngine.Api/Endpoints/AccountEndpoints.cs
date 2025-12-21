@@ -58,8 +58,8 @@ public static class AccountEndpoints
                 EventType.DebtCharge => evt.Amount,
                 EventType.DebtPayment => -evt.Amount,
                 EventType.InterestFee => evt.Amount,
-                EventType.SavingsContribution => evt.Amount,
-                EventType.InvestmentContribution => evt.Amount,
+                EventType.SavingsContribution => account.Type == AccountType.Cash ? -evt.Amount : evt.Amount,
+                EventType.InvestmentContribution => account.Type == AccountType.Cash ? -evt.Amount : evt.Amount,
                 _ => 0
             };
         }
@@ -117,6 +117,12 @@ public static class AccountEndpoints
         if (request.PaymentDueDayOfMonth is < 1 or > 31)
             return Results.BadRequest("Payment due day must be 1-31");
 
+        if (request.AnnualPercentageRate is < 0 or > 1)
+            return Results.BadRequest("APR must be between 0 and 1");
+
+        if (request.PromotionalAnnualPercentageRate is < 0 or > 1)
+            return Results.BadRequest("Promotional APR must be between 0 and 1");
+
         if (request.PromotionalAnnualPercentageRate.HasValue != request.PromotionalPeriodEndDate.HasValue)
             return Results.BadRequest("Both promotional APR and end date required, or neither");
 
@@ -124,8 +130,8 @@ public static class AccountEndpoints
             request.PromotionalPeriodEndDate.Value <= DateTime.UtcNow)
             return Results.BadRequest("Promotional end date must be in the future");
 
-        if (request.BalanceTransferFeePercentage is < 0 or > 100)
-            return Results.BadRequest("Balance transfer fee must be 0-100%");
+        if (request.BalanceTransferFeePercentage is < 0 or > 1)
+            return Results.BadRequest("Balance transfer fee must be between 0 and 1");
 
         // Auto-calculate minimum payment for debt accounts if not provided
         var minimumPayment = request.MinimumPayment;
@@ -195,6 +201,12 @@ public static class AccountEndpoints
         if (request.PaymentDueDayOfMonth is < 1 or > 31)
             return Results.BadRequest("Payment due day must be 1-31");
 
+        if (request.AnnualPercentageRate is < 0 or > 1)
+            return Results.BadRequest("APR must be between 0 and 1");
+
+        if (request.PromotionalAnnualPercentageRate is < 0 or > 1)
+            return Results.BadRequest("Promotional APR must be between 0 and 1");
+
         if (request.PromotionalAnnualPercentageRate.HasValue != request.PromotionalPeriodEndDate.HasValue)
             return Results.BadRequest("Both promotional APR and end date required, or neither");
 
@@ -202,8 +214,8 @@ public static class AccountEndpoints
             request.PromotionalPeriodEndDate.Value <= DateTime.UtcNow)
             return Results.BadRequest("Promotional end date must be in the future");
 
-        if (request.BalanceTransferFeePercentage is < 0 or > 100)
-            return Results.BadRequest("Balance transfer fee must be 0-100%");
+        if (request.BalanceTransferFeePercentage is < 0 or > 1)
+            return Results.BadRequest("Balance transfer fee must be between 0 and 1");
 
         account.Name = request.Name ?? account.Name;
         account.AnnualPercentageRate = request.AnnualPercentageRate ?? account.AnnualPercentageRate;
@@ -258,22 +270,7 @@ public static class AccountEndpoints
         if (account is null)
             return Results.NotFound();
 
-        // Calculate balance from initial balance + events (event sourcing)
-        var balance = account.InitialBalance;
-        foreach (var evt in account.Events)
-        {
-            balance += evt.Type switch
-            {
-                EventType.Income => evt.Amount,
-                EventType.Expense => -evt.Amount,
-                EventType.DebtCharge => evt.Amount,
-                EventType.DebtPayment => -evt.Amount,
-                EventType.InterestFee => evt.Amount,
-                EventType.SavingsContribution => evt.Amount,
-                EventType.InvestmentContribution => evt.Amount,
-                _ => 0
-            };
-        }
+        var balance = CalculateBalance(account);
 
         return Results.Ok(new { accountId = id, balance });
     }

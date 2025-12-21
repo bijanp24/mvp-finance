@@ -79,14 +79,72 @@ public static class EventEndpoints
         if (!Enum.TryParse<EventType>(request.Type, true, out var eventType))
             return Results.BadRequest("Invalid event type");
 
+        var description = request.Description ?? string.Empty;
+
+        bool IsTransferType(EventType type) =>
+            type == EventType.DebtPayment ||
+            type == EventType.SavingsContribution ||
+            type == EventType.InvestmentContribution;
+
+        if (IsTransferType(eventType))
+        {
+            if (!request.AccountId.HasValue || !request.TargetAccountId.HasValue)
+                return Results.BadRequest("Both accountId and targetAccountId are required for transfers");
+
+            var debitEvent = new FinancialEventEntity
+            {
+                Date = request.Date,
+                Type = eventType,
+                Amount = request.Amount,
+                Description = description,
+                AccountId = request.AccountId,
+                TargetAccountId = request.TargetAccountId
+            };
+
+            var creditEvent = new FinancialEventEntity
+            {
+                Date = request.Date,
+                Type = eventType,
+                Amount = request.Amount,
+                Description = description,
+                AccountId = request.TargetAccountId,
+                TargetAccountId = request.AccountId
+            };
+
+            db.Events.AddRange(debitEvent, creditEvent);
+            await db.SaveChangesAsync();
+
+            return Results.Created($"/api/events/{debitEvent.Id}", new EventDto(
+                debitEvent.Id,
+                debitEvent.Date,
+                debitEvent.Type.ToString(),
+                debitEvent.Amount,
+                debitEvent.Description,
+                debitEvent.AccountId,
+                debitEvent.TargetAccountId
+            ));
+        }
+
+        if (eventType == EventType.DebtCharge)
+        {
+            if (!request.TargetAccountId.HasValue)
+                return Results.BadRequest("targetAccountId is required for debt charges");
+        }
+        else if (eventType == EventType.Income || eventType == EventType.Expense || eventType == EventType.InterestFee)
+        {
+            if (!request.AccountId.HasValue)
+                return Results.BadRequest("accountId is required for this event type");
+        }
+
+        var accountId = eventType == EventType.DebtCharge ? request.TargetAccountId : request.AccountId;
         var evt = new FinancialEventEntity
         {
             Date = request.Date,
             Type = eventType,
             Amount = request.Amount,
-            Description = request.Description ?? string.Empty,
-            AccountId = request.AccountId,
-            TargetAccountId = request.TargetAccountId
+            Description = description,
+            AccountId = accountId,
+            TargetAccountId = eventType == EventType.DebtCharge ? null : request.TargetAccountId
         };
 
         db.Events.Add(evt);
