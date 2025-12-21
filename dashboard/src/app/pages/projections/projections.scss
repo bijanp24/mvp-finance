@@ -63,3 +63,48 @@ mat-button-toggle-group {
     color: rgba(0, 0, 0, 0.87);
   }
 }
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .projections-page {
+    padding: 16px;
+  }
+
+  mat-button-toggle-group {
+    flex-wrap: wrap;
+  }
+
+  .summary-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .stat .value {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .projections-page {
+    padding: 8px;
+  }
+
+  .header-card,
+  .projection-card {
+    margin-bottom: 16px;
+  }
+
+  mat-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  mat-button-toggle-group {
+    width: 100%;
+
+    mat-button-toggle {
+      flex: 1;
+      font-size: 12px;
+    }
+  }
+}
