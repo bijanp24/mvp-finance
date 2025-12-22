@@ -85,7 +85,7 @@ export class TransactionsPage {
   constructor() {
     this.transactionForm = this.fb.group({
       type: ['Expense', Validators.required],
-      amount: [null, [Validators.required, Validators.min(0.01)]],
+      amount: [null, [Validators.required, Validators.min(0.01), Validators.max(1000000)]],
       date: [new Date(), Validators.required],
       description: [''],
       accountId: [null],
