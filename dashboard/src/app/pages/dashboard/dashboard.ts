@@ -52,19 +52,19 @@ export class DashboardPage {
   readonly totalCash = computed(() => {
     return this.accounts()
       .filter(a => a.type === 'Cash')
-      .reduce((sum, a) => sum + a.initialBalance, 0);
+      .reduce((sum, a) => sum + a.currentBalance, 0);
   });
 
   readonly totalDebt = computed(() => {
     return this.accounts()
       .filter(a => a.type === 'Debt')
-      .reduce((sum, a) => sum + a.initialBalance, 0);
+      .reduce((sum, a) => sum + a.currentBalance, 0);
   });
 
   readonly totalInvestments = computed(() => {
     return this.accounts()
       .filter(a => a.type === 'Investment')
-      .reduce((sum, a) => sum + a.initialBalance, 0);
+      .reduce((sum, a) => sum + a.currentBalance, 0);
   });
 
   constructor() {
@@ -97,7 +97,7 @@ export class DashboardPage {
 
   calculateSpendable(accounts: Account[]): void {
     const cashAccounts = accounts.filter(a => a.type === 'Cash');
-    const totalCash = cashAccounts.reduce((sum, a) => sum + a.initialBalance, 0);
+    const totalCash = cashAccounts.reduce((sum, a) => sum + a.currentBalance, 0);
 
     if (totalCash === 0) {
       this.loading.set(false);

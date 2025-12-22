@@ -1,34 +1,39 @@
 # TODO_NEXT.md
 
-Last updated: 2025-12-21
+Last updated: 2025-12-22
 
 Read this first when resuming work.
 
 ## Top Priority Next Step
-- Claim one Phase 1 work item in `ROADMAP.md` and mark it [IN PROGRESS] in the Agent Assignment Log.
-- Execute the work item and run its verification command.
+- Claim one Phase 2 work item in `ROADMAP.md` and mark it [IN PROGRESS] in the Agent Assignment Log.
+- Complete the work item and run its verification command.
 - Update `WORKLOG.md` and this file with results and timestamps.
 
-## Parallelizable Work Items (Phase 1 Quick Wins)
+## Parallelizable Work Items (Phase 2 Core MVP Features)
 All items below can be done in parallel by different agents. Details and acceptance criteria live in `ROADMAP.md`.
 
 | Work Item | File(s) | Effort | Parallelizable |
 |------|---------|--------|----------------|
-| WI-P1-001: Fix dashboard balance bug | `dashboard/src/app/pages/dashboard/dashboard.ts` | 5 min | Yes |
-| WI-P1-002: Delete placeholder test | `FinanceEngine.Tests/UnitTest1.cs` | 1 min | Yes |
-| WI-P1-003: Sync documentation timestamps | `AGENTS.md`, `PROGRESS.md`, `TODO_NEXT.md`, `WORKLOG.md`, `ROADMAP.md` | 5 min | Yes |
+| WI-P2-001: Scenario slider backend integration | `FinanceEngine.Api/Endpoints/CalculatorEndpoints.cs`, `dashboard/src/app/core/services/api.service.ts` | 30-45 min | Yes |
+| WI-P2-003: Crossover milestone calculation | `dashboard/src/app/core/services/projection.service.ts` | 30-45 min | Yes |
+| WI-P2-005: Net worth curve | `dashboard/src/app/core/services/projection.service.ts`, `dashboard/src/app/pages/projections/projections.html` | 45-60 min | Yes |
 
 ## Working State Snapshot
-- Branch: master (as of 2025-12-21)
-- Working tree: dirty (local `.claude/settings.local.json`, do not commit)
+- Branch: master (as of 2025-12-22)
+- Working tree: dirty (Phase 1 quick wins pending commit; local `.claude/settings.local.json`, do not commit)
 - Servers: not checked
-- Last activity: Codebase analysis and priority planning (Claude Opus 4.5)
+- Last activity: Phase 1 quick wins completed (Codex GPT-5)
 
 ## Current Status
-**Last Completed:** All roadmap modules 1-5 (settings integration, transaction edit, validation, testing, polish)
+**Last Completed:** Phase 1 quick wins (dashboard balance fix, placeholder test removal, doc sync)
 **Planning Completed:** Priority roadmap created with 5 phases (see `ROADMAP.md`)
 **Branch:** master
-**Ready for:** Phase 1 quick wins, then Phase 2 core features
+**Ready for:** Phase 2 core features
+
+## Recently Completed (2025-12-22)
+- Phase 1: Dashboard totals use currentBalance
+- Phase 1: Placeholder test file removed
+- Phase 1: Documentation timestamps synced
 
 ## Recently Completed (2025-12-21)
 - Module 1: Settings integration (API tests, dashboard settings, calendar settings, date validation)

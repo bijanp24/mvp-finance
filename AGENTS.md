@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Last updated: 2025-12-21
+Last updated: 2025-12-22
 
 ## Purpose
 - Consolidated agent guide for this repo; keep it short and actionable.

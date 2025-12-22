@@ -1,6 +1,6 @@
 # MVP Finance - Current Progress
 
-Last updated: 2025-12-21
+Last updated: 2025-12-22
 Current commit: 27c4cb9 (latest as of 2025-12-21)
 Working tree: may be dirty (local `.claude/settings.local.json`, do not commit)
 
@@ -152,10 +152,7 @@ Key Patterns:
 ## Known Issues and Improvement Opportunities
 
 ### Priority 1: Bug Fixes (Critical)
-| Issue | Location | Impact | Effort |
-|-------|----------|--------|--------|
-| Dashboard uses `initialBalance` not `currentBalance` | `dashboard/src/app/pages/dashboard/dashboard.ts:52-68` | Shows wrong totals | 5 min |
-| Placeholder test file | `FinanceEngine.Tests/UnitTest1.cs` | Clutter | 1 min |
+- None currently tracked.
 
 ### Priority 2: MVP Spec Gaps
 | Feature | Spec Reference | Current State | Files Affected |

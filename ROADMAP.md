@@ -1,6 +1,6 @@
 # ROADMAP.md
 
-Last updated: 2025-12-21
+Last updated: 2025-12-22
 Created by: Claude Opus 4.5 (via Claude Code CLI)
 
 ## Purpose
@@ -23,12 +23,12 @@ Structured work items optimized for parallel agent execution. Each work item is 
 ---
 
 ## Phase 1: Quick Wins
-**Status:** Ready
+**Status:** Complete
 **Estimated effort:** 1 session
 **All items parallelizable:** Yes
 
 ### WI-P1-001: Fix Dashboard Balance Bug
-- **Status:** [ ] Not Started
+- **Status:** [DONE]
 - **Parallelizable:** Yes
 - **Depends on:** None
 - **Files:**
@@ -49,7 +49,7 @@ Structured work items optimized for parallel agent execution. Each work item is 
 - **Acceptance:** Dashboard totals reflect actual account balances
 
 ### WI-P1-002: Delete Placeholder Test
-- **Status:** [ ] Not Started
+- **Status:** [DONE]
 - **Parallelizable:** Yes
 - **Depends on:** None
 - **Files:**
@@ -63,7 +63,7 @@ Structured work items optimized for parallel agent execution. Each work item is 
 - **Acceptance:** No placeholder test files remain
 
 ### WI-P1-003: Sync Documentation Timestamps
-- **Status:** [ ] Not Started
+- **Status:** [DONE]
 - **Parallelizable:** Yes
 - **Depends on:** None
 - **Files:**
@@ -75,7 +75,7 @@ Structured work items optimized for parallel agent execution. Each work item is 
 ---
 
 ## Phase 2: Core MVP Features
-**Status:** Blocked by Phase 1
+**Status:** Ready
 **Estimated effort:** 2-3 sessions
 **Partial parallelization:** See individual items
 
@@ -371,7 +371,9 @@ Track which agent is working on what to prevent conflicts.
 
 | Work Item | Agent | Started | Completed |
 |-----------|-------|---------|-----------|
-| (none yet) | | | |
+| WI-P1-001 | Codex (GPT-5) | 2025-12-22 | 2025-12-22 |
+| WI-P1-002 | Codex (GPT-5) | 2025-12-22 | 2025-12-22 |
+| WI-P1-003 | Codex (GPT-5) | 2025-12-22 | 2025-12-22 |
 
 ---
 
@@ -394,5 +396,3 @@ cd dashboard && npm start               # Terminal 2
 # API health check
 curl http://localhost:5285/api/accounts
 ```
-
-

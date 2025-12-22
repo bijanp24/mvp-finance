@@ -1,8 +1,24 @@
 # WORKLOG.md
 
-Last updated: 2025-12-21
+Last updated: 2025-12-22
 
 Append-only. Add new entries at the top.
+
+## 2025-12-22 (Phase 1 - Quick Wins wrap-up)
+- Agent: Codex (GPT-5)
+- Status: Completed
+- Branch: master
+- Commit: none (local changes)
+- Scope: Phase 1 quick wins (dashboard balance fix, placeholder test cleanup, docs sync)
+- Changes:
+  - Switched dashboard totals and spendable calc to `currentBalance`
+  - Removed placeholder test file `FinanceEngine.Tests/UnitTest1.cs`
+  - Synced handoff doc timestamps and Phase 1 statuses
+- Tests: Not run (not requested)
+- Decisions:
+  - Phase 1 items marked done in ROADMAP and Agent Assignment Log updated
+- Next steps:
+  - Start Phase 2 core MVP features (Scenario Slider backend, Crossover milestone, Net Worth curve)
 
 ## 2025-12-21 (Docs - Copilot stub)
 - Agent: Codex (GPT-5)
