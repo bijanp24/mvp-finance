@@ -11,6 +11,7 @@ public static class EventEndpoints
         group.MapGet("/", GetEvents);
         group.MapGet("/{id}", GetEventById);
         group.MapPost("/", CreateEvent);
+        group.MapPut("/{id}", UpdateEvent);
         group.MapDelete("/{id}", DeleteEvent);
         group.MapGet("/recent", GetRecentEvents);
 
@@ -161,6 +162,74 @@ public static class EventEndpoints
         ));
     }
 
+    private static async Task<IResult> UpdateEvent(int id, UpdateEventRequest request, FinanceDbContext db)
+    {
+        var evt = await db.Events.FindAsync(id);
+        if (evt is null)
+            return Results.NotFound();
+
+        // Validate event type if it's being changed
+        EventType eventType = evt.Type;
+        if (!string.IsNullOrEmpty(request.Type))
+        {
+            if (!Enum.TryParse<EventType>(request.Type, true, out eventType))
+                return Results.BadRequest("Invalid event type");
+        }
+
+        // Update fields
+        if (request.Date.HasValue)
+            evt.Date = request.Date.Value;
+
+        if (!string.IsNullOrEmpty(request.Type))
+            evt.Type = eventType;
+
+        if (request.Amount.HasValue)
+            evt.Amount = request.Amount.Value;
+
+        if (request.Description != null)
+            evt.Description = request.Description;
+
+        if (request.AccountId.HasValue)
+            evt.AccountId = request.AccountId;
+
+        if (request.TargetAccountId.HasValue)
+            evt.TargetAccountId = request.TargetAccountId;
+
+        // Validate based on event type
+        bool IsTransferType(EventType type) =>
+            type == EventType.DebtPayment ||
+            type == EventType.SavingsContribution ||
+            type == EventType.InvestmentContribution;
+
+        if (IsTransferType(evt.Type))
+        {
+            if (!evt.AccountId.HasValue || !evt.TargetAccountId.HasValue)
+                return Results.BadRequest("Both accountId and targetAccountId are required for transfers");
+        }
+        else if (evt.Type == EventType.DebtCharge)
+        {
+            if (!evt.TargetAccountId.HasValue)
+                return Results.BadRequest("targetAccountId is required for debt charges");
+        }
+        else if (evt.Type == EventType.Income || evt.Type == EventType.Expense || evt.Type == EventType.InterestFee)
+        {
+            if (!evt.AccountId.HasValue)
+                return Results.BadRequest("accountId is required for this event type");
+        }
+
+        await db.SaveChangesAsync();
+
+        return Results.Ok(new EventDto(
+            evt.Id,
+            evt.Date,
+            evt.Type.ToString(),
+            evt.Amount,
+            evt.Description,
+            evt.AccountId,
+            evt.TargetAccountId
+        ));
+    }
+
     private static async Task<IResult> DeleteEvent(int id, FinanceDbContext db)
     {
         var evt = await db.Events.FindAsync(id);
@@ -210,6 +279,15 @@ public record CreateEventRequest(
     DateTime Date,
     string Type,
     decimal Amount,
+    string? Description = null,
+    int? AccountId = null,
+    int? TargetAccountId = null
+);
+
+public record UpdateEventRequest(
+    DateTime? Date = null,
+    string? Type = null,
+    decimal? Amount = null,
     string? Description = null,
     int? AccountId = null,
     int? TargetAccountId = null
