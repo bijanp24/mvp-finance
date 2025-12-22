@@ -328,7 +328,16 @@ export class AccountDialogComponent {
         error: (error) => {
           console.error('Error saving account:', error);
           this.saving.set(false);
-          // TODO: Show error message to user
+          
+          // Show user-friendly error message
+          let errorMessage = 'Failed to save account';
+          if (error.error?.message) {
+            errorMessage = error.error.message;
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+          
+          this.snackBar.open(errorMessage, 'Close', { duration: 5000 });
         }
       });
     }
