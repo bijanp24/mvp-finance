@@ -1,0 +1,59 @@
+# Cursor ignore rules (reduce token usage by skipping generated/large files)
+
+# Git and local tooling
+.git/
+.claude/
+.vscode/
+.idea/
+.vs/
+
+# .NET build artifacts
+**/bin/
+**/obj/
+**/artifacts/
+**/TestResults/
+**/*.user
+**/*.suo
+**/*.pdb
+**/*.dll
+**/*.exe
+**/*.nupkg
+**/*.snupkg
+**/*.trx
+**/*.coverage
+**/*.coveragexml
+
+# Angular/Node artifacts
+**/node_modules/
+**/dist/
+**/coverage/
+**/.angular/
+**/.angular/cache/
+**/.cache/
+**/.turbo/
+**/.nx/
+**/.vite/
+**/.eslintcache
+**/.stylelintcache
+
+# Logs and temp files
+**/*.log
+**/*.tmp
+**/*.temp
+**/*.bak
+**/*.swp
+**/*.zip
+**/*.tar
+**/*.tgz
+**/*.gz
+**/*.7z
+
+# Databases and generated data
+FinanceEngine.Api/finance.db
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+
+# OS cruft
+.DS_Store
+Thumbs.db

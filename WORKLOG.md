@@ -1,85 +1,130 @@
 # WORKLOG.md
 
+Last updated: 2025-12-21
+
 Append-only. Add new entries at the top.
 
-## 2025-12-22 (Completion)
-- Agent: Claude Sonnet 4.5 (via Cursor)
+## 2025-12-21 (Docs - CLAUDE stubs)
+- Agent: Codex (GPT-5)
+- Status: Completed
 - Branch: master
-- Commit: (latest) - All 5 modules completed
-- Summary: Implemented complete roadmap from Settings integration through Polish/UX
-- Completed Modules:
-  1. **Module 1: Settings Integration** (4 work items)
-     - WI-SETTINGS-001: Integration tests for Settings endpoints
-     - WI-SETTINGS-002: Dashboard integration with nextPaycheckDate
-     - WI-SETTINGS-003: Calendar integration verification
-     - WI-SETTINGS-004: Date handling improvements with validation
-  2. **Module 2: Transaction Editing** (3 work items)
-     - WI-TRANS-001: Backend PUT endpoint for updating events
-     - WI-TRANS-003: API service updateEvent method
-     - WI-TRANS-002: Frontend edit functionality with form reuse
-  3. **Module 3: Validation & Error Handling** (2 work items)
-     - WI-VALID-001: Amount validation with max limit ($1M)
-     - WI-VALID-002: Account dialog error handling with MatSnackBar
-  4. **Module 4: Testing Infrastructure** (1 work item)
-     - WI-TEST-001: Event endpoint integration tests
-  5. **Module 5: Polish & UX** (1 work item)
-     - WI-POLISH-004: .gitattributes for line ending consistency
-- Git Workflow: Used module → work-item → merge --no-ff pattern throughout
-- All branches cleaned up after merging
-- Next: Application ready for deployment and further feature development
+- Commit: none (documentation changes)
+- Scope: Consolidate agent instruction files
+- Changes:
+  - Converted root `CLAUDE.md` and `dashboard/CLAUDE.md` to minimal stubs
+  - Moved unique commit format and frontend guidance into `AGENTS.md`
+- Tests: Not run
+- Decisions:
+  - Keep CLAUDE files for auto-load, but avoid duplication
+  - Use AGENTS.md as the single source of truth
+- Next steps: None
 
-## 2025-12-21 (Completion)
+## 2025-12-21 (Docs - TODO_NEXT conventions)
+- Agent: Codex (GPT-5)
+- Status: Completed
+- Branch: master
+- Commit: none (documentation changes)
+- Scope: Handoff docs and roadmap hygiene
+- Changes:
+  - Reconciled TODO_NEXT format with parallel execution workflow
+  - Added TODO_NEXT update rules to AGENTS.md
+  - Cleaned non-ASCII artifacts in ROADMAP.md and CLAUDE.md
+- Tests: Not run
+- Decisions:
+  - Keep detailed work item specs in ROADMAP.md
+  - Keep TODO_NEXT action-first with parallelizable summary table
+- Next steps: Execute Phase 1 work items in ROADMAP.md
+
+## 2025-12-21 (Planning - Priority Roadmap)
+- Agent: Claude Opus 4.5 (via Claude Code CLI)
+- Status: Completed
+- Branch: master
+- Commit: none (documentation only)
+- Scope: Full codebase analysis and prioritized improvement roadmap
+- Changes:
+  - Analyzed all backend endpoints, calculators, entities, and tests
+  - Analyzed all frontend pages, services, and components
+  - Identified 88 passing tests, 56% test/code ratio
+  - Found critical bug: Dashboard uses initialBalance not currentBalance
+  - Created 5-phase prioritized roadmap (see ROADMAP.md)
+  - Updated TODO_NEXT.md with Phase 1 quick wins
+  - Updated PROGRESS.md with priority-ranked issues
+- Tests: 88 passing (verified via analysis)
+- Decisions:
+  - Bug fix (balance display) is top priority
+  - Scenario Slider and Crossover Milestone are key MVP differentiators
+  - Reconciliation (Pending/Cleared) needed for data integrity
+  - Structured work items for parallel agent execution
+- Multi-Agent Notes:
+  - Phase 1 tasks are fully parallelizable (3 independent items)
+  - Phase 2-3 have some dependencies (backend before frontend)
+  - Test coverage tasks parallelizable by component
+  - Created ROADMAP.md optimized for multi-agent handoffs
+- Next steps:
+  - Execute Phase 1 quick wins (any agent)
+  - Then Phase 2 core MVP features
+
+## 2025-12-21 (Completion - Roadmap modules)
+- Agent: Claude Sonnet 4.5 (via Cursor)
+- Status: Completed
+- Branch: master
+- Commit: 27c4cb9 (docs update after modules)
+- Scope: Settings integration, transaction editing, validation, tests, polish
+- Changes:
+  - Module 1: Settings Integration (Settings endpoint tests, Dashboard nextPaycheckDate, Calendar settings integration, date validation)
+  - Module 2: Transaction Editing (PUT endpoint for events, API client updateEvent, edit UI and form reuse)
+  - Module 3: Validation and Error Handling (amount max limit, account dialog MatSnackBar errors)
+  - Module 4: Testing Infrastructure (event endpoint integration tests)
+  - Module 5: Polish and UX (.gitattributes for line endings)
+- Tests: Not recorded
+- Decisions: Used module and work-item merge --no-ff workflow; cleaned up branches
+- Next steps: Ready for deployment or next feature selection
+
+## 2025-12-21 (Completion - Projections)
 - Agent: Claude Sonnet 4.5
+- Status: Completed
 - Branch: master
 - Commit: f0b366b (feature/projections merged to master)
-- Summary: Completed projections feature, merged to master, cleaned up branches
-- Completed Work Items:
+- Scope: Projections feature
+- Changes:
   - WI-001: Verified and fixed TypeScript models (removed duplicates)
   - WI-002: CalendarComponent (already complete from WIP)
   - WI-003: Navigation links (already complete from WIP)
   - WI-004: Added responsive styles for mobile/tablet
-- Final Build: Successful with no errors
-- Branch Management: Used feature/projections → work-item branches → merge back workflow
-- Next: Ready for GitHub repository creation
+- Tests: Final build successful with no errors
+- Decisions: Used feature/projections and work-item branch workflow
+- Next steps: Ready for GitHub repository creation
 
-## 2025-12-21 (Start)
+## 2025-12-21 (Start - Projections)
 - Agent: Claude Sonnet 4.5
+- Status: Started
 - Branch: feature/projections
 - Commit: 093c559 (starting point - WIP features committed to master, now on feature branch)
-- Summary: Created feature/projections branch, analyzed WIP projections code, identified work items
+- Scope: Create feature branch, analyze WIP projections code
+- Changes:
+  - Created feature/projections branch
+  - Read projections components, services, and backend endpoints
+  - Identified work items WI-001 through WI-005
 - Decisions:
-  - Using feature branch workflow going forward
-  - Feature branches named `feature/<name>`, work-item branches named `wi/<ticket>-<slug>`
-  - Projections feature includes: debt/investment visualization, calendar integration, chart components
+  - Adopt feature/<name> and wi/<ticket>-<slug> workflow
+  - Projections scope includes debt/investment visualization, calendar integration, chart components
 - Commands:
   - `git checkout -b feature/projections`
-  - Read projections components, services, and backend endpoints
-- WIP Components Found:
-  - ProjectionsPage (dashboard/src/app/pages/projections/)
-  - ProjectionService (dashboard/src/app/core/services/projection.service.ts)
-  - CalendarService (dashboard/src/app/core/services/calendar.service.ts)
-  - DebtProjectionChartComponent (dashboard/src/app/features/charts/)
-  - InvestmentProjectionChartComponent (dashboard/src/app/features/charts/)
-  - CalendarComponent (dashboard/src/app/features/calendar/)
-  - Backend: SettingsEndpoints, CalculatorEndpoints with simulation/projection APIs
-- Work Items Identified:
-  - WI-001-verify-models: Verify TypeScript models and API contracts
-  - WI-002-calendar-component: Complete CalendarComponent integration
-  - WI-003-navigation-link: Add projections to sidebar navigation
-  - WI-004-projections-styles: Add SCSS styles for projections page
-  - WI-005-integration-testing: End-to-end testing and bug fixes
 - Next steps:
   - Start with WI-001 to verify models
-  - Check CalendarComponent completeness (WI-002)
+  - Complete CalendarComponent integration (WI-002)
   - Add navigation link (WI-003)
   - Style the page (WI-004)
-  - Test end-to-end (WI-005)
+  - End-to-end testing (WI-005)
 
-## YYYY-MM-DD
+## YYYY-MM-DD (Status - Short Title)
 - Agent:
+- Status:
 - Branch:
 - Commit:
-- Summary:
+- Scope:
+- Changes:
+- Tests:
 - Decisions:
 - Commands:
 - Next steps:
