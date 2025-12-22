@@ -20,6 +20,7 @@ dashboard/.vscode/
 *.sln.docstates
 
 # Claude Code
+settings.local.json
 .claude/settings.local.json
 dashboard/.claude/settings.local.json
 

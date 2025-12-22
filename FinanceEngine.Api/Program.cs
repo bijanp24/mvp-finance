@@ -1,5 +1,7 @@
 using FinanceEngine.Api.Endpoints;
+using FinanceEngine.Api.Services;
 using FinanceEngine.Data;
+using FinanceEngine.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +13,12 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<FinanceDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")
         ?? "Data Source=finance.db"));
+
+// Register repositories
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+
+// Register services
+builder.Services.AddScoped<IAccountService, AccountService>();
 
 // Configure CORS for Angular dev server
 builder.Services.AddCors(options =>
