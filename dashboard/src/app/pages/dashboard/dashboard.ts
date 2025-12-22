@@ -112,9 +112,23 @@ export class DashboardPage {
 
     // Calculate next payday based on settings
     const today = new Date();
-    const nextPayday = new Date(today);
-    const payFrequencyDays = this.getPayFrequencyDays(currentSettings.payFrequency);
-    nextPayday.setDate(nextPayday.getDate() + payFrequencyDays);
+    let nextPayday: Date;
+    
+    if (currentSettings.nextPaycheckDate) {
+      // Use the configured next paycheck date
+      nextPayday = new Date(currentSettings.nextPaycheckDate);
+      
+      // If that date is in the past, calculate the next occurrence
+      while (nextPayday < today) {
+        const payFrequencyDays = this.getPayFrequencyDays(currentSettings.payFrequency);
+        nextPayday.setDate(nextPayday.getDate() + payFrequencyDays);
+      }
+    } else {
+      // Fall back to estimating based on pay frequency
+      nextPayday = new Date(today);
+      const payFrequencyDays = this.getPayFrequencyDays(currentSettings.payFrequency);
+      nextPayday.setDate(nextPayday.getDate() + payFrequencyDays);
+    }
 
     const request: SpendableRequest = {
       availableCash: totalCash,
