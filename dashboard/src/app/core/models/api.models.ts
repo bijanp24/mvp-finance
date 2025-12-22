@@ -52,6 +52,15 @@ export interface CreateEventRequest {
   targetAccountId?: number;
 }
 
+export interface UpdateEventRequest {
+  date?: string;
+  type?: string;
+  amount?: number;
+  description?: string;
+  accountId?: number;
+  targetAccountId?: number;
+}
+
 // Calculator models
 export interface SpendableRequest {
   availableCash: number;
