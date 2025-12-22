@@ -94,3 +94,6 @@ app.MapGroup("/api/settings").MapSettingsEndpoints();
 // });
 
 app.Run();
+
+// Make Program accessible to tests
+public partial class Program { }

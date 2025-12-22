@@ -1,0 +1,201 @@
+# MVP Finance - Cursor AI Rules
+
+## Project Overview
+Full-stack finance application with .NET 10 backend and Angular 21 frontend.
+
+**Backend Stack:**
+- .NET 10.0, Entity Framework Core 10.0.1, SQLite
+- ASP.NET Core Minimal APIs
+- xUnit 2.9.3 for testing
+- Clean Architecture/DDD with event-sourcing model
+
+**Frontend Stack:**
+- Angular 21.0.5 with standalone components
+- Angular Material 21.0.3
+- TypeScript 5.9.2, RxJS 7.8.0
+- SCSS styling
+
+## Project Structure
+```
+mvp-finance/
+├── FinanceEngine/              # Core calculation library
+├── FinanceEngine.Data/         # EF Core data layer
+├── FinanceEngine.Api/          # ASP.NET Core Web API
+├── FinanceEngine.Tests/        # xUnit test suite
+└── dashboard/                  # Angular 21 frontend
+```
+
+## Development Commands
+
+**Backend:**
+```bash
+dotnet build                              # Build solution
+dotnet test                               # Run tests
+dotnet run --project FinanceEngine.Api    # Run API
+```
+
+**Frontend:**
+```bash
+cd dashboard
+npm install                               # Install dependencies
+npm start                                 # Dev server (http://localhost:4200)
+npm run build                             # Production build
+npm test                                  # Run tests
+```
+
+## Git Workflow & Branching
+
+### Branch Naming
+- **Main branch:** `master` (production/deployable)
+- **Module branches:** `module/<module-name>` (from `master`)
+- **Work Item branches:** `work-item/<key>-<description>` (from Module)
+  - Example: `work-item/FIN-123-spendable-calculator-ui`
+
+### Workflow
+1. Create Module branch from `master`
+2. For each Work Item:
+   - Create Work Item branch from Module
+   - Complete development
+   - Consolidate documentation (see Documentation Rules)
+   - Merge into Module with `--no-ff`
+   - Delete Work Item branch
+3. When Module complete:
+   - Merge latest `master` into Module
+   - Test thoroughly
+   - Merge Module into `master` with `--no-ff`
+   - Delete Module branch
+
+### Merge Strategy
+- **Always use `--no-ff`** to preserve branch history
+- Delete branches after successful merge
+- `WIP:` commits allowed for checkpoints
+
+## Backend Conventions (.NET/C#)
+
+- Follow Clean Architecture/DDD principles
+- Use event-sourcing model as documented in `mvp-finance.md`
+- Keep Minimal API endpoints focused and small
+- Write unit tests with xUnit
+- Use Entity Framework Core for data access
+- SQLite database (`FinanceEngine.Api/finance.db`) is generated at runtime
+
+## Frontend Conventions (Angular/TypeScript)
+
+### TypeScript
+- Use strict type checking
+- Prefer type inference when obvious
+- Avoid `any`; use `unknown` when type is uncertain
+
+### Angular Components
+- **Standalone components only** (do NOT set `standalone: true` - it's default in Angular 20+)
+- Use `ChangeDetectionStrategy.OnPush` in `@Component` decorator
+- Keep components small and focused on single responsibility
+- Use `input()` and `output()` functions instead of decorators
+- Prefer inline templates for small components
+- When using external templates/styles, use paths relative to component TS file
+
+### State Management
+- Use signals for local component state
+- Use `computed()` for derived state (do NOT use `mutate`)
+- Use `update()` or `set()` to modify signals
+- Keep state transformations pure and predictable
+
+### Templates
+- Keep templates simple, avoid complex logic
+- Use native control flow: `@if`, `@for`, `@switch` (not `*ngIf`, `*ngFor`, `*ngSwitch`)
+- Use `class` bindings instead of `ngClass`
+- Use `style` bindings instead of `ngStyle`
+- Use async pipe to handle observables
+- Do NOT use arrow functions in templates (not supported)
+- Do NOT assume globals like `new Date()` are available in templates
+
+### Forms & Services
+- Prefer Reactive Forms over Template-driven
+- Use `inject()` function instead of constructor injection
+- Design services around single responsibility
+- Use `providedIn: 'root'` for singleton services
+
+### Host Bindings
+- Do NOT use `@HostBinding` and `@HostListener` decorators
+- Put host bindings inside the `host` object of `@Component` or `@Directive` decorator
+
+### Images
+- Use `NgOptimizedImage` for all static images
+- `NgOptimizedImage` does NOT work for inline base64 images
+
+### Accessibility
+- MUST pass all AXE checks
+- MUST follow WCAG AA minimums (focus management, color contrast, ARIA attributes)
+
+### Lazy Loading
+- Implement lazy loading for feature routes
+
+## Documentation Rules
+
+### Markdown Consolidation
+**Before ANY commit**, consolidate markdown files:
+- **Root folder:** All `.md` files → `mvp-finance.md`
+- **Dashboard folder:** All `.md` files → `dashboard.md`
+
+**Exceptions (NEVER consolidate):**
+- `CLAUDE.md` and `dashboard/CLAUDE.md`
+- `README.md` files
+- `AGENTS.md`
+- `WORKLOG.md`
+- `TODO_NEXT.md`
+- `PROGRESS.md`
+
+**Process:**
+1. Merge all content from working `.md` files into canonical file
+2. Remove any image references from consolidated markdown
+3. Delete redundant source `.md` files
+4. Stage and commit changes
+
+### Images
+- Development images (mockups, screenshots, diagrams) excluded from commits
+- Images stored in Google Workspace and referenced externally
+- `.gitignore` excludes: `*.png`, `*.jpg`, `*.jpeg`, `*.gif` (except public assets/favicon)
+- Remove image references when consolidating markdown
+
+## Commit Message Format
+
+Follow conventional commit format:
+```
+<type>: <short description>
+
+<optional body>
+
+<optional footer>
+```
+
+**Types:**
+- `feat:` New feature
+- `fix:` Bug fix
+- `docs:` Documentation changes
+- `chore:` Maintenance tasks
+- `refactor:` Code refactoring
+- `test:` Test additions/changes
+- `style:` Code style changes (formatting)
+
+## Safety & No-Touch Areas
+
+- Do NOT commit secrets or credentials
+- Do NOT edit `.git/`, `.claude/`, or generated folders: `bin/`, `obj/`, `dashboard/node_modules/`
+- Treat `FinanceEngine.Api/finance.db` as generated; do not hand-edit
+- Do NOT edit or commit `.claude/` folder contents
+
+## Handoff Procedure
+
+When completing work:
+1. Run verification (tests/build/lint as applicable)
+2. Create checkpoint commit with clear message (`WIP:` allowed)
+3. Update `WORKLOG.md` with branch, commit, changes, decisions, next steps
+4. Update `TODO_NEXT.md` with immediate next actions and commands to run
+
+## Reference Documentation
+
+- `mvp-finance.md` - System goals, algorithms, architecture
+- `PROGRESS.md` - Current status and known issues
+- `dashboard/README.md` - Angular CLI usage
+- `AGENTS.md` - Agent-specific consolidated guide
+
