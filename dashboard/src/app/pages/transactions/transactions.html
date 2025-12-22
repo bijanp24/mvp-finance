@@ -29,6 +29,9 @@
             @if (transactionForm.get('amount')?.hasError('min')) {
               <mat-error>Amount must be greater than 0</mat-error>
             }
+            @if (transactionForm.get('amount')?.hasError('max')) {
+              <mat-error>Amount cannot exceed $1,000,000</mat-error>
+            }
           </mat-form-field>
 
           <!-- Date -->
