@@ -103,6 +103,22 @@ Configurable logic for how extra cash is applied:
 
 ---
 
+## 5.1 Implementation Notes
+
+### Component Boundaries
+- **FinanceEngine** - Pure calculation library (no I/O, no EF Core). Stateless calculators with record-based inputs/outputs.
+- **FinanceEngine.Data** - EF Core layer with `FinanceDbContext`, entities, and SQLite persistence.
+- **FinanceEngine.Api** - Minimal API using endpoint groups (`/api/accounts`, `/api/events`, `/api/calculators`).
+- **dashboard/** - Angular app with standalone components, signals, and Material UI.
+
+### Design Patterns and Gotchas
+- **Event sourcing:** Account balances are computed from transaction history, not stored.
+- **Calculator pattern:** Static methods in `FinanceEngine.Calculators` with record-based inputs/outputs.
+- **APR storage:** Store as decimal (0.0499 = 4.99%), not percentage values.
+- **EF Core queries:** Materialize with `.ToListAsync()` before mapping to domain models.
+
+---
+
 ## 6. Core Data Concepts
 
 ### Accounts
@@ -117,9 +133,9 @@ The system relies on an **Event Sourcing** model. Account balances are derived s
 * **Income:** Inflow to Cash (Paycheck, etc.).
 * **Expense:** Outflow from Cash (General spending).
 * **DebtCharge/Borrow:** Increase in Debt liability (e.g., Credit Card purchase).
-* **DebtPayment:** Transfer from Cash → Debt (reduces liability).
+* **DebtPayment:** Transfer from Cash  Debt (reduces liability).
 * **Interest/Fee:** Cost of borrowing or account fees (Generated or Imported).
-* **Savings/InvestmentContribution:** Transfer from Cash → Investment.
+* **Savings/InvestmentContribution:** Transfer from Cash  Investment.
 
 ### Optional / Post-MVP
 * **State Management:** Pending vs. Cleared transactions.
@@ -160,3 +176,4 @@ The MVP is considered complete when the user can perform the following actions:
 * **Interactivity:**
     * **Scenario Slider:** Allows user to toggle an extra amount (e.g., +$100/paycheck).
     * **Logic:** Instantly re-render curves to answer: *"Should I put this extra $100 toward Debt or Investments?"*
+

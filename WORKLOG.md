@@ -4,6 +4,20 @@ Last updated: 2025-12-21
 
 Append-only. Add new entries at the top.
 
+## 2025-12-21 (Docs - Copilot stub)
+- Agent: Codex (GPT-5)
+- Status: Completed
+- Branch: master
+- Commit: none (documentation changes)
+- Scope: Copilot instructions consolidation
+- Changes:
+  - Converted `.github/copilot-instructions.md` to a minimal stub
+  - Moved architecture notes into `mvp-finance.md`
+- Tests: Not run
+- Decisions:
+  - Keep auto-load files minimal to avoid duplication
+- Next steps: None
+
 ## 2025-12-21 (Docs - CLAUDE stubs)
 - Agent: Codex (GPT-5)
 - Status: Completed
