@@ -6,6 +6,7 @@ import {
   CreateAccountRequest,
   FinancialEvent,
   CreateEventRequest,
+  UpdateEventRequest,
   SpendableRequest,
   SpendableResult,
   DebtAllocationRequest,
@@ -68,6 +69,10 @@ export class ApiService {
 
   createEvent(request: CreateEventRequest): Observable<FinancialEvent> {
     return this.http.post<FinancialEvent>(`${this.baseUrl}/events`, request);
+  }
+
+  updateEvent(id: number, request: UpdateEventRequest): Observable<FinancialEvent> {
+    return this.http.put<FinancialEvent>(`${this.baseUrl}/events/${id}`, request);
   }
 
   deleteEvent(id: number): Observable<void> {
