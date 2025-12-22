@@ -55,6 +55,9 @@ import { UpdateSettingsRequest } from '../../core/models/api.models';
                   type="date"
                   formControlName="nextPaycheckDate">
                 <mat-hint>When is your next paycheck? We'll calculate future dates from this.</mat-hint>
+                @if (form.get('nextPaycheckDate')?.hasError('tooOld') && form.get('nextPaycheckDate')?.touched) {
+                  <mat-error>Date cannot be more than 90 days in the past</mat-error>
+                }
               </mat-form-field>
 
               <mat-form-field appearance="outline">
@@ -157,8 +160,28 @@ export class SettingsPage implements OnInit {
       payFrequency: ['BiWeekly', Validators.required],
       paycheckAmount: [2500, [Validators.required, Validators.min(0.01)]],
       safetyBuffer: [100, [Validators.required, Validators.min(0)]],
-      nextPaycheckDate: [null]
+      nextPaycheckDate: [null, this.validateFutureDate.bind(this)]
     });
+  }
+
+  private validateFutureDate(control: any): { [key: string]: boolean } | null {
+    if (!control.value) {
+      return null; // Allow empty date
+    }
+
+    const selectedDate = new Date(control.value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Date should not be more than 90 days in the past
+    const ninetyDaysAgo = new Date(today);
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+    
+    if (selectedDate < ninetyDaysAgo) {
+      return { tooOld: true };
+    }
+    
+    return null;
   }
 
   ngOnInit(): void {
@@ -170,11 +193,18 @@ export class SettingsPage implements OnInit {
 
     this.apiService.getSettings().subscribe({
       next: (settings) => {
+        // Convert date to YYYY-MM-DD format for the date input
+        let formattedDate: string | null = null;
+        if (settings.nextPaycheckDate) {
+          const date = new Date(settings.nextPaycheckDate);
+          formattedDate = date.toISOString().split('T')[0];
+        }
+
         this.form.patchValue({
           payFrequency: settings.payFrequency,
           paycheckAmount: settings.paycheckAmount,
           safetyBuffer: settings.safetyBuffer,
-          nextPaycheckDate: settings.nextPaycheckDate
+          nextPaycheckDate: formattedDate
         });
         this.loading.set(false);
       },
@@ -190,7 +220,21 @@ export class SettingsPage implements OnInit {
     if (this.form.valid) {
       this.saving.set(true);
 
-      const request: UpdateSettingsRequest = this.form.value;
+      // Convert date string to ISO DateTime for the API
+      const formValue = this.form.value;
+      let nextPaycheckDate: string | undefined = undefined;
+      if (formValue.nextPaycheckDate) {
+        // Create date at noon UTC to avoid timezone issues
+        const date = new Date(formValue.nextPaycheckDate + 'T12:00:00Z');
+        nextPaycheckDate = date.toISOString();
+      }
+
+      const request: UpdateSettingsRequest = {
+        payFrequency: formValue.payFrequency,
+        paycheckAmount: formValue.paycheckAmount,
+        safetyBuffer: formValue.safetyBuffer,
+        nextPaycheckDate
+      };
 
       this.apiService.updateSettings(request).subscribe({
         next: () => {
