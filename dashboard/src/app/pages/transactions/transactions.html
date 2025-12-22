@@ -3,7 +3,7 @@
     <!-- Quick Add Form -->
     <mat-card class="quick-add-card">
       <mat-card-header>
-        <mat-card-title>Quick Add Transaction</mat-card-title>
+        <mat-card-title>{{ editingEventId() ? 'Edit Transaction' : 'Quick Add Transaction' }}</mat-card-title>
       </mat-card-header>
 
       <mat-card-content>
@@ -99,10 +99,14 @@
           <!-- Action Buttons -->
           <div class="form-actions">
             <button mat-stroked-button type="button" (click)="resetForm()">
-              Clear
+              {{ editingEventId() ? 'Cancel' : 'Clear' }}
             </button>
             <button mat-raised-button color="primary" type="submit" [disabled]="!transactionForm.valid || saving()">
-              {{ saving() ? 'Saving...' : 'Save Transaction' }}
+              @if (saving()) {
+                {{ editingEventId() ? 'Updating...' : 'Saving...' }}
+              } @else {
+                {{ editingEventId() ? 'Update Transaction' : 'Save Transaction' }}
+              }
             </button>
           </div>
         </form>
@@ -171,6 +175,9 @@
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef>Actions</th>
                 <td mat-cell *matCellDef="let event">
+                  <button mat-icon-button (click)="editEvent(event)" aria-label="Edit transaction">
+                    <mat-icon>edit</mat-icon>
+                  </button>
                   <button mat-icon-button (click)="deleteEvent(event)" aria-label="Delete transaction">
                     <mat-icon>delete</mat-icon>
                   </button>

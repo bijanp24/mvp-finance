@@ -47,6 +47,7 @@ export class TransactionsPage {
   readonly recentEvents = signal<FinancialEvent[]>([]);
   readonly loading = signal(false);
   readonly saving = signal(false);
+  readonly editingEventId = signal<number | null>(null);
   readonly displayedColumns = ['date', 'type', 'description', 'account', 'amount', 'actions'];
 
   readonly transactionForm: FormGroup;
@@ -144,6 +145,7 @@ export class TransactionsPage {
   }
 
   resetForm(): void {
+    this.editingEventId.set(null);
     this.transactionForm.reset({
       type: 'Expense',
       date: new Date(),
@@ -154,12 +156,28 @@ export class TransactionsPage {
     });
   }
 
+  editEvent(event: FinancialEvent): void {
+    this.editingEventId.set(event.id);
+    this.transactionForm.patchValue({
+      type: event.type,
+      amount: event.amount,
+      date: new Date(event.date),
+      description: event.description || '',
+      accountId: event.accountId,
+      targetAccountId: event.targetAccountId
+    });
+
+    // Scroll to form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   onSubmit(): void {
     if (this.transactionForm.valid) {
       this.saving.set(true);
       const formValue = this.transactionForm.value;
+      const editingId = this.editingEventId();
 
-      const request: CreateEventRequest = {
+      const requestData = {
         type: formValue.type,
         amount: formValue.amount,
         date: this.formatDate(formValue.date),
@@ -168,19 +186,22 @@ export class TransactionsPage {
         targetAccountId: formValue.targetAccountId
       };
 
-      this.apiService.createEvent(request).subscribe({
+      const apiCall = editingId 
+        ? this.apiService.updateEvent(editingId, requestData)
+        : this.apiService.createEvent(requestData);
+
+      apiCall.subscribe({
         next: () => {
           this.saving.set(false);
-          this.snackBar.open('Transaction saved successfully', 'Close', { duration: 3000 });
-          this.transactionForm.patchValue({
-            amount: null,
-            description: ''
-          });
+          const message = editingId ? 'Transaction updated successfully' : 'Transaction saved successfully';
+          this.snackBar.open(message, 'Close', { duration: 3000 });
+          this.resetForm();
           this.loadData();
         },
         error: (error) => {
           console.error('Error saving transaction:', error);
-          this.snackBar.open('Failed to save transaction', 'Close', { duration: 3000 });
+          const message = editingId ? 'Failed to update transaction' : 'Failed to save transaction';
+          this.snackBar.open(message, 'Close', { duration: 3000 });
           this.saving.set(false);
         }
       });
