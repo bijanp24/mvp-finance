@@ -20,7 +20,20 @@
       "Bash(curl:*)",
       "Bash(python -m json.tool:*)",
       "Bash(sqlite3:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfeat: Add accounts and transactions management with dashboard integration\n\nImplemented complete CRUD functionality for financial accounts and transactions with real-time dashboard updates.\n\nNew Features:\n- Accounts page with create/edit/delete operations and type-based validation\n- Transactions page with quick-add form supporting 6 event types\n- Updated dashboard with live data from accounts and events APIs\n- Dynamic form validation based on account/transaction types\n- Event-sourced balance calculation for accounts\n\nBackend Changes:\n- Enhanced AccountEndpoints with balance calculation from events\n- Complete EventEndpoints with CRUD operations\n\nFrontend Changes:\n- New AccountsPage with dialog-based CRUD \\(Material Design\\)\n- New TransactionsPage with smart account filtering\n- Updated DashboardPage to consume real API data\n- Added navigation links for new pages\n- TypeScript models for all API contracts\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit:*)",
+      "Bash(findstr:*)",
+      "Bash(del FinanceEngine.Apifinance.db)",
+      "Bash(dotnet tool list:*)",
+      "Bash(git reset:*)",
+      "Bash(del:*)",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(git branch:*)",
+      "Bash(taskkill:*)",
+      "Bash(netstat:*)",
+      "Bash(start:*)"
     ]
   }
 }
