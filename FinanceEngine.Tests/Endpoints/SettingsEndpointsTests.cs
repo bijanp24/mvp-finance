@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using FinanceEngine.Api.Endpoints;
 using FinanceEngine.Data;
 using FinanceEngine.Data.Entities;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,8 +17,10 @@ public class SettingsEndpointsTests : IClassFixture<WebApplicationFactory<Progra
 
     public SettingsEndpointsTests(WebApplicationFactory<Program> factory)
     {
+        var databaseName = "TestDatabase_" + Guid.NewGuid();
         _factory = factory.WithWebHostBuilder(builder =>
         {
+            builder.UseEnvironment("Testing");
             builder.ConfigureServices(services =>
             {
                 // Remove the existing DbContext configuration
@@ -27,7 +30,7 @@ public class SettingsEndpointsTests : IClassFixture<WebApplicationFactory<Progra
                 // Add in-memory database for testing
                 services.AddDbContext<FinanceDbContext>(options =>
                 {
-                    options.UseInMemoryDatabase("TestDatabase_" + Guid.NewGuid());
+                    options.UseInMemoryDatabase(databaseName);
                 });
             });
         });
@@ -208,4 +211,3 @@ public class SettingsEndpointsTests : IClassFixture<WebApplicationFactory<Progra
         Assert.Equal(500m, settings.SafetyBuffer);
     }
 }
-

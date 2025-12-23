@@ -9,10 +9,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container
 builder.Services.AddOpenApi();
 
-// Configure EF Core with SQLite
-builder.Services.AddDbContext<FinanceDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")
-        ?? "Data Source=finance.db"));
+if (!builder.Environment.IsEnvironment("Testing"))
+{
+    // Configure EF Core with SQLite
+    builder.Services.AddDbContext<FinanceDbContext>(options =>
+        options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")
+            ?? "Data Source=finance.db"));
+}
 
 // Register repositories
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
