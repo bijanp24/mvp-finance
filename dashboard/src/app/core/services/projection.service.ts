@@ -12,7 +12,8 @@ import {
   InvestmentProjectionRequest,
   InvestmentProjectionResult,
   DebtChartData,
-  InvestmentChartData
+  InvestmentChartData,
+  NetWorthChartData
 } from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
@@ -50,6 +51,106 @@ export class ProjectionService {
     };
   });
 
+  readonly netWorthChartData = computed<NetWorthChartData | null>(() => {
+    const debt = this.debtProjection();
+    const investment = this.investmentProjection();
+
+    // Need at least one projection
+    if (!debt?.snapshots?.length && !investment?.projections?.length) {
+      return null;
+    }
+
+    // Collect all unique dates
+    const dateSet = new Set<string>();
+    debt?.snapshots?.forEach(s => dateSet.add(s.date));
+    investment?.projections?.forEach(p => dateSet.add(p.date));
+
+    // Sort chronologically
+    const dates = Array.from(dateSet).sort();
+
+    // Calculate net worth at each date
+    const netWorth: number[] = [];
+    const investments: number[] = [];
+    const debtBalances: number[] = [];
+
+    dates.forEach(date => {
+      const debtAtDate = debt?.snapshots?.find(s => s.date === date)?.totalDebt ?? 0;
+      const investmentAtDate = investment?.projections?.find(p => p.date === date)?.nominalValue ?? 0;
+      
+      investments.push(investmentAtDate);
+      debtBalances.push(debtAtDate);
+      netWorth.push(investmentAtDate - debtAtDate);
+    });
+
+    return {
+      dates,
+      netWorth,
+      investments,
+      debt: debtBalances
+    };
+  });
+
+  readonly crossoverDate = computed<string | null>(() => {
+    const debt = this.debtProjection();
+    const investment = this.investmentProjection();
+
+    // Edge case: No debt or no investments
+    if (!debt?.snapshots?.length || !investment?.projections?.length) {
+      return null;
+    }
+
+    // Edge case: No debt means already "crossed over" (no interest to beat)
+    const hasDebt = debt.snapshots.some(s => s.totalDebt > 0);
+    if (!hasDebt) {
+      return null;
+    }
+
+    // Edge case: No investments means can't cross over
+    const hasInvestments = investment.projections.some(p => p.nominalValue > 0);
+    if (!hasInvestments) {
+      return null;
+    }
+
+    // Align dates - find common months between projections
+    const debtMap = new Map(debt.snapshots.map(s => [s.date, s]));
+    
+    // Calculate weighted average APR from initial debt balances
+    const initialDebts = debt.snapshots[0]?.debtBalances || {};
+    let totalDebt = 0;
+    let weightedAPR = 0;
+    
+    for (const [debtName, balance] of Object.entries(initialDebts)) {
+      totalDebt += balance;
+      // Use default 18% APR (typical credit card rate) as we don't have per-debt APR in snapshots
+      weightedAPR += balance * 0.18;
+    }
+    
+    const averageAPR = totalDebt > 0 ? weightedAPR / totalDebt : 0.18;
+
+    // Find crossover point
+    for (let i = 1; i < investment.projections.length; i++) {
+      const currentDate = investment.projections[i].date;
+      const debtSnapshot = debtMap.get(currentDate);
+      
+      if (!debtSnapshot) continue;
+
+      // Calculate monthly investment return (growth from previous month)
+      const monthlyInvestmentReturn = 
+        investment.projections[i].nominalValue - investment.projections[i - 1].nominalValue;
+
+      // Calculate monthly debt interest
+      const monthlyDebtInterest = debtSnapshot.totalDebt * (averageAPR / 12);
+
+      // Check if investment returns exceed debt interest
+      if (monthlyInvestmentReturn > monthlyDebtInterest && debtSnapshot.totalDebt > 0) {
+        return currentDate;
+      }
+    }
+
+    // Crossover not reached in projection period
+    return null;
+  });
+
   calculateProjections(
     accounts: Account[],
     timeRangeMonths: number = 12,
@@ -70,6 +171,7 @@ export class ProjectionService {
       debtAccounts,
       startDate,
       endDate,
+      0,
       settings
     );
 
@@ -100,10 +202,41 @@ export class ProjectionService {
     );
   }
 
+  calculateDebtProjectionWithExtra(
+    debtAccounts: Account[],
+    timeRangeMonths: number,
+    extraPayment: number,
+    settings?: UserSettings
+  ): Observable<SimulationResult | null> {
+    if (debtAccounts.length === 0) {
+      return of(null);
+    }
+    
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setMonth(endDate.getMonth() + timeRangeMonths);
+    
+    const request = this.buildDebtSimulationRequest(
+      debtAccounts,
+      startDate,
+      endDate,
+      extraPayment,
+      settings
+    );
+    
+    return this.apiService.runSimulation(request).pipe(
+      catchError(err => {
+        console.error('Error calculating debt projection with extra payment:', err);
+        return of(null);
+      })
+    );
+  }
+
   private buildDebtSimulationRequest(
     debtAccounts: Account[],
     startDate: Date,
     endDate: Date,
+    extraPayment: number = 0,
     settings?: UserSettings
   ): SimulationRequest {
     // Sum cash accounts for initial cash (or default to 0)
@@ -120,19 +253,23 @@ export class ProjectionService {
       promotionalPeriodEndDate: a.promotionalPeriodEndDate
     }));
 
-    // Generate monthly minimum payment events for each debt
+    // Generate monthly payment events for each debt
     const events: SimEventDto[] = [];
     const current = new Date(startDate);
 
     while (current <= endDate) {
       for (const account of debtAccounts) {
         if (account.minimumPayment && account.minimumPayment > 0) {
+          // Calculate total payment (minimum + proportional extra payment)
+          const extraPerDebt = extraPayment / debtAccounts.length;
+          const totalPayment = account.minimumPayment + extraPerDebt;
+          
           // Create monthly payment event
           events.push({
             date: current.toISOString(),
             type: 'DebtPayment',
-            description: `Minimum payment for ${account.name}`,
-            amount: account.minimumPayment,
+            description: `Payment for ${account.name}${extraPayment > 0 ? ' (with extra)' : ''}`,
+            amount: totalPayment,
             relatedDebtName: account.name
           });
         }

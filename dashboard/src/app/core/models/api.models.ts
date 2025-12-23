@@ -233,3 +233,10 @@ export interface InvestmentChartData {
   values: number[];
   contributions?: number[];
 }
+
+export interface NetWorthChartData {
+  dates: string[];
+  netWorth: number[];
+  investments: number[];
+  debt: number[];
+}

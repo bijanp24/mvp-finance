@@ -1,22 +1,28 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatSliderModule } from '@angular/material/slider';
 import { forkJoin } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { ProjectionService } from '../../core/services/projection.service';
 import { DebtProjectionChartComponent } from '../../features/charts/debt-projection-chart.component';
 import { InvestmentProjectionChartComponent } from '../../features/charts/investment-projection-chart.component';
-import { Account, UserSettings } from '../../core/models/api.models';
+import { NetWorthChartComponent } from '../../features/charts/net-worth-chart.component';
+import { Account, UserSettings, SimulationResult } from '../../core/models/api.models';
 
 @Component({
   selector: 'app-projections',
   imports: [
     CommonModule,
+    FormsModule,
     MatCardModule,
     MatButtonToggleModule,
+    MatSliderModule,
     DebtProjectionChartComponent,
-    InvestmentProjectionChartComponent
+    InvestmentProjectionChartComponent,
+    NetWorthChartComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './projections.html',
@@ -29,13 +35,37 @@ export class ProjectionsPage {
   readonly timeRangeMonths = signal(12); // 1 year default
   readonly accounts = signal<Account[]>([]);
   readonly settings = signal<UserSettings | null>(null);
+  readonly extraPayment = signal(0);
+  readonly debtProjectionWithExtra = signal<SimulationResult | null>(null);
 
   readonly debtChartData = this.projectionService.debtChartData;
   readonly investmentChartData = this.projectionService.investmentChartData;
+  readonly netWorthChartData = this.projectionService.netWorthChartData;
   readonly loading = this.projectionService.loading;
 
   readonly debtProjection = this.projectionService.debtProjection;
   readonly investmentProjection = this.projectionService.investmentProjection;
+  readonly crossoverDate = this.projectionService.crossoverDate;
+
+  readonly debtComparison = computed(() => {
+    const baseline = this.debtProjection();
+    const withExtra = this.debtProjectionWithExtra();
+    
+    if (!baseline || !withExtra || !baseline.debtFreeDate || !withExtra.debtFreeDate) {
+      return null;
+    }
+    
+    const baselineDate = new Date(baseline.debtFreeDate);
+    const withExtraDate = new Date(withExtra.debtFreeDate);
+    const monthsSaved = Math.round((baselineDate.getTime() - withExtraDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
+    const interestSaved = baseline.totalInterestPaid - withExtra.totalInterestPaid;
+    
+    return {
+      newPayoffDate: withExtra.debtFreeDate,
+      monthsSaved,
+      interestSaved
+    };
+  });
 
   constructor() {
     this.loadData();
@@ -55,6 +85,33 @@ export class ProjectionsPage {
   onTimeRangeChange(months: number): void {
     this.timeRangeMonths.set(months);
     this.calculateProjections();
+    // Recalculate extra payment scenario if active
+    if (this.extraPayment() > 0) {
+      this.onExtraPaymentChange();
+    }
+  }
+
+  onExtraPaymentChange(): void {
+    if (this.extraPayment() === 0) {
+      // Reset to baseline
+      this.debtProjectionWithExtra.set(null);
+      return;
+    }
+    
+    const accounts = this.accounts();
+    const debtAccounts = accounts.filter(a => a.type === 'Debt');
+    
+    if (debtAccounts.length === 0) return;
+    
+    // Recalculate with extra payment
+    this.projectionService.calculateDebtProjectionWithExtra(
+      debtAccounts,
+      this.timeRangeMonths(),
+      this.extraPayment(),
+      this.settings() || undefined
+    ).subscribe(result => {
+      this.debtProjectionWithExtra.set(result);
+    });
   }
 
   private calculateProjections(): void {

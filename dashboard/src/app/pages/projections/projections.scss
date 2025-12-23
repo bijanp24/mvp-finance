@@ -8,6 +8,33 @@
   margin-bottom: 24px;
 }
 
+.milestone-card {
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+
+  mat-card-header {
+    mat-card-title {
+      color: white;
+      font-size: 1.25rem;
+    }
+  }
+
+  .milestone-date {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 1rem 0;
+    text-align: center;
+  }
+
+  .milestone-description {
+    text-align: center;
+    font-size: 1.1rem;
+    margin: 0.5rem 0 0 0;
+    opacity: 0.95;
+  }
+}
+
 .projection-card {
   margin-bottom: 24px;
 }
@@ -19,6 +46,53 @@ mat-card-content {
 mat-button-toggle-group {
   display: flex;
   gap: 8px;
+}
+
+.extra-payment-slider {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 4px;
+  
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.87);
+  }
+  
+  mat-slider {
+    width: 100%;
+  }
+  
+  .comparison-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+    
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      
+      .label {
+        font-size: 0.875rem;
+        color: rgba(0, 0, 0, 0.6);
+      }
+      
+      .value {
+        font-size: 1.25rem;
+        font-weight: 500;
+        
+        &.highlight {
+          color: #4caf50;
+        }
+      }
+    }
+  }
 }
 
 .loading,

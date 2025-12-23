@@ -1,34 +1,41 @@
 # TODO_NEXT.md
 
-Last updated: 2025-12-22
+Last updated: 2025-12-23
 
 Read this first when resuming work.
 
 ## Top Priority Next Step
-- Claim one Phase 2 work item in `ROADMAP.md` and mark it [IN PROGRESS] in the Agent Assignment Log.
-- Complete the work item and run its verification command.
-- Update `WORKLOG.md` and this file with results and timestamps.
+- **Phase 2 Complete!** All core MVP features implemented.
+- Manual testing: Start both servers and verify all Phase 2 features work correctly
+- Commands: `dotnet run --project FinanceEngine.Api` (terminal 1) and `cd dashboard; npm start` (terminal 2)
+- Test scenarios:
+  - Scenario Slider: Move slider 0-500, verify comparison stats update
+  - Net Worth: Verify chart displays and toggle works
+  - Crossover Milestone: Verify purple card displays with correct date
+- Next: Consider Phase 3 (Data Integrity - Reconciliation) or commit Phase 2 changes
 
 ## Parallelizable Work Items (Phase 2 Core MVP Features)
-All items below can be done in parallel by different agents. Details and acceptance criteria live in `ROADMAP.md`.
+Remaining items can be done in parallel by different agents. Details in `ROADMAP.md`.
 
-| Work Item | File(s) | Effort | Parallelizable |
-|------|---------|--------|----------------|
-| WI-P2-001: Scenario slider backend integration | `FinanceEngine.Api/Endpoints/CalculatorEndpoints.cs`, `dashboard/src/app/core/services/api.service.ts` | 30-45 min | Yes |
-| WI-P2-003: Crossover milestone calculation | `dashboard/src/app/core/services/projection.service.ts` | 30-45 min | Yes |
-| WI-P2-005: Net worth curve | `dashboard/src/app/core/services/projection.service.ts`, `dashboard/src/app/pages/projections/projections.html` | 45-60 min | Yes |
+| Work Item | File(s) | Effort | Status |
+|------|---------|--------|--------|
+| WI-P2-001: Scenario slider backend integration | `dashboard/src/app/pages/projections/` | 30-45 min | DONE (2025-12-23) |
+| WI-P2-002: Scenario slider UI | `dashboard/src/app/pages/projections/` | 30-45 min | DONE (2025-12-23) |
+| WI-P2-003: Crossover milestone calculation | `dashboard/src/app/core/services/projection.service.ts` | 30-45 min | DONE (2025-12-23) |
+| WI-P2-004: Crossover milestone UI | `dashboard/src/app/pages/projections/projections.html` | 15-30 min | DONE (2025-12-23) |
+| WI-P2-005: Net worth curve | Multiple files | 45-60 min | DONE (2025-12-23) |
 
 ## Working State Snapshot
-- Branch: master (as of 2025-12-22)
-- Working tree: dirty (Phase 1 quick wins pending commit; local `.claude/settings.local.json`, do not commit)
-- Servers: not checked
-- Last activity: Phase 1 quick wins completed (Codex GPT-5)
+- Branch: master (as of 2025-12-23)
+- Working tree: dirty (All Phase 2 changes uncommitted: WI-P2-001 through WI-P2-005)
+- Servers: not running
+- Last activity: WI-P2-003/004 Crossover Milestone completed (Claude Sonnet 4.5)
 
 ## Current Status
-**Last Completed:** Phase 1 quick wins (dashboard balance fix, placeholder test removal, doc sync)
-**Planning Completed:** Priority roadmap created with 5 phases (see `ROADMAP.md`)
+**Last Completed:** WI-P2-003/004 Crossover Milestone Calculation and UI
+**Phase 2:** Complete! All 5 work items done.
 **Branch:** master
-**Ready for:** Phase 2 core features
+**Ready for:** Manual testing and commit, or proceed to Phase 3 (Data Integrity)
 
 ## Recently Completed (2025-12-22)
 - Phase 1: Dashboard totals use currentBalance

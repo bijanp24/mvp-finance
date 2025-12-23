@@ -14,8 +14,50 @@
         <mat-button-toggle [value]="24">2 Years</mat-button-toggle>
         <mat-button-toggle [value]="60">5 Years</mat-button-toggle>
       </mat-button-toggle-group>
+
+      <!-- Extra Payment Slider -->
+      @if (debtChartData()) {
+        <div class="extra-payment-slider">
+          <label for="extra-payment">Extra Monthly Payment: {{ formatCurrency(extraPayment()) }}</label>
+          <mat-slider min="0" max="500" step="25" discrete showTickMarks>
+            <input matSliderThumb [(ngModel)]="extraPayment" (ngModelChange)="onExtraPaymentChange()" id="extra-payment">
+          </mat-slider>
+          
+          @if (debtComparison(); as comparison) {
+            <div class="comparison-stats">
+              <div class="stat-item">
+                <span class="label">New Debt-Free Date:</span>
+                <span class="value highlight">{{ formatDate(comparison.newPayoffDate) }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="label">Months Saved:</span>
+                <span class="value highlight">{{ comparison.monthsSaved }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="label">Interest Saved:</span>
+                <span class="value highlight">{{ formatCurrency(comparison.interestSaved) }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      }
     </mat-card-content>
   </mat-card>
+
+  <!-- Crossover Milestone -->
+  @if (crossoverDate()) {
+    <mat-card class="milestone-card" appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Crossover Milestone 🎯</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <p class="milestone-date">{{ formatDate(crossoverDate()!) }}</p>
+        <p class="milestone-description">
+          Your investment returns will exceed your debt interest costs
+        </p>
+      </mat-card-content>
+    </mat-card>
+  }
 
   <!-- Debt Projection -->
   <mat-card class="projection-card" appearance="outlined">
@@ -85,6 +127,40 @@
         }
       } @else {
         <div class="empty-state">No investment accounts to project</div>
+      }
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Net Worth Projection -->
+  <mat-card class="projection-card" appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Net Worth Projection</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @if (loading()) {
+        <div class="loading">Calculating projections...</div>
+      } @else if (netWorthChartData()) {
+        <app-net-worth-chart
+          [data]="netWorthChartData()"
+          [height]="'600px'"
+          [compact]="false">
+        </app-net-worth-chart>
+
+        <div class="summary">
+          <h3>Summary</h3>
+          <div class="summary-stats">
+            <div class="stat">
+              <span class="label">Current Net Worth:</span>
+              <span class="value">{{ formatCurrency(netWorthChartData()!.netWorth[0]) }}</span>
+            </div>
+            <div class="stat">
+              <span class="label">Projected Net Worth:</span>
+              <span class="value">{{ formatCurrency(netWorthChartData()!.netWorth[netWorthChartData()!.netWorth.length - 1]) }}</span>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="empty-state">Add accounts to see net worth projection</div>
       }
     </mat-card-content>
   </mat-card>
