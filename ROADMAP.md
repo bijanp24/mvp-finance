@@ -1,6 +1,6 @@
 # ROADMAP.md
 
-Last updated: 2025-12-22
+Last updated: 2025-12-24
 Created by: Claude Opus 4.5 (via Claude Code CLI)
 
 ## Purpose
@@ -227,7 +227,7 @@ Structured work items optimized for parallel agent execution. Each work item is 
 ---
 
 ## Phase 4: Test Coverage
-**Status:** In Progress
+**Status:** Complete
 **Estimated effort:** 2-3 sessions
 **All items parallelizable:** Yes
 
@@ -255,11 +255,11 @@ Structured work items optimized for parallel agent execution. Each work item is 
 - **Acceptance:** ✅ All criteria met - Jest runs tests, @testing-library/jest-dom matchers work, TypeScript compilation works
 
 ### WI-P4-001: AccountEndpoints Integration Tests
-- **Status:** [ ] Not Started
+- **Status:** [DONE]
 - **Parallelizable:** Yes
 - **Depends on:** Phase 3 complete
 - **Files:**
-  - New file: `FinanceEngine.Tests/AccountEndpointsTests.cs`
+  - `FinanceEngine.Tests/AccountEndpointsTests.cs`
 - **Task:** Add integration tests for account CRUD
 - **Details:**
   - Test GET all accounts
@@ -272,14 +272,14 @@ Structured work items optimized for parallel agent execution. Each work item is 
   ```bash
   dotnet test --filter "FullyQualifiedName~AccountEndpoints"
   ```
-- **Acceptance:** All account endpoints have test coverage
+- **Acceptance:** ✅ All account endpoints have test coverage
 
 ### WI-P4-002: CalculatorEndpoints Integration Tests
-- **Status:** [ ] Not Started
+- **Status:** [DONE]
 - **Parallelizable:** Yes
 - **Depends on:** Phase 3 complete
 - **Files:**
-  - New file: `FinanceEngine.Tests/CalculatorEndpointsTests.cs`
+  - `FinanceEngine.Tests/CalculatorEndpointsTests.cs`
 - **Task:** Add integration tests for calculator endpoints
 - **Details:**
   - Test spendable calculation
@@ -291,14 +291,14 @@ Structured work items optimized for parallel agent execution. Each work item is 
   ```bash
   dotnet test --filter "FullyQualifiedName~CalculatorEndpoints"
   ```
-- **Acceptance:** All calculator endpoints have test coverage
+- **Acceptance:** ✅ All calculator endpoints have test coverage
 
 ### WI-P4-003: Frontend Dashboard Tests
-- **Status:** [ ] Not Started
+- **Status:** [DONE]
 - **Parallelizable:** Yes
 - **Depends on:** WI-P4-000 (Jest setup)
 - **Files:**
-  - New file: `dashboard/src/app/pages/dashboard/dashboard.spec.ts`
+  - `dashboard/src/app/pages/dashboard/dashboard.spec.ts`
 - **Task:** Add unit tests for dashboard component
 - **Details:**
   - Test balance calculations
@@ -309,14 +309,14 @@ Structured work items optimized for parallel agent execution. Each work item is 
   ```bash
   cd dashboard && npm test
   ```
-- **Acceptance:** Dashboard component has test coverage
+- **Acceptance:** ✅ Dashboard component has test coverage (14 tests)
 
 ### WI-P4-004: Frontend Transaction Tests
-- **Status:** [ ] Not Started
+- **Status:** [DONE]
 - **Parallelizable:** Yes
 - **Depends on:** WI-P4-000 (Jest setup)
 - **Files:**
-  - New file: `dashboard/src/app/pages/transactions/transactions.spec.ts`
+  - `dashboard/src/app/pages/transactions/transactions.spec.ts`
 - **Task:** Add unit tests for transaction form
 - **Details:**
   - Test form validation
@@ -327,40 +327,176 @@ Structured work items optimized for parallel agent execution. Each work item is 
   ```bash
   cd dashboard && npm test
   ```
-- **Acceptance:** Transaction form has test coverage
+- **Acceptance:** ✅ Transaction form has test coverage (23 tests)
 
 ---
 
 ## Phase 5: Polish & UX
-**Status:** Blocked by Phase 4
+**Status:** Complete
 **Estimated effort:** 1-2 sessions
 
 ### WI-P5-001: Loading Skeletons
-- **Status:** [ ] Not Started
+- **Status:** [DONE]
 - **Parallelizable:** Yes
 - **Files:**
   - `dashboard/src/app/pages/dashboard/dashboard.html`
+  - `dashboard/src/app/pages/dashboard/dashboard.scss`
   - `dashboard/src/app/pages/transactions/transactions.html`
+  - `dashboard/src/app/pages/transactions/transactions.scss`
   - `dashboard/src/app/pages/accounts/accounts.html`
+  - `dashboard/src/app/pages/accounts/accounts.scss`
 - **Task:** Replace spinners with skeleton loaders
-- **Acceptance:** Better perceived performance
+- **Acceptance:** ✅ Loading skeletons implemented on dashboard, accounts, and transactions pages
 
 ### WI-P5-002: Extract Balance Calculation
-- **Status:** [ ] Not Started
+- **Status:** [DONE]
 - **Parallelizable:** Yes
 - **Files:**
-  - `FinanceEngine.Api/Endpoints/AccountEndpoints.cs`
-  - New file: `FinanceEngine/Services/BalanceCalculator.cs` (or similar)
+  - `FinanceEngine/Services/BalanceCalculator.cs` (NEW)
+  - `FinanceEngine.Api/Services/AccountService.cs` (updated)
 - **Task:** DRY up duplicated balance logic
-- **Acceptance:** Single source of truth for balance calculation
+- **Acceptance:** ✅ Single source of truth for balance calculation in shared service
 
 ### WI-P5-003: Remove Commented Migration
-- **Status:** [ ] Not Started
+- **Status:** [DONE]
 - **Parallelizable:** Yes
 - **Files:**
-  - `FinanceEngine.Api/Program.cs` (lines 50-94)
+  - `FinanceEngine.Api/Program.cs`
 - **Task:** Remove completed migration code
-- **Acceptance:** Cleaner Program.cs
+- **Acceptance:** ✅ Cleaner Program.cs (46 lines removed)
+
+---
+
+## Phase 6: Frontend Redesign
+**Status:** Ready
+**Estimated effort:** 3-4 sessions
+**Partial parallelization:** See individual items
+
+### WI-P6-001: Visual System and Theme Tokens
+- **Status:** [READY]
+- **Parallelizable:** No
+- **Depends on:** None
+- **Files:**
+  - `dashboard/src/styles.scss`
+  - `dashboard/src/app/app.scss`
+- **Task:** Define a new visual system, typography, and base layout tokens for the redesign.
+- **Details:**
+  - Replace the current dark theme with a new light-forward theme and CSS variables.
+  - Introduce expressive fonts and spacing scale.
+  - Establish background treatments and card styles used across pages.
+- **Verification:**
+  ```bash
+  cd dashboard && npm run build
+  ```
+- **Acceptance:** Global theme and tokens are in place and do not break builds.
+
+### WI-P6-002: App Shell and Navigation Redesign
+- **Status:** [READY]
+- **Parallelizable:** No
+- **Depends on:** WI-P6-001
+- **Files:**
+  - `dashboard/src/app/app.html`
+  - `dashboard/src/app/app.scss`
+- **Task:** Redesign the app shell to match the new visual system.
+- **Details:**
+  - Update top bar and nav to new layout and spacing.
+  - Improve mobile nav behavior and focus states.
+  - Keep routing and signals unchanged.
+- **Verification:**
+  ```bash
+  cd dashboard && npm run build
+  ```
+- **Acceptance:** App shell matches new design direction and remains accessible.
+
+### WI-P6-003: Dashboard Page Redesign
+- **Status:** [READY]
+- **Parallelizable:** Yes (after WI-P6-001)
+- **Depends on:** WI-P6-001
+- **Files:**
+  - `dashboard/src/app/pages/dashboard/dashboard.html`
+  - `dashboard/src/app/pages/dashboard/dashboard.scss`
+- **Task:** Redesign dashboard layout, cards, and hierarchy.
+- **Details:**
+  - Introduce a hero summary band and a structured metrics grid.
+  - Restyle recent transactions list to match the new system.
+  - Preserve loading skeleton behavior.
+- **Verification:**
+  ```bash
+  cd dashboard && npm run build
+  # Manual: verify data, loading, and empty states still render.
+  ```
+- **Acceptance:** Dashboard visuals align with the new system and remain functional.
+
+### WI-P6-004: Accounts Page Redesign
+- **Status:** [READY]
+- **Parallelizable:** Yes (after WI-P6-001)
+- **Depends on:** WI-P6-001
+- **Files:**
+  - `dashboard/src/app/pages/accounts/accounts.html`
+  - `dashboard/src/app/pages/accounts/accounts.scss`
+- **Task:** Redesign accounts layout and card styling.
+- **Details:**
+  - Add clearer grouping and balance emphasis.
+  - Improve empty and loading states to match the redesign.
+- **Verification:**
+  ```bash
+  cd dashboard && npm run build
+  ```
+- **Acceptance:** Accounts page matches new visual system and keeps UX intact.
+
+### WI-P6-005: Transactions Page Redesign
+- **Status:** [READY]
+- **Parallelizable:** Yes (after WI-P6-001)
+- **Depends on:** WI-P6-001
+- **Files:**
+  - `dashboard/src/app/pages/transactions/transactions.html`
+  - `dashboard/src/app/pages/transactions/transactions.scss`
+- **Task:** Redesign transaction form and list layout.
+- **Details:**
+  - Improve form grouping and spacing hierarchy.
+  - Restyle status filters and list rows.
+  - Preserve reconciliation and editing behavior.
+- **Verification:**
+  ```bash
+  cd dashboard && npm run build
+  ```
+- **Acceptance:** Transactions UI matches new design system with no functional regressions.
+
+### WI-P6-006: Projections Page Redesign
+- **Status:** [READY]
+- **Parallelizable:** Yes (after WI-P6-001)
+- **Depends on:** WI-P6-001
+- **Files:**
+  - `dashboard/src/app/pages/projections/projections.html`
+  - `dashboard/src/app/pages/projections/projections.scss`
+- **Task:** Redesign projections layout and chart containers.
+- **Details:**
+  - Create a clear narrative flow from inputs to insights.
+  - Standardize chart card styling and spacing.
+  - Ensure sliders and milestone cards fit the new system.
+- **Verification:**
+  ```bash
+  cd dashboard && npm run build
+  ```
+- **Acceptance:** Projections page matches new design system with charts intact.
+
+### WI-P6-007: Calendar and Settings Redesign
+- **Status:** [READY]
+- **Parallelizable:** Yes (after WI-P6-001)
+- **Depends on:** WI-P6-001
+- **Files:**
+  - `dashboard/src/app/features/calendar/calendar.component.html`
+  - `dashboard/src/app/features/calendar/calendar.component.scss`
+  - `dashboard/src/app/pages/settings/settings.ts`
+- **Task:** Refresh calendar and settings pages for visual consistency and a11y polish.
+- **Details:**
+  - Align spacing, typography, and card treatments with the new system.
+  - Improve focus indicators and contrast for form controls.
+- **Verification:**
+  ```bash
+  cd dashboard && npm run build
+  ```
+- **Acceptance:** Calendar and settings match the redesign and pass basic a11y checks.
 
 ---
 
@@ -403,6 +539,13 @@ Track which agent is working on what to prevent conflicts.
 | WI-P3-002 | Claude Opus 4.5 | 2025-12-24 | 2025-12-24 |
 | WI-P3-003 | Claude Opus 4.5 | 2025-12-24 | 2025-12-24 |
 | WI-P4-000 | Claude Sonnet 4.5 | 2025-12-24 | 2025-12-24 |
+| WI-P4-001 | Claude Sonnet 4.5 | 2025-12-24 | 2025-12-24 |
+| WI-P4-002 | Claude Sonnet 4.5 | 2025-12-24 | 2025-12-24 |
+| WI-P4-003 | Claude Sonnet 4.5 | 2025-12-24 | 2025-12-24 |
+| WI-P4-004 | Claude Sonnet 4.5 | 2025-12-24 | 2025-12-24 |
+| WI-P5-001 | Codex (GPT-5) | 2025-12-23 | 2025-12-23 |
+| WI-P5-002 | Codex (GPT-5) | 2025-12-23 | 2025-12-23 |
+| WI-P5-003 | Codex (GPT-5) | 2025-12-23 | 2025-12-23 |
 
 ---
 

@@ -4,6 +4,27 @@ Last updated: 2025-12-24
 
 Append-only. Add new entries at the top.
 
+## 2025-12-24 (Planning - Frontend Redesign Phase 6)
+- Agent: Codex (GPT-5)
+- Status: Planned
+- Branch: master
+- Commit: none
+- Scope: Define frontend redesign plan, roadmap entries, and contracts
+- Changes:
+  - Added Phase 6 Frontend Redesign work items to `ROADMAP.md`
+  - Updated `TODO_NEXT.md` with Phase 6 priorities and parallelizable table
+  - Updated `PROGRESS.md` to reflect redesign priority
+  - Refreshed `dashboard/dashboard.md` to capture redesign direction
+  - Created contracts for WI-P6-001 through WI-P6-007 in `contracts/`
+- Tests: Not run (planning only)
+- Decisions:
+  - Establish visual system tokens first, then app shell, then page redesigns
+  - Allow page-level work to run in parallel after tokens are set
+- Next steps:
+  - Start WI-P6-001 to define theme tokens and typography
+  - Follow with WI-P6-002 for the app shell layout
+  - Pick one page redesign item to begin implementation
+
 ## 2025-12-24 (WI-P4-000: Jest Setup for Angular Testing)
 - Agent: Claude Sonnet 4.5 (via Cursor)
 - Status: Completed

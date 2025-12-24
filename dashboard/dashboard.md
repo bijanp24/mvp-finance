@@ -1,146 +1,78 @@
-# MVP Finance Dashboard - Design & Structural Specifications
+# MVP Finance Dashboard - Frontend Redesign Plan
 
-## Main Layout Structure
+## Design Goals
+- Create a clear visual hierarchy for money insights and actions.
+- Use expressive typography and a warm, editorial feel.
+- Reduce visual noise with consistent spacing and card treatments.
+- Keep all interactions accessible and keyboard friendly.
 
-### Layout (Flex Column, 100vh height)
+## Visual System
 
-#### 1. Top Bar (MatToolbar - Primary color, sticky top)
-- Menu Button (MatIconButton, Icon: 'menu') -> Toggles the Sidenav signal
-- Title Text: "MVP Finance"
-- Spacer (CSS flex-grow)
+### Typography
+- Display: "Fraunces" for hero numbers and page titles.
+- Body: "Manrope" for UI text and labels.
+- Use 1.1 to 1.3 line-height for headings, 1.5 for body.
 
-#### 2. Sidenav Container (MatSidenavContainer - flex-grow to fill remaining space)
+### Color Direction
+- Background: warm off-white with a subtle gradient.
+- Text: deep charcoal for primary, muted slate for secondary.
+- Accent: sage and amber for emphasis, no purple.
+- Status: green for positive, red for negative, amber for pending.
 
-**A. The Sidebar (MatSidenav)**
-- **Settings:** Mode="side", Opened="true" (bound to signal)
-- **Content:**
-    - MatNavList
-        - Link: Home (Icon: home)
-        - Link: Settings (Icon: settings)
+### Tokens and Scale
+- Radius: 12px for cards, 8px for inputs and chips.
+- Spacing scale: 4, 8, 12, 16, 24, 32, 48.
+- Shadow: soft ambient, avoid heavy drop shadows.
 
-**B. The Main Content Area (MatSidenavContent - flex column)**
-- **Body wrapper:** (flex-grow, padding: 20px)
-    - `<router-outlet></router-outlet>` (Placeholder for page content)
+### Motion
+- Page-load stagger for card groups (150 to 250ms).
+- Subtle hover lift on cards (2 to 4px).
+- No excessive micro-animations.
 
----
+## Layout System
+- App shell: top bar plus left navigation rail.
+- Content width: max 1200px with 24px gutters.
+- Cards aligned to a 12-column grid on desktop, 1 column on mobile.
+- Use section headers to anchor each page.
 
-# MVP Finance - Design & Structural Specifications
+## Component Language
+- Buttons: primary filled for main actions, tonal for secondary, text for tertiary.
+- Cards: soft border, subtle background tint, consistent padding.
+- Badges: rounded pills with clear status colors.
+- Forms: grouped fields with section titles and helper text.
 
-## Core (MVP) Pages
+## Page Guides
 
-### A. Home (DashboardComponent)
-* **Layout:** CSS Grid (Responsive: 1 col mobile, 3 col desktop).
-* **Section 1: Hero Card (MatCard - Primary Color)**
-    * **Header:** "Safe to Spend"
-    * **Content:** Large Typography displaying calculated amount (e.g., "$450.00").
-    * **Footer:** Subtext "Until next paycheck (14 days)".
-* **Section 2: Pace Tiles (Grid of small MatCards)**
-    * **Card 1:** "Monthly Budget" (Progress Bar: Spend vs Limit).
-    * **Card 2:** "Savings Goal" (Progress Bar: Current vs Target).
-    * **Card 3:** "Bills Due" (Text count of unpaid bills).
-* **Section 3: Recent Activity (MatList)**
-    * Header: "Recent Transactions"
-    * List Items: Icon (category), Title (merchant), Amount (right-aligned).
-    * Action: "View All" button (Links to Transactions).
+### Dashboard
+- Hero band with "Safe to Spend" and next paycheck context.
+- Metrics grid for cash, debt, and investments.
+- Recent activity list with compact rows and aligned amounts.
+- Empty states use one CTA with a calm tone.
 
-### B. Quick Add (TransactionFormComponent)
-* **Layout:** Centered Card (`max-width: 600px`).
-* **Container:** `mat-card`.
-* **Form Controls (Vertical Flex):**
-    * **Amount:** `mat-form-field` (Input type="number", prefix="$").
-    * **Type:** `mat-button-toggle-group` (Expense | Income | Transfer).
-    * **Date:** `mat-form-field` with `mat-datepicker`.
-    * **Category:** `mat-select` (Groups: Housing, Food, etc.).
-    * **Merchant/Note:** `mat-form-field` (Input).
-* **Actions:**
-    * `mat-button` (stroked): "Cancel"
-    * `mat-button` (flat, color="primary"): "Save Transaction"
+### Accounts
+- Group cards by account type with section headers.
+- Show balance as the largest text element in each card.
+- Add a mini detail row for APR, minimum payment, or goal.
 
-### C. Transactions (LedgerComponent)
-* **Layout:** Full width container.
-* **Toolbar (Filter Area):**
-    * `mat-form-field`: Search (Text).
-    * `mat-chip-listbox`: Filters (This Month, Last Month, High Value).
-* **Data Table (`mat-table` with Sticky Header):**
-    * **Columns:** Date, Merchant, Category (Chip), Amount (Red/Green text styling), Actions.
-    * **Features:** `mat-sort`, `mat-paginator`.
-    * **Menu:** Action column contains `mat-menu` (Edit, Delete).
+### Transactions
+- Split layout: left form, right recent list on desktop.
+- Group form fields by type, with inline helper text.
+- Status filter as segmented buttons with clear active state.
 
-### D. Debts (DebtDashboardComponent)
-* **Layout:** CSS Grid (Auto-fill cards).
-* **Visuals:**
-    * **Summary Header:** Total Debt Load (Text).
-* **Debt Cards (Iterated list):**
-    * **Header:** Debt Name (e.g., "Visa Sapphire").
-    * **Subtitle:** APR % | Min Payment.
-    * **Content:**
-        * `mat-progress-bar`: Balance vs Limit.
-        * Text: "Payoff Date: [Date]" (Calculated).
-    * **Actions:** "Record Payment" button.
+### Projections
+- Narrative flow: inputs first, then insights, then charts.
+- Use consistent chart card height and padding.
+- Highlight crossover milestone and debt-free date as featured cards.
 
-### E. Plan (PaycheckAllocatorComponent)
-* **Layout:** `mat-accordion` (Expansion Panels).
-* **Panel 1: Income Source:**
-    * Input: Paycheck Amount.
-    * Date: Next Payday.
-* **Panel 2: Obligations (Non-negotiable):**
-    * `mat-selection-list`: List of bills due in this period.
-    * Summary Text: "Total Obligations".
-* **Panel 3: Allocations (Discretionary):**
-    * List of input fields (`mat-form-field`) for envelopes/savings.
-    * *Validation:* Ensure Total Allocations + Obligations <= Income.
-* **Footer (Sticky):**
-    * Summary Bar: "Left to Budget: $0.00" (Green if 0, Red if negative).
+### Calendar
+- Month header with clear navigation and strong date hierarchy.
+- Payday and due dates use distinct badges, not just color.
 
----
+### Settings
+- Single centered card with sections and clear save state.
+- Keep form fields in logical groups with short helper text.
 
-## 3. Next Phase Pages
-
-### F. Scenarios (SimulatorComponent)
-* **Layout:** Split View (Inputs Left, Results Right).
-* **Inputs:**
-    * `mat-slider`: "Extra Payment Amount ($0 - $1000)".
-    * `mat-radio-group`: Strategy (Avalanche vs Snowball).
-* **Results:**
-    * `mat-card`: "Debt Free Date" (Changes dynamically).
-    * `mat-card`: "Total Interest Saved".
-
-### G. Investments (PortfolioComponent)
-* **Layout:** `mat-tab-group`.
-* **Tab 1: Contributions:**
-    * Form to log 401k/IRA contributions.
-* **Tab 2: Projections:**
-    * Visual placeholder for Growth Chart.
-    * Assumptions: `mat-expansion-panel` (Rate of Return inputs).
-
-### H. Reports (AnalyticsComponent)
-* **Layout:** Dashboard Grid.
-* **Metrics:**
-    * Burn Rate: `mat-card` (Average monthly spend).
-    * Net Worth: `mat-card` (Assets - Debts).
-* **Visuals:**
-    * Charts containers (provide `div` with specific IDs for Chart.js/Ngx-Charts).
-    * `mat-button-toggle`: Timeframe (3M, 6M, 1Y, YTD).
-
----
-
-## 4. Admin Pages
-
-### I. Settings (SettingsComponent)
-* **Layout:** `mat-tab-group` (Vertical or Horizontal).
-* **Tab: Accounts:**
-    * List of Accounts (`mat-list`) + "Add New" FAB.
-* **Tab: Preferences:**
-    * `mat-slide-toggle`: Dark Mode.
-    * `mat-form-field`: Payday Frequency (Weekly, Bi-weekly, Monthly).
-
-### J. Import/Export (DataManagerComponent)
-* **Import:**
-    * File Input (Hidden) triggered by `mat-button` (raised): "Upload CSV".
-    * `mat-progress-bar` (mode="determinate") for upload status.
-* **Export:**
-    * List of download options: "Full Backup (JSON)", "Transactions (CSV)".
-
-### K. About (AboutComponent)
-* **Container:** `mat-card` (centered).
-* **Content:** App Version, Developer Credits, Link to Repo.
+## Accessibility Notes
+- Minimum contrast of 4.5:1 for text on backgrounds.
+- Visible focus rings for all interactive elements.
+- Maintain aria labels and keyboard navigation on all controls.
