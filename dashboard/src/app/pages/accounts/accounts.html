@@ -10,7 +10,21 @@
 
     <mat-card-content>
       @if (loading()) {
-        <p>Loading accounts...</p>
+        <div class="skeleton-accounts" aria-busy="true">
+          <div class="skeleton-table-header" aria-hidden="true">
+            <div class="skeleton-line skeleton-header-cell"></div>
+            <div class="skeleton-line skeleton-header-cell"></div>
+            <div class="skeleton-line skeleton-header-cell"></div>
+            <div class="skeleton-line skeleton-header-cell"></div>
+            <div class="skeleton-line skeleton-header-cell"></div>
+          </div>
+          <div class="skeleton-table-rows" aria-hidden="true">
+            <div class="skeleton-table-row"></div>
+            <div class="skeleton-table-row"></div>
+            <div class="skeleton-table-row"></div>
+            <div class="skeleton-table-row"></div>
+          </div>
+        </div>
       } @else if (accounts().length === 0) {
         <div class="empty-state">
           <mat-icon>account_balance_wallet</mat-icon>

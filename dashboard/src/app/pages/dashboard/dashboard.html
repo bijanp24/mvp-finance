@@ -1,7 +1,51 @@
 <div class="dashboard-container">
   @if (loading()) {
-    <div class="loading-state">
-      <p>Loading dashboard...</p>
+    <div class="skeleton-container" aria-busy="true">
+      <!-- Hero Card Skeleton -->
+      <div class="skeleton-hero-card" aria-hidden="true">
+        <div class="skeleton-line skeleton-title"></div>
+        <div class="skeleton-line skeleton-hero-amount"></div>
+        <div class="skeleton-line skeleton-subtext"></div>
+      </div>
+
+      <!-- Pace Tiles Skeleton -->
+      <div class="skeleton-pace-tiles" aria-hidden="true">
+        <div class="skeleton-pace-card">
+          <div class="skeleton-line skeleton-tile-title"></div>
+          <div class="skeleton-line skeleton-tile-amount"></div>
+          <div class="skeleton-line skeleton-tile-label"></div>
+        </div>
+        <div class="skeleton-pace-card">
+          <div class="skeleton-line skeleton-tile-title"></div>
+          <div class="skeleton-line skeleton-tile-amount"></div>
+          <div class="skeleton-line skeleton-tile-label"></div>
+        </div>
+        <div class="skeleton-pace-card">
+          <div class="skeleton-line skeleton-tile-title"></div>
+          <div class="skeleton-line skeleton-tile-amount"></div>
+          <div class="skeleton-line skeleton-tile-label"></div>
+        </div>
+      </div>
+
+      <!-- Projection Charts Skeleton -->
+      <div class="skeleton-projections" aria-hidden="true">
+        <div class="skeleton-projection-card">
+          <div class="skeleton-line skeleton-chart-title"></div>
+          <div class="skeleton-chart-area"></div>
+        </div>
+        <div class="skeleton-projection-card">
+          <div class="skeleton-line skeleton-chart-title"></div>
+          <div class="skeleton-chart-area"></div>
+        </div>
+      </div>
+
+      <!-- Recent Activity Skeleton -->
+      <div class="skeleton-recent-activity" aria-hidden="true">
+        <div class="skeleton-line skeleton-section-title"></div>
+        <div class="skeleton-list-item"></div>
+        <div class="skeleton-list-item"></div>
+        <div class="skeleton-list-item"></div>
+      </div>
     </div>
   } @else {
     <!-- Section 1: Hero Card - Safe to Spend -->
@@ -74,7 +118,10 @@
           </mat-card-header>
           <mat-card-content>
             @if (projectionsLoading()) {
-              <div class="loading">Loading projections...</div>
+              <div class="projection-skeleton" aria-busy="true">
+                <div class="skeleton-line projection-skeleton-title" aria-hidden="true"></div>
+                <div class="projection-skeleton-chart" aria-hidden="true"></div>
+              </div>
             } @else if (debtChartData()) {
               <app-debt-projection-chart
                 [data]="debtChartData()"
@@ -98,7 +145,10 @@
           </mat-card-header>
           <mat-card-content>
             @if (projectionsLoading()) {
-              <div class="loading">Loading projections...</div>
+              <div class="projection-skeleton" aria-busy="true">
+                <div class="skeleton-line projection-skeleton-title" aria-hidden="true"></div>
+                <div class="projection-skeleton-chart" aria-hidden="true"></div>
+              </div>
             } @else if (investmentChartData()) {
               <app-investment-projection-chart
                 [data]="investmentChartData()"

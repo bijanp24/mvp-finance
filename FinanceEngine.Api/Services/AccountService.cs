@@ -1,6 +1,7 @@
 using FinanceEngine.Api.Models;
 using FinanceEngine.Data.Entities;
 using FinanceEngine.Data.Repositories;
+using FinanceEngine.Services;
 
 namespace FinanceEngine.Api.Services;
 
@@ -27,14 +28,14 @@ public class AccountService : IAccountService
 
     public async Task<AccountDto> CreateAccountAsync(CreateAccountRequest request)
     {
-        if (!Enum.TryParse<AccountType>(request.Type, true, out var accountType))
+        if (!Enum.TryParse<Data.Entities.AccountType>(request.Type, true, out var accountType))
             throw new ArgumentException("Invalid account type");
 
         ValidateAccountRequest(request);
 
         // Auto-calculate minimum payment for debt accounts if not provided
         var minimumPayment = request.MinimumPayment;
-        if (accountType == AccountType.Debt && !minimumPayment.HasValue && request.InitialBalance > 0)
+        if (accountType == Data.Entities.AccountType.Debt && !minimumPayment.HasValue && request.InitialBalance > 0)
         {
             // Check if 0% promo is active
             var hasActivePromo = request.PromotionalAnnualPercentageRate == 0 &&
@@ -134,22 +135,26 @@ public class AccountService : IAccountService
 
     private decimal CalculateBalance(AccountEntity account)
     {
-        var balance = account.InitialBalance;
-        foreach (var evt in account.Events)
-        {
-            balance += evt.Type switch
-            {
-                EventType.Income => evt.Amount,
-                EventType.Expense => -evt.Amount,
-                EventType.DebtCharge => evt.Amount,
-                EventType.DebtPayment => -evt.Amount,
-                EventType.InterestFee => evt.Amount,
-                EventType.SavingsContribution => account.Type == AccountType.Cash ? -evt.Amount : evt.Amount,
-                EventType.InvestmentContribution => account.Type == AccountType.Cash ? -evt.Amount : evt.Amount,
-                _ => 0
-            };
-        }
-        return balance;
+        var accountType = MapAccountType(account.Type);
+        var events = account.Events
+            .Select(e => new { Type = MapEventType(e.Type), e.Amount })
+            .Where(e => e.Type.HasValue)
+            .Select(e => new FinancialEvent(e.Type!.Value, e.Amount));
+        return BalanceCalculator.Calculate(accountType, account.InitialBalance, events);
+    }
+
+    private static FinanceEngine.Services.AccountType MapAccountType(Data.Entities.AccountType entityType)
+    {
+        return Enum.TryParse<FinanceEngine.Services.AccountType>(entityType.ToString(), out var mapped)
+            ? mapped
+            : FinanceEngine.Services.AccountType.Cash;
+    }
+
+    private static FinanceEngine.Services.EventType? MapEventType(Data.Entities.EventType entityType)
+    {
+        return Enum.TryParse<FinanceEngine.Services.EventType>(entityType.ToString(), out var mapped)
+            ? mapped
+            : null;
     }
 
     private decimal? CalculateEffectiveAPR(AccountEntity account)
