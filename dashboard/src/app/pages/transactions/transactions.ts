@@ -49,6 +49,7 @@ export class TransactionsPage {
   readonly saving = signal(false);
   readonly editingEventId = signal<number | null>(null);
   readonly statusFilter = signal<'All' | EventStatus>('All');
+  readonly selectedType = signal<string>('Expense');
   readonly displayedColumns = ['date', 'type', 'description', 'account', 'amount', 'status', 'actions'];
 
   readonly filteredEvents = computed(() => {
@@ -74,12 +75,12 @@ export class TransactionsPage {
   ];
 
   readonly showTargetAccount = computed(() => {
-    const type = this.transactionForm.get('type')?.value;
+    const type = this.selectedType();
     return type === 'DebtPayment' || type === 'SavingsContribution' || type === 'InvestmentContribution';
   });
 
   readonly filteredTargetAccounts = computed(() => {
-    const type = this.transactionForm.get('type')?.value;
+    const type = this.selectedType();
     const accounts = this.accounts();
 
     if (type === 'DebtPayment') {
@@ -104,8 +105,9 @@ export class TransactionsPage {
       targetAccountId: [null]
     });
 
-    // Watch type changes to update validation
+    // Watch type changes to update validation and signals
     this.transactionForm.get('type')?.valueChanges.subscribe(type => {
+      this.selectedType.set(type);
       const accountControl = this.transactionForm.get('accountId');
       const targetControl = this.transactionForm.get('targetAccountId');
 
@@ -158,6 +160,7 @@ export class TransactionsPage {
 
   resetForm(): void {
     this.editingEventId.set(null);
+    this.selectedType.set('Expense');
     this.transactionForm.reset({
       type: 'Expense',
       date: new Date(),
@@ -170,6 +173,7 @@ export class TransactionsPage {
 
   editEvent(event: FinancialEvent): void {
     this.editingEventId.set(event.id);
+    this.selectedType.set(event.type);
     this.transactionForm.patchValue({
       type: event.type,
       amount: event.amount,
