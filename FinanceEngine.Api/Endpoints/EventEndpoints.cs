@@ -12,6 +12,7 @@ public static class EventEndpoints
         group.MapGet("/{id}", GetEventById);
         group.MapPost("/", CreateEvent);
         group.MapPut("/{id}", UpdateEvent);
+        group.MapPatch("/{id}/status", UpdateEventStatus);
         group.MapDelete("/{id}", DeleteEvent);
         group.MapGet("/recent", GetRecentEvents);
 
@@ -22,6 +23,7 @@ public static class EventEndpoints
         FinanceDbContext db,
         int? accountId = null,
         string? type = null,
+        string? status = null,
         DateTime? startDate = null,
         DateTime? endDate = null,
         int limit = 100)
@@ -33,6 +35,9 @@ public static class EventEndpoints
 
         if (!string.IsNullOrEmpty(type) && Enum.TryParse<EventType>(type, true, out var eventType))
             query = query.Where(e => e.Type == eventType);
+
+        if (!string.IsNullOrEmpty(status) && Enum.TryParse<EventStatus>(status, true, out var eventStatus))
+            query = query.Where(e => e.Status == eventStatus);
 
         if (startDate.HasValue)
             query = query.Where(e => e.Date >= startDate.Value);
@@ -51,7 +56,8 @@ public static class EventEndpoints
                 e.Amount,
                 e.Description,
                 e.AccountId,
-                e.TargetAccountId
+                e.TargetAccountId,
+                e.Status.ToString()
             ))
             .ToListAsync();
 
@@ -71,7 +77,8 @@ public static class EventEndpoints
             evt.Amount,
             evt.Description,
             evt.AccountId,
-            evt.TargetAccountId
+            evt.TargetAccountId,
+            evt.Status.ToString()
         ));
     }
 
@@ -122,7 +129,8 @@ public static class EventEndpoints
                 debitEvent.Amount,
                 debitEvent.Description,
                 debitEvent.AccountId,
-                debitEvent.TargetAccountId
+                debitEvent.TargetAccountId,
+                debitEvent.Status.ToString()
             ));
         }
 
@@ -158,7 +166,8 @@ public static class EventEndpoints
             evt.Amount,
             evt.Description,
             evt.AccountId,
-            evt.TargetAccountId
+            evt.TargetAccountId,
+            evt.Status.ToString()
         ));
     }
 
@@ -226,7 +235,8 @@ public static class EventEndpoints
             evt.Amount,
             evt.Description,
             evt.AccountId,
-            evt.TargetAccountId
+            evt.TargetAccountId,
+            evt.Status.ToString()
         ));
     }
 
@@ -240,6 +250,30 @@ public static class EventEndpoints
         await db.SaveChangesAsync();
 
         return Results.NoContent();
+    }
+
+    private static async Task<IResult> UpdateEventStatus(int id, UpdateStatusRequest request, FinanceDbContext db)
+    {
+        var evt = await db.Events.FindAsync(id);
+        if (evt is null)
+            return Results.NotFound();
+
+        if (!Enum.TryParse<EventStatus>(request.Status, true, out var status))
+            return Results.BadRequest("Invalid status. Must be 'Pending' or 'Cleared'.");
+
+        evt.Status = status;
+        await db.SaveChangesAsync();
+
+        return Results.Ok(new EventDto(
+            evt.Id,
+            evt.Date,
+            evt.Type.ToString(),
+            evt.Amount,
+            evt.Description,
+            evt.AccountId,
+            evt.TargetAccountId,
+            evt.Status.ToString()
+        ));
     }
 
     private static async Task<IResult> GetRecentEvents(FinanceDbContext db, int days = 30)
@@ -256,7 +290,8 @@ public static class EventEndpoints
                 e.Amount,
                 e.Description,
                 e.AccountId,
-                e.TargetAccountId
+                e.TargetAccountId,
+                e.Status.ToString()
             ))
             .ToListAsync();
 
@@ -272,8 +307,11 @@ public record EventDto(
     decimal Amount,
     string Description,
     int? AccountId,
-    int? TargetAccountId
+    int? TargetAccountId,
+    string Status
 );
+
+public record UpdateStatusRequest(string Status);
 
 public record CreateEventRequest(
     DateTime Date,

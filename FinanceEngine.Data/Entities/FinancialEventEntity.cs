@@ -11,6 +11,12 @@ public enum EventType
     InvestmentContribution
 }
 
+public enum EventStatus
+{
+    Pending,
+    Cleared
+}
+
 public class FinancialEventEntity
 {
     public int Id { get; set; }
@@ -20,6 +26,7 @@ public class FinancialEventEntity
     public string Description { get; set; } = string.Empty;
     public int? AccountId { get; set; }
     public int? TargetAccountId { get; set; }  // For transfers (e.g., DebtPayment from Cash to Debt)
+    public EventStatus Status { get; set; } = EventStatus.Cleared;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation

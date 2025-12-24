@@ -26,10 +26,40 @@
 
 mat-card-header {
   margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
 
   mat-card-title {
     font-size: 20px;
     font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+}
+
+.pending-badge {
+  background-color: #ff9800;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-filter {
+  mat-button-toggle-group {
+    height: 36px;
+
+    mat-button-toggle {
+      ::ng-deep .mat-button-toggle-label-content {
+        padding: 0 12px;
+        font-size: 13px;
+      }
+    }
   }
 }
 
@@ -125,5 +155,27 @@ mat-form-field {
   .negative {
     color: #c62828;
     font-weight: 500;
+  }
+}
+
+.status-button {
+  min-width: 100px;
+  font-size: 12px;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+  }
+
+  &.pending {
+    color: #ff9800;
+    border-color: #ff9800;
+  }
+
+  &.cleared {
+    color: #4caf50;
+    border-color: #4caf50;
   }
 }

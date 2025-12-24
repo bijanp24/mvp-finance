@@ -42,6 +42,7 @@ public class FinanceDbContext : DbContext
             entity.Property(e => e.Description).HasMaxLength(500);
             entity.HasIndex(e => e.Date);
             entity.HasIndex(e => e.Type);
+            entity.HasIndex(e => e.Status);
 
             entity.HasOne(e => e.Account)
                 .WithMany(a => a.Events)

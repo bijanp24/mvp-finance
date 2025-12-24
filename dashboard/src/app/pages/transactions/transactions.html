@@ -119,20 +119,32 @@
     <!-- Recent Transactions -->
     <mat-card class="recent-transactions-card">
       <mat-card-header>
-        <mat-card-title>Recent Transactions</mat-card-title>
+        <mat-card-title>
+          Recent Transactions
+          @if (pendingCount() > 0) {
+            <span class="pending-badge">{{ pendingCount() }} pending</span>
+          }
+        </mat-card-title>
+        <div class="status-filter">
+          <mat-button-toggle-group [value]="statusFilter()" (change)="setStatusFilter($event.value)">
+            <mat-button-toggle value="All">All</mat-button-toggle>
+            <mat-button-toggle value="Pending">Pending</mat-button-toggle>
+            <mat-button-toggle value="Cleared">Cleared</mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
       </mat-card-header>
 
       <mat-card-content>
         @if (loading()) {
           <p>Loading transactions...</p>
-        } @else if (recentEvents().length === 0) {
+        } @else if (filteredEvents().length === 0) {
           <div class="empty-state">
             <mat-icon>receipt_long</mat-icon>
             <p>No transactions yet. Add your first transaction above!</p>
           </div>
         } @else {
           <div class="table-container">
-            <table mat-table [dataSource]="recentEvents()" class="transactions-table">
+            <table mat-table [dataSource]="filteredEvents()" class="transactions-table">
               <!-- Date Column -->
               <ng-container matColumnDef="date">
                 <th mat-header-cell *matHeaderCellDef>Date</th>
@@ -171,6 +183,21 @@
                 <th mat-header-cell *matHeaderCellDef>Amount</th>
                 <td mat-cell *matCellDef="let event" [class.positive]="event.type === 'Income'" [class.negative]="event.type === 'Expense'">
                   {{ formatCurrency(event.amount) }}
+                </td>
+              </ng-container>
+
+              <!-- Status Column -->
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let event">
+                  <button mat-stroked-button
+                          [class.pending]="event.status === 'Pending'"
+                          [class.cleared]="event.status === 'Cleared'"
+                          (click)="toggleStatus(event)"
+                          class="status-button">
+                    <mat-icon>{{ event.status === 'Cleared' ? 'check_circle' : 'pending' }}</mat-icon>
+                    {{ event.status }}
+                  </button>
                 </td>
               </ng-container>
 

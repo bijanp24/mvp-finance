@@ -6,6 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ApiService } from '../../core/services/api.service';
 import { Account, CreateAccountRequest } from '../../core/models/api.models';
 
@@ -23,7 +24,8 @@ export interface AccountDialogData {
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatButtonModule
+    MatButtonModule,
+    MatSnackBarModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -205,6 +207,7 @@ export class AccountDialogComponent {
   private readonly apiService = inject(ApiService);
   private readonly dialogRef = inject(MatDialogRef<AccountDialogComponent>);
   private readonly fb = inject(FormBuilder);
+  private readonly snackBar = inject(MatSnackBar);
   readonly data = inject<AccountDialogData>(MAT_DIALOG_DATA);
 
   readonly saving = signal(false);

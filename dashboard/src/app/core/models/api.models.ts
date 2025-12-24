@@ -33,6 +33,8 @@ export interface CreateAccountRequest {
 }
 
 // Event models
+export type EventStatus = 'Pending' | 'Cleared';
+
 export interface FinancialEvent {
   id: number;
   date: string;
@@ -41,6 +43,7 @@ export interface FinancialEvent {
   description: string;
   accountId?: number;
   targetAccountId?: number;
+  status: EventStatus;
 }
 
 export interface CreateEventRequest {
@@ -59,6 +62,10 @@ export interface UpdateEventRequest {
   description?: string;
   accountId?: number;
   targetAccountId?: number;
+}
+
+export interface UpdateStatusRequest {
+  status: EventStatus;
 }
 
 // Calculator models

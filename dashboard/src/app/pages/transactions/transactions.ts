@@ -14,7 +14,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { ApiService } from '../../core/services/api.service';
-import { Account, FinancialEvent, CreateEventRequest } from '../../core/models/api.models';
+import { Account, FinancialEvent, CreateEventRequest, EventStatus } from '../../core/models/api.models';
 
 @Component({
   selector: 'app-transactions',
@@ -48,7 +48,19 @@ export class TransactionsPage {
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly editingEventId = signal<number | null>(null);
-  readonly displayedColumns = ['date', 'type', 'description', 'account', 'amount', 'actions'];
+  readonly statusFilter = signal<'All' | EventStatus>('All');
+  readonly displayedColumns = ['date', 'type', 'description', 'account', 'amount', 'status', 'actions'];
+
+  readonly filteredEvents = computed(() => {
+    const events = this.recentEvents();
+    const filter = this.statusFilter();
+    if (filter === 'All') return events;
+    return events.filter(e => e.status === filter);
+  });
+
+  readonly pendingCount = computed(() => {
+    return this.recentEvents().filter(e => e.status === 'Pending').length;
+  });
 
   readonly transactionForm: FormGroup;
 
@@ -259,5 +271,30 @@ export class TransactionsPage {
 
   private formatDate(date: Date): string {
     return date.toISOString().split('T')[0];
+  }
+
+  toggleStatus(event: FinancialEvent): void {
+    const newStatus: EventStatus = event.status === 'Pending' ? 'Cleared' : 'Pending';
+    this.apiService.updateEventStatus(event.id, newStatus).subscribe({
+      next: (updatedEvent) => {
+        // Update the event in the local list
+        const events = this.recentEvents();
+        const index = events.findIndex(e => e.id === event.id);
+        if (index !== -1) {
+          const updated = [...events];
+          updated[index] = updatedEvent;
+          this.recentEvents.set(updated);
+        }
+        this.snackBar.open(`Transaction marked as ${newStatus}`, 'Close', { duration: 2000 });
+      },
+      error: (error) => {
+        console.error('Error updating status:', error);
+        this.snackBar.open('Failed to update status', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  setStatusFilter(filter: 'All' | EventStatus): void {
+    this.statusFilter.set(filter);
   }
 }

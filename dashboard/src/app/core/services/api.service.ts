@@ -7,6 +7,8 @@ import {
   FinancialEvent,
   CreateEventRequest,
   UpdateEventRequest,
+  UpdateStatusRequest,
+  EventStatus,
   SpendableRequest,
   SpendableResult,
   DebtAllocationRequest,
@@ -56,6 +58,7 @@ export class ApiService {
   getEvents(params?: {
     accountId?: number;
     type?: string;
+    status?: EventStatus;
     startDate?: string;
     endDate?: string;
     limit?: number;
@@ -77,6 +80,10 @@ export class ApiService {
 
   deleteEvent(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/events/${id}`);
+  }
+
+  updateEventStatus(id: number, status: EventStatus): Observable<FinancialEvent> {
+    return this.http.patch<FinancialEvent>(`${this.baseUrl}/events/${id}/status`, { status });
   }
 
   // Calculator endpoints
