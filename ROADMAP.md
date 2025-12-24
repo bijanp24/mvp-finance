@@ -227,9 +227,32 @@ Structured work items optimized for parallel agent execution. Each work item is 
 ---
 
 ## Phase 4: Test Coverage
-**Status:** Ready
+**Status:** In Progress
 **Estimated effort:** 2-3 sessions
 **All items parallelizable:** Yes
+
+### WI-P4-000: Jest Setup for Angular Testing
+- **Status:** [DONE]
+- **Parallelizable:** Yes
+- **Depends on:** Phase 3 complete
+- **Files:**
+  - `dashboard/jest.config.js` (NEW)
+  - `dashboard/setup-jest.ts` (NEW)
+  - `dashboard/tsconfig.spec.json` (NEW)
+  - `dashboard/package.json` (updated scripts)
+  - `dashboard/src/app/app.spec.ts` (NEW - smoke test)
+- **Task:** Configure Jest testing framework for Angular 21
+- **Details:**
+  - Installed jest, @types/jest, jest-preset-angular, @testing-library/angular, @testing-library/jest-dom, jest-environment-jsdom
+  - Created Jest configuration with preset and setup files
+  - Added test scripts: test, test:watch, test:coverage
+  - Created smoke test to verify setup
+- **Verification:**
+  ```bash
+  cd dashboard && npm test
+  # Should pass 2 tests (Jest Setup suite)
+  ```
+- **Acceptance:** ✅ All criteria met - Jest runs tests, @testing-library/jest-dom matchers work, TypeScript compilation works
 
 ### WI-P4-001: AccountEndpoints Integration Tests
 - **Status:** [ ] Not Started
@@ -273,7 +296,7 @@ Structured work items optimized for parallel agent execution. Each work item is 
 ### WI-P4-003: Frontend Dashboard Tests
 - **Status:** [ ] Not Started
 - **Parallelizable:** Yes
-- **Depends on:** Phase 3 complete
+- **Depends on:** WI-P4-000 (Jest setup)
 - **Files:**
   - New file: `dashboard/src/app/pages/dashboard/dashboard.spec.ts`
 - **Task:** Add unit tests for dashboard component
@@ -291,7 +314,7 @@ Structured work items optimized for parallel agent execution. Each work item is 
 ### WI-P4-004: Frontend Transaction Tests
 - **Status:** [ ] Not Started
 - **Parallelizable:** Yes
-- **Depends on:** Phase 3 complete
+- **Depends on:** WI-P4-000 (Jest setup)
 - **Files:**
   - New file: `dashboard/src/app/pages/transactions/transactions.spec.ts`
 - **Task:** Add unit tests for transaction form
@@ -379,6 +402,7 @@ Track which agent is working on what to prevent conflicts.
 | WI-P3-001 | Claude Opus 4.5 | 2025-12-24 | 2025-12-24 |
 | WI-P3-002 | Claude Opus 4.5 | 2025-12-24 | 2025-12-24 |
 | WI-P3-003 | Claude Opus 4.5 | 2025-12-24 | 2025-12-24 |
+| WI-P4-000 | Claude Sonnet 4.5 | 2025-12-24 | 2025-12-24 |
 
 ---
 

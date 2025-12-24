@@ -5,14 +5,22 @@ Last updated: 2025-12-24
 Read this first when resuming work.
 
 ## Top Priority Next Step
-- **Phase 3 Complete!** Transaction reconciliation (Pending/Cleared) implemented.
-- Manual testing: Start both servers and verify Phase 3 features work correctly
-- Commands: `dotnet run --project FinanceEngine.Api` (terminal 1) and `cd dashboard; npm start` (terminal 2)
-- Test scenarios:
-  - Transaction status: Click status button to toggle between Pending/Cleared
-  - Status filter: Use All/Pending/Cleared filter buttons
-  - Pending badge: Verify count shows in header when pending transactions exist
-- Next: Commit Phase 3 changes or proceed to Phase 4 (Test Coverage)
+- **Phase 4 Started!** Jest testing framework configured for Angular dashboard.
+- WI-P4-000 (Jest Setup) complete - 2 passing smoke tests
+- Ready to implement frontend component tests (WI-P4-003, WI-P4-004)
+- Backend integration tests (WI-P4-001, WI-P4-002) can run in parallel
+- Commands to verify: `cd dashboard; npm test` (should pass 2 tests)
+- Next: Implement WI-P4-003 (Dashboard Tests) or WI-P4-004 (Transaction Tests)
+
+## Phase 4 Work Items (Test Coverage)
+
+| Work Item | File(s) | Status |
+|------|---------|--------|
+| WI-P4-000: Jest setup | `jest.config.js`, `setup-jest.ts`, `tsconfig.spec.json` | DONE (2025-12-24) |
+| WI-P4-001: AccountEndpoints tests | Backend integration tests | Not Started |
+| WI-P4-002: CalculatorEndpoints tests | Backend integration tests | Not Started |
+| WI-P4-003: Dashboard component tests | `dashboard.spec.ts` | Not Started |
+| WI-P4-004: Transaction component tests | `transactions.spec.ts` | Not Started |
 
 ## Phase 3 Work Items (Data Integrity - Reconciliation)
 
@@ -24,16 +32,17 @@ Read this first when resuming work.
 
 ## Working State Snapshot
 - Branch: master (as of 2025-12-24)
-- Working tree: dirty (Phase 3 changes uncommitted)
+- Working tree: dirty (Phase 3 + WI-P4-000 changes uncommitted)
 - Servers: not running
-- Last activity: WI-P3-003 Reconciliation UI completed (Claude Opus 4.5)
+- Last activity: WI-P4-000 Jest Setup completed (Claude Sonnet 4.5)
 
 ## Current Status
-**Last Completed:** WI-P3-003 Reconciliation UI (status toggle, filter, pending badge)
+**Last Completed:** WI-P4-000 Jest Setup (testing framework configured)
 **Phase 2:** Complete! All 5 work items done.
 **Phase 3:** Complete! All 3 work items done.
+**Phase 4:** In Progress (1 of 5 work items done)
 **Branch:** master
-**Ready for:** Manual testing and commit, or proceed to Phase 4 (Test Coverage)
+**Ready for:** Frontend component tests (WI-P4-003, WI-P4-004) or backend integration tests (WI-P4-001, WI-P4-002)
 
 ## Recently Completed (2025-12-22)
 - Phase 1: Dashboard totals use currentBalance
@@ -61,7 +70,8 @@ Read this first when resuming work.
 - Settings endpoints (GET/PUT, validation, defaults)
 - Event endpoints (CRUD operations)
 - Backend calculator tests (existing)
-- Frontend component tests: not implemented
+- Jest testing framework: configured and working
+- Frontend component tests: ready to implement
 
 ## Known Issues and Risks
 - Balance calculation duplication in `FinanceEngine.Api/Endpoints/AccountEndpoints.cs`

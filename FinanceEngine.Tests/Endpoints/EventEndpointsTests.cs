@@ -179,3 +179,4 @@ public class EventEndpointsTests : IClassFixture<WebApplicationFactory<Program>>
         Assert.NotNull(events);
     }
 }
+

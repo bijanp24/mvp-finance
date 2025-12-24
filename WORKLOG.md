@@ -1,8 +1,58 @@
 # WORKLOG.md
 
-Last updated: 2025-12-23
+Last updated: 2025-12-24
 
 Append-only. Add new entries at the top.
+
+## 2025-12-24 (WI-P4-000: Jest Setup for Angular Testing)
+- Agent: Claude Sonnet 4.5 (via Cursor)
+- Status: Completed
+- Branch: master
+- Commit: pending
+- Scope: Phase 4 - Configure Jest testing framework for Angular 21 dashboard
+- Changes:
+  - Installed dependencies:
+    - jest@30.2.0
+    - @types/jest@30.0.0
+    - jest-preset-angular@16.0.0
+    - @testing-library/angular@18.1.1
+    - @testing-library/jest-dom@6.9.1
+    - jest-environment-jsdom@30.2.0 (required for Jest 28+)
+  - Created `dashboard/jest.config.js`:
+    - Configured jest-preset-angular
+    - Set testEnvironment to jsdom
+    - Added moduleNameMapper for src/ alias
+    - Configured transform for TypeScript/HTML
+    - Set up coverage collection
+  - Created `dashboard/setup-jest.ts`:
+    - Imports @testing-library/jest-dom for extended matchers
+  - Created `dashboard/tsconfig.spec.json`:
+    - Extends main tsconfig
+    - Adds jest types
+    - Includes spec files and setup file
+  - Updated `dashboard/package.json` scripts:
+    - `test`: jest
+    - `test:watch`: jest --watch
+    - `test:coverage`: jest --coverage
+  - Created `dashboard/src/app/app.spec.ts`:
+    - Smoke test suite with 2 tests
+    - Verifies Jest runs and jest-dom matchers work
+- Implementation details:
+  - Used --legacy-peer-deps flag to resolve Angular 21 peer dependency conflicts
+  - Minimal setup-jest.ts (no preset import needed, handled by config)
+  - Explicit transform configuration for jest-preset-angular
+  - TypeScript compiler warnings about isolatedModules/emitDecoratorMetadata are expected
+- Tests: 2 passing (Jest Setup suite)
+- Verification: `cd dashboard; npm test` - SUCCESS
+- Decisions:
+  - Chose Jest over Karma for better DX and performance
+  - Used @testing-library/angular for user-centric testing approach
+  - Created minimal smoke test to verify setup works
+  - This is a prerequisite for WI-P4-003 and WI-P4-004
+- Next steps:
+  - Implement WI-P4-003 (Frontend Dashboard Tests)
+  - Implement WI-P4-004 (Frontend Transaction Tests)
+  - Backend integration tests (WI-P4-001, WI-P4-002) can run in parallel
 
 ## 2025-12-23 (WI-P2-003 & WI-P2-004: Crossover Milestone Calculation)
 - Agent: Claude Sonnet 4.5 (via Cursor)

@@ -211,3 +211,4 @@ public class SettingsEndpointsTests : IClassFixture<WebApplicationFactory<Progra
         Assert.Equal(500m, settings.SafetyBuffer);
     }
 }
+
