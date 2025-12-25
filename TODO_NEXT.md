@@ -109,6 +109,10 @@ Read this first when resuming work.
 - Performance testing
 - Accessibility audits
 
+## State Validation
+- Last successful build commit: `Hash or "Not Verified"`
+- Last passed test suite: `Name or "None"`
+
 ## Commands Reference
 ```bash
 # Backend

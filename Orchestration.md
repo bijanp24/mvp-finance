@@ -56,16 +56,25 @@ Output:
 4. Report results in the required format.
 
 ## Worker Contract Template
-Goal: <one sentence>
-Allowed paths: <folders/files>
-Forbidden paths: <folders/files>
-Definition of done:
-- <tests or build command>
-- <expected behavior change>
-Output:
-- Short summary
+**Goal:** <one sentence>
+**Allowed paths (Write Access):**
+- <folders/files the agent can EDIT>
+**Reference paths (Read-Only):**
+- <folders/files the agent needs for CONTEXT>
+
+**Definition of done:**
+- [ ] Tests pass: `<command>`
+- [ ] Logic implemented as requested
+
+**Verification Evidence (REQUIRED):**
+The agent MUST output the actual logs of the verification command.
+- [ ] Build success log: `<paste log snippet>`
+- [ ] Test success log: `<paste log snippet>`
+- [ ] Manual Check: `<description>`
+
+**Output:**
+- Summary of changes
 - Files changed
-- Commands run + results
 - Risks/follow-ups
 
 ## Agent Status Protocol
