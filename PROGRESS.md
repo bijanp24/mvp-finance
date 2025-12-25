@@ -20,9 +20,19 @@ Use this file for deep dive context: feature inventory, file references, known i
 - [x] **WI-P6-008**: Implemented dark slate/blue theme across the entire application.
 - [x] **WI-P6-009**: Fixed account name truncation in cards and made dialogs responsive.
 - [x] **WI-P6-010**: Enhanced chart aesthetics with line smoothing, hidden symbols, and dark-mode optimized gradients.
-- [ ] **WI-P6-005**: Transactions redesign
-- [ ] **WI-P6-006**: Projections redesign
-- [ ] **WI-P6-007**: Calendar and settings redesign
+
+## Phase 8: Recurring Contributions (Ready)
+- [ ] **WI-P8-001**: RecurringContributionEntity
+- [ ] **WI-P8-002**: RecurringEventExpansionService
+- [ ] **WI-P8-003**: API Endpoints
+- [ ] **WI-P8-004**: Settings UI
+- [ ] **WI-P8-005**: Calendar Integration
+- [ ] **WI-P8-006**: Projection Integration
+- [ ] **WI-P8-007**: Net Worth Simulation
+
+## Phase 9: Chart Enhancements (Ready)
+- [ ] **WI-P9-001**: Data Aggregation
+- [ ] **WI-P9-002**: Chart View Controls & Stepped Rendering
 
 ## Quick Start
 

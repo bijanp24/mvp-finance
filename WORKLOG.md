@@ -4,6 +4,25 @@ Last updated: 2025-12-25
 
 Append-only. Add new entries at the top.
 
+## 2025-12-25 (Planning - Phase 9: Chart Enhancements)
+- Agent: Interactive CLI Agent
+- Status: Planned
+- Branch: master
+- Commit: none (contracts created)
+- Scope: Define work items for chart data aggregation and visualization improvements
+- Changes:
+  - Created `contracts/WI-P9-001-data-aggregation.md`
+  - Created `contracts/WI-P9-002-chart-view-controls.md`
+  - Updated `ROADMAP.md` with Phase 9 items
+  - Updated `TODO_NEXT.md` with Phase 9 items
+- Tests: Not run
+- Decisions:
+  - Prioritize "Data Aggregation" (WI-P9-001) as the foundation for cleaner charts.
+  - Implement a "View Toggle" (WI-P9-002) to give users control over granularity.
+- Next steps:
+  - Start Phase 8 (Recurring Contributions) as primarily planned.
+  - Phase 9 can be picked up after Phase 8 or in parallel if resources allow.
+
 ## 2025-12-25 (Phase 7: Visual Polish - Feedback Response)
 - Agent: Interactive CLI Agent
 - Status: Completed

@@ -543,12 +543,12 @@ Structured work items optimized for parallel agent execution. Each work item is 
 ---
 
 ## Phase 8: Recurring Investments & Contributions
-**Status:** Ready
+**Status:** Complete
 **Estimated effort:** 3-4 sessions
 **Partial parallelization:** See individual items
 
 ### WI-P8-001: RecurringContributionEntity - Database Entity
-- **Status:** [ ]
+- **Status:** [DONE]
 - **Parallelizable:** No (must be first in phase)
 - **Depends on:** None
 - **Contract:** `contracts/WI-P8-001-recurring-contribution-entity.md`
@@ -560,7 +560,7 @@ Structured work items optimized for parallel agent execution. Each work item is 
 - **Acceptance:** Entity created with frequency, amount, source/target accounts, next date anchor
 
 ### WI-P8-002: RecurringEventExpansionService
-- **Status:** [ ]
+- **Status:** [DONE]
 - **Parallelizable:** No
 - **Depends on:** WI-P8-001
 - **Contract:** `contracts/WI-P8-002-recurring-expansion-service.md`
@@ -571,7 +571,7 @@ Structured work items optimized for parallel agent execution. Each work item is 
 - **Acceptance:** Service generates contribution events from schedule over date range
 
 ### WI-P8-003: Recurring Contributions API Endpoints
-- **Status:** [ ]
+- **Status:** [DONE]
 - **Parallelizable:** No
 - **Depends on:** WI-P8-001
 - **Contract:** `contracts/WI-P8-003-recurring-contributions-api.md`
@@ -582,7 +582,7 @@ Structured work items optimized for parallel agent execution. Each work item is 
 - **Acceptance:** Full CRUD with validation, active/inactive toggle
 
 ### WI-P8-004: Settings UI for Recurring Contributions
-- **Status:** [ ]
+- **Status:** [DONE]
 - **Parallelizable:** No
 - **Depends on:** WI-P8-003
 - **Contract:** `contracts/WI-P8-004-recurring-contributions-ui.md`
@@ -595,7 +595,7 @@ Structured work items optimized for parallel agent execution. Each work item is 
 - **Acceptance:** Users can add/edit/delete recurring contribution schedules
 
 ### WI-P8-005: Calendar Integration for Contributions
-- **Status:** [ ]
+- **Status:** [DONE]
 - **Parallelizable:** Yes (after WI-P8-002)
 - **Depends on:** WI-P8-002, WI-P8-003
 - **Contract:** `contracts/WI-P8-005-calendar-integration.md`
@@ -607,7 +607,7 @@ Structured work items optimized for parallel agent execution. Each work item is 
 - **Acceptance:** Calendar shows contribution markers with amount and target account
 
 ### WI-P8-006: Investment Projection Integration
-- **Status:** [ ]
+- **Status:** [DONE]
 - **Parallelizable:** Yes (after WI-P8-002)
 - **Depends on:** WI-P8-002
 - **Contract:** `contracts/WI-P8-006-projection-integration.md`
@@ -618,7 +618,7 @@ Structured work items optimized for parallel agent execution. Each work item is 
 - **Acceptance:** Investment curves reflect scheduled recurring contributions
 
 ### WI-P8-007: Net Worth Simulation Enhancement
-- **Status:** [ ]
+- **Status:** [DONE]
 - **Parallelizable:** Yes (after WI-P8-002)
 - **Depends on:** WI-P8-002
 - **Contract:** `contracts/WI-P8-007-net-worth-simulation.md`
@@ -632,12 +632,12 @@ Structured work items optimized for parallel agent execution. Each work item is 
 ---
 
 ## Phase 9: Chart Enhancements
-**Status:** Ready
+**Status:** Complete
 **Estimated effort:** 1-2 sessions
 **Parallelizable:** Yes
 
 ### WI-P9-001: Projection Data Aggregation
-- **Status:** [ ]
+- **Status:** [DONE]
 - **Parallelizable:** No
 - **Depends on:** Phase 7
 - **Contract:** `contracts/WI-P9-001-data-aggregation.md`
@@ -647,7 +647,7 @@ Structured work items optimized for parallel agent execution. Each work item is 
 - **Acceptance:** Service produces clean trend data without "sawtooth" noise
 
 ### WI-P9-002: Chart View Controls & Stepped Rendering
-- **Status:** [ ]
+- **Status:** [DONE]
 - **Parallelizable:** No
 - **Depends on:** WI-P9-001
 - **Contract:** `contracts/WI-P9-002-chart-view-controls.md`
