@@ -427,7 +427,7 @@ Structured work items optimized for parallel agent execution. Each work item is 
 - **Acceptance:** ✅ Dashboard hierarchy is clear; metrics grid and hero band implemented.
 
 ### WI-P6-004: Accounts Page Redesign
-- **Status:** [READY]
+- **Status:** [DONE]
 - **Parallelizable:** Yes (after WI-P6-001)
 - **Depends on:** WI-P6-001
 - **Files:**
@@ -435,13 +435,14 @@ Structured work items optimized for parallel agent execution. Each work item is 
   - `dashboard/src/app/pages/accounts/accounts.scss`
 - **Task:** Redesign accounts layout and card styling.
 - **Details:**
-  - Add clearer grouping and balance emphasis.
-  - Improve empty and loading states to match the redesign.
+  - Grouped accounts by type with section headers.
+  - Implemented card-based grid layout emphasizing balance.
+  - Added action menus and redesigned metadata display.
 - **Verification:**
   ```bash
   cd dashboard && npm run build
   ```
-- **Acceptance:** Accounts page matches new visual system and keeps UX intact.
+- **Acceptance:** ✅ Accounts page matches new visual system; cards used instead of table.
 
 ### WI-P6-005: Transactions Page Redesign
 - **Status:** [READY]
@@ -548,6 +549,7 @@ Track which agent is working on what to prevent conflicts.
 | WI-P6-001 | Interactive Agent | 2025-12-25 | 2025-12-25 |
 | WI-P6-002 | Interactive Agent | 2025-12-25 | 2025-12-25 |
 | WI-P6-003 | Interactive Agent | 2025-12-25 | 2025-12-25 |
+| WI-P6-004 | Interactive Agent | 2025-12-25 | 2025-12-25 |
 
 ---
 

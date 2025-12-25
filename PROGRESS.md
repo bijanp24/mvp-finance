@@ -11,7 +11,8 @@ Use this file for deep dive context: feature inventory, file references, known i
 - [x] **WI-P6-001**: Established new visual system with CSS tokens, warm light-forward theme, and Fraunces/Manrope typography.
 - [x] **WI-P6-002**: Redesigned app shell (top bar, navigation, layout spacing).
 - [x] **WI-P6-003**: Redesigned Dashboard page with hero band, metrics grid, and refined transaction list.
-- [ ] **WI-P6-004**: Accounts redesign (Next)
+- [x] **WI-P6-004**: Redesigned Accounts page with type-grouped cards and balance emphasis.
+- [ ] **WI-P6-005**: Transactions redesign (Next)
 - [ ] **WI-P6-005**: Transactions redesign
 - [ ] **WI-P6-006**: Projections redesign
 - [ ] **WI-P6-007**: Calendar and settings redesign

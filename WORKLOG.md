@@ -4,6 +4,32 @@ Last updated: 2025-12-25
 
 Append-only. Add new entries at the top.
 
+## 2025-12-25 (WI-P6-004: Accounts Redesign)
+- Agent: Interactive CLI Agent
+- Status: Completed
+- Branch: wi/p6-004-accounts-redesign
+- Commit: pending
+- Scope: Phase 6 - Redesign of the accounts page
+- Changes:
+  - **Component (`accounts.ts`)**:
+    - Added computed signals to group accounts by type (Cash, Debt, Investment).
+    - Imported `MatMenuModule` for action menus on cards.
+  - **Template (`accounts.html`)**:
+    - Switched from a tabular layout to a card-based grid layout.
+    - Grouped accounts into clearly defined sections with headers and counts.
+    - Redesigned account cards to emphasize balance and secondary meta-data (APR, Min Payment).
+    - Replaced row-based actions with a kebab menu for each card.
+  - **Styles (`accounts.scss`)**:
+    - Implemented a responsive grid layout using visual system tokens.
+    - Added specific styling for account cards, including a vertical indicator for debt accounts.
+    - Refined skeleton loaders to match the new card-grid structure.
+- Tests: Build successful.
+- Decisions:
+  - Grouping by type provides a better high-level view of different financial categories compared to a single table.
+  - Cards allow for more visual emphasis on the balance while keeping secondary info tucked but accessible.
+- Next steps:
+  - Start WI-P6-005 (Transactions redesign).
+
 ## 2025-12-25 (WI-P6-003: Dashboard Redesign)
 - Agent: Interactive CLI Agent
 - Status: Completed

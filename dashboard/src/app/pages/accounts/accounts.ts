@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,6 +7,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatMenuModule } from '@angular/material/menu';
 import { ApiService } from '../../core/services/api.service';
 import { Account } from '../../core/models/api.models';
 import { AccountDialogComponent } from './account-dialog.component';
@@ -21,7 +22,8 @@ import { AccountDialogComponent } from './account-dialog.component';
     MatTableModule,
     MatChipsModule,
     MatDialogModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatMenuModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './accounts.html',
@@ -34,7 +36,10 @@ export class AccountsPage {
 
   readonly accounts = signal<Account[]>([]);
   readonly loading = signal(false);
-  readonly displayedColumns = ['name', 'type', 'balance', 'apr', 'actions'];
+
+  readonly cashAccounts = computed(() => this.accounts().filter(a => a.type === 'Cash'));
+  readonly debtAccounts = computed(() => this.accounts().filter(a => a.type === 'Debt'));
+  readonly investmentAccounts = computed(() => this.accounts().filter(a => a.type === 'Investment'));
 
   constructor() {
     this.loadAccounts();

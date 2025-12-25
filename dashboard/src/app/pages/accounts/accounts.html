@@ -1,90 +1,136 @@
 <div class="accounts-container">
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title>Accounts</mat-card-title>
-      <button mat-raised-button color="primary" (click)="openCreateDialog()">
+  <header class="page-header">
+    <div class="header-content">
+      <h1>Accounts</h1>
+      <button mat-flat-button color="primary" (click)="openCreateDialog()">
         <mat-icon>add</mat-icon>
         Add Account
       </button>
-    </mat-card-header>
+    </div>
+  </header>
 
-    <mat-card-content>
-      @if (loading()) {
-        <div class="skeleton-accounts" aria-busy="true">
-          <div class="skeleton-table-header" aria-hidden="true">
-            <div class="skeleton-line skeleton-header-cell"></div>
-            <div class="skeleton-line skeleton-header-cell"></div>
-            <div class="skeleton-line skeleton-header-cell"></div>
-            <div class="skeleton-line skeleton-header-cell"></div>
-            <div class="skeleton-line skeleton-header-cell"></div>
-          </div>
-          <div class="skeleton-table-rows" aria-hidden="true">
-            <div class="skeleton-table-row"></div>
-            <div class="skeleton-table-row"></div>
-            <div class="skeleton-table-row"></div>
-            <div class="skeleton-table-row"></div>
-          </div>
+  @if (loading()) {
+    <div class="skeleton-container" aria-busy="true">
+      <div class="skeleton-section">
+        <div class="skeleton-header"></div>
+        <div class="skeleton-grid">
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
         </div>
-      } @else if (accounts().length === 0) {
-        <div class="empty-state">
-          <mat-icon>account_balance_wallet</mat-icon>
-          <p>No accounts yet. Create your first account to get started!</p>
-          <button mat-raised-button color="primary" (click)="openCreateDialog()">
-            <mat-icon>add</mat-icon>
-            Create Account
-          </button>
+      </div>
+      <div class="skeleton-section">
+        <div class="skeleton-header"></div>
+        <div class="skeleton-grid">
+          <div class="skeleton-card"></div>
         </div>
-      } @else {
-        <table mat-table [dataSource]="accounts()" class="accounts-table">
-          <!-- Name Column -->
-          <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef>Name</th>
-            <td mat-cell *matCellDef="let account">{{ account.name }}</td>
-          </ng-container>
+      </div>
+    </div>
+  } @else if (accounts().length === 0) {
+    <div class="app-card empty-state">
+      <mat-icon>account_balance_wallet</mat-icon>
+      <h2>No accounts found</h2>
+      <p>Connect your first account to start tracking your finances.</p>
+      <button mat-flat-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon>
+        Create Account
+      </button>
+    </div>
+  } @else {
+    <!-- Cash Accounts -->
+    @if (cashAccounts().length > 0) {
+      <section class="account-group">
+        <div class="group-header">
+          <h2>Cash & Liquid</h2>
+          <span class="count">{{ cashAccounts().length }}</span>
+        </div>
+        <div class="account-grid">
+          @for (account of cashAccounts(); track account.id) {
+            <ng-container *ngTemplateOutlet="accountCard; context: { $implicit: account }"></ng-container>
+          }
+        </div>
+      </section>
+    }
 
-          <!-- Type Column -->
-          <ng-container matColumnDef="type">
-            <th mat-header-cell *matHeaderCellDef>Type</th>
-            <td mat-cell *matCellDef="let account">
-              <mat-chip [highlighted]="true" [color]="getAccountTypeColor(account.type)">
-                {{ account.type }}
-              </mat-chip>
-            </td>
-          </ng-container>
+    <!-- Debt Accounts -->
+    @if (debtAccounts().length > 0) {
+      <section class="account-group">
+        <div class="group-header">
+          <h2>Debt & Liabilities</h2>
+          <span class="count">{{ debtAccounts().length }}</span>
+        </div>
+        <div class="account-grid">
+          @for (account of debtAccounts(); track account.id) {
+            <ng-container *ngTemplateOutlet="accountCard; context: { $implicit: account }"></ng-container>
+          }
+        </div>
+      </section>
+    }
 
-          <!-- Balance Column -->
-          <ng-container matColumnDef="balance">
-            <th mat-header-cell *matHeaderCellDef>Current Balance</th>
-            <td mat-cell *matCellDef="let account">
-              {{ formatCurrency(account.currentBalance) }}
-            </td>
-          </ng-container>
-
-          <!-- APR Column -->
-          <ng-container matColumnDef="apr">
-            <th mat-header-cell *matHeaderCellDef>APR</th>
-            <td mat-cell *matCellDef="let account">
-              {{ formatAPR(account) }}
-            </td>
-          </ng-container>
-
-          <!-- Actions Column -->
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef>Actions</th>
-            <td mat-cell *matCellDef="let account">
-              <button mat-icon-button (click)="openEditDialog(account)" aria-label="Edit account">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button (click)="deleteAccount(account)" aria-label="Delete account">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table>
-      }
-    </mat-card-content>
-  </mat-card>
+    <!-- Investment Accounts -->
+    @if (investmentAccounts().length > 0) {
+      <section class="account-group">
+        <div class="group-header">
+          <h2>Investments & Growth</h2>
+          <span class="count">{{ investmentAccounts().length }}</span>
+        </div>
+        <div class="account-grid">
+          @for (account of investmentAccounts(); track account.id) {
+            <ng-container *ngTemplateOutlet="accountCard; context: { $implicit: account }"></ng-container>
+          }
+        </div>
+      </section>
+    }
+  }
 </div>
+
+<!-- Reusable Account Card Template -->
+<ng-template #accountCard let-account>
+  <div class="app-card account-card" [class.debt]="account.type === 'Debt'">
+    <div class="card-header">
+      <div class="account-info">
+        <span class="account-type-badge" [class]="account.type.toLowerCase()">{{ account.type }}</span>
+        <h3 class="account-name">{{ account.name }}</h3>
+      </div>
+      <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Account actions">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="openEditDialog(account)">
+          <mat-icon>edit</mat-icon>
+          <span>Edit</span>
+        </button>
+        <button mat-menu-item (click)="deleteAccount(account)">
+          <mat-icon>delete</mat-icon>
+          <span>Delete</span>
+        </button>
+      </mat-menu>
+    </div>
+
+    <div class="card-body">
+      <div class="balance-container">
+        <span class="balance-label">Current Balance</span>
+        <h4 class="balance-amount">{{ formatCurrency(account.currentBalance) }}</h4>
+      </div>
+
+      <div class="account-meta">
+        @if (account.type === 'Debt') {
+          <div class="meta-item">
+            <span class="meta-label">APR</span>
+            <span class="meta-value">{{ formatAPR(account) }}</span>
+          </div>
+          @if (account.minimumPayment) {
+            <div class="meta-item">
+              <span class="meta-label">Min Payment</span>
+              <span class="meta-value">{{ formatCurrency(account.minimumPayment) }}</span>
+            </div>
+          }
+        } @else if (account.type === 'Investment' && account.annualPercentageRate) {
+          <div class="meta-item">
+            <span class="meta-label">Target Return</span>
+            <span class="meta-value">{{ (account.annualPercentageRate * 100).toFixed(2) }}%</span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</ng-template>
