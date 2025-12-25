@@ -4,6 +4,33 @@ Last updated: 2025-12-25
 
 Append-only. Add new entries at the top.
 
+## 2025-12-25 (Completion - Phases 8 & 9: Recurring Contributions + Chart Enhancements)
+- Agent: Interactive CLI Agent
+- Status: Completed
+- Branch: master
+- Commit: 843b2a3
+- Scope: Phase 8 (Recurring Contributions) and Phase 9 (Chart Enhancements) implementation
+- Changes:
+  - **Phase 8 - Recurring Investments & Contributions:**
+    - WI-P8-001: RecurringContributionEntity with frequency, accounts, anchor date
+    - WI-P8-002: RecurringEventExpansionService for date expansion
+    - WI-P8-003: Full CRUD API endpoints with validation and preview
+    - WI-P8-004: Settings UI with contribution management dialog
+    - WI-P8-005: Calendar integration showing contribution markers
+    - WI-P8-006: Projection integration with auto-populated contributions
+    - WI-P8-007: ForwardSimulationEngine with investment tracking and net worth
+  - **Phase 9 - Chart Enhancements:**
+    - WI-P9-001: Data aggregation (Daily/Weekly/Monthly granularity)
+    - WI-P9-002: Chart view controls with stepped line rendering for debt
+- Tests: 157 backend tests passing
+- Decisions:
+  - Recurring contributions managed via Settings page
+  - Contributions auto-populate in projections and calendar views
+  - Granularity toggle gives users control over chart detail level
+- Next steps:
+  - All phases (1-9) complete
+  - Ready for future feature development (Categories, CSV Import, etc.)
+
 ## 2025-12-25 (Planning - Phase 9: Chart Enhancements)
 - Agent: Interactive CLI Agent
 - Status: Planned

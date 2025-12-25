@@ -1,17 +1,23 @@
 # AGENTS.md
 
-Last updated: 2025-12-22
+Last updated: 2025-12-25
 
 ## Purpose
 - Consolidated agent guide for this repo; keep it short and actionable.
 - If other agent instruction files exist, treat this as the source of truth.
 
+## Current Version: v2 (Goal-Driven Budgeting)
+- v1 (Phases 1-9) is complete and archived in `docs/v1-archive/`
+- v2 focuses on budget categories, financial goals, and dynamic planning
+- See `GOAL_DRIVEN_BUDGETING.md` for the full v2 vision
+
 ## Reading order
 - `AGENTS.md` (this file - conventions and safety)
 - `TODO_NEXT.md` (immediate context and next actions)
-- `ROADMAP.md` (work items for parallel execution)
-- `WORKLOG.md` (history and decisions)
-- `PROGRESS.md` (deep dive status and references)
+- `docs/v2/ROADMAP-v2.md` (work items for parallel execution)
+- `docs/v2/WORKLOG-v2.md` (history and decisions)
+- `docs/v2/PROGRESS-v2.md` (deep dive status and references)
+- `GOAL_DRIVEN_BUDGETING.md` (v2 vision document)
 
 ## Repo overview
 - .NET 10 backend: `FinanceEngine/` (core library), `FinanceEngine.Api/` (Minimal API), `FinanceEngine.Data/` (EF Core), `FinanceEngine.Tests/` (xUnit).
@@ -19,11 +25,15 @@ Last updated: 2025-12-22
 - SQLite database: `FinanceEngine.Api/finance.db` (generated at runtime).
 
 ## Key folders
-- `FinanceEngine/`
-- `FinanceEngine.Api/`
-- `FinanceEngine.Data/`
-- `FinanceEngine.Tests/`
-- `dashboard/`
+- `FinanceEngine/` - Core library
+- `FinanceEngine.Api/` - Minimal API
+- `FinanceEngine.Data/` - EF Core entities
+- `FinanceEngine.Tests/` - xUnit tests
+- `dashboard/` - Angular 21 frontend
+- `docs/v2/` - Current v2 documentation
+- `docs/v1-archive/` - Archived v1 documentation
+- `contracts/v2/` - Current v2 work item contracts
+- `contracts/v1/` - Archived v1 contracts
 - `.claude/` (local settings; do not edit or commit)
 
 ## Build/Test/Run
@@ -112,9 +122,20 @@ Services:
 - Before commits, consolidate markdown files into:
   - Root: `mvp-finance.md`
   - Dashboard: `dashboard.md`
-- Exceptions (do not consolidate): `CLAUDE.md`, `dashboard/CLAUDE.md`, `README.md`, `AGENTS.md`, `WORKLOG.md`, `TODO_NEXT.md`, `PROGRESS.md`, `ROADMAP.md`
+- Exceptions (do not consolidate): `CLAUDE.md`, `dashboard/CLAUDE.md`, `README.md`, `AGENTS.md`, `TODO_NEXT.md`, `GOAL_DRIVEN_BUDGETING.md`, `Orchestration.md`, and all files in `docs/` and `contracts/`
 - Remove image references during consolidation.
 - Do not commit images (stored externally).
+
+## Documentation Update Protocol (Timeout Safety)
+
+When updating multiple markdown files:
+1. **START:** Edit TODO_NEXT.md first, add `## SYNC IN PROGRESS` header after title
+2. **UPDATE:** Make changes to ROADMAP-v2, WORKLOG-v2, PROGRESS-v2
+3. **END:** Remove `## SYNC IN PROGRESS` from TODO_NEXT.md
+
+On session resume:
+- If TODO_NEXT.md contains `## SYNC IN PROGRESS` → audit other files
+- This indicates previous session timed out mid-update
 
 ## Commit message format
 Use conventional commit format:
@@ -144,8 +165,8 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
 
 ## TODO_NEXT.md update rules
 - Keep "Top Priority Next Step" to 1-3 atomic tasks with commands when possible.
-- If parallel work exists, add a short "Parallelizable Work Items" table that references `ROADMAP.md` work item IDs.
-- Do not duplicate full task details here; keep details and acceptance criteria in `ROADMAP.md`.
+- If parallel work exists, add a short "Parallelizable Work Items" table that references `ROADMAP-v2.md` work item IDs.
+- Do not duplicate full task details here; keep details and acceptance criteria in `docs/v2/ROADMAP-v2.md`.
 - Keep "Working State Snapshot" factual; use "not checked" when unknown.
 - Use ASCII only; avoid special symbols and emojis.
 
@@ -153,7 +174,7 @@ Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>
 This repo supports parallel agent workflows (e.g., Claude Code + Codex + Copilot).
 
 **Claiming Work:**
-1. Check `ROADMAP.md` for available work items
+1. Check `docs/v2/ROADMAP-v2.md` for available work items
 2. Update the Agent Assignment Log before starting
 3. Mark work item `[IN PROGRESS]` with your identifier
 4. Avoid items with unmet dependencies
@@ -166,29 +187,31 @@ This repo supports parallel agent workflows (e.g., Claude Code + Codex + Copilot
 
 **Handoff Between Agents:**
 - Complete your work item fully before handing off
-- Update WORKLOG.md with your changes
-- Mark work item `[DONE]` in ROADMAP.md
+- Update `docs/v2/WORKLOG-v2.md` with your changes
+- Mark work item `[DONE]` in `docs/v2/ROADMAP-v2.md`
 - Next agent reads TODO_NEXT.md first
 
 ## Handoff Procedure
 - Run verification (tests/build/lint as applicable).
 - Create a checkpoint commit with a clear message (`WIP:` allowed).
-- Update `WORKLOG.md` with branch, commit, changes, decisions, and next steps.
+- Update `docs/v2/WORKLOG-v2.md` with branch, commit, changes, decisions, and next steps.
 - Update `TODO_NEXT.md` with immediate next actions and commands to run.
-- Update `ROADMAP.md` work item status.
-- Update `PROGRESS.md` if scope or known issues changed.
+- Update `docs/v2/ROADMAP-v2.md` work item status.
+- Update `docs/v2/PROGRESS-v2.md` if scope or known issues changed.
 - Record a working state snapshot (branch, dirty/clean, running servers).
 
 ## Handoff checklist
 - [ ] Tests/build status recorded (or noted as not run)
-- [ ] `WORKLOG.md` updated with decisions and next steps
+- [ ] `docs/v2/WORKLOG-v2.md` updated with decisions and next steps
 - [ ] `TODO_NEXT.md` updated with the top next actions and commands
-- [ ] `ROADMAP.md` work item status updated
-- [ ] `PROGRESS.md` updated if issues or scope changed
+- [ ] `docs/v2/ROADMAP-v2.md` work item status updated
+- [ ] `docs/v2/PROGRESS-v2.md` updated if issues or scope changed
 - [ ] Working state snapshot recorded (branch, dirty/clean, servers)
 - [ ] Agent Assignment Log updated (if using parallel execution)
 
 ## Reference docs
 - `mvp-finance.md` - system goals, algorithms, architecture.
-- `PROGRESS.md` - current status and known issues.
+- `GOAL_DRIVEN_BUDGETING.md` - v2 vision and phased approach.
+- `docs/v2/PROGRESS-v2.md` - current status and known issues.
+- `docs/v1-archive/` - archived v1 documentation (Phases 1-9).
 - `dashboard/README.md` - Angular CLI usage.

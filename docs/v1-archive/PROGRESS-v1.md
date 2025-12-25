@@ -1,8 +1,8 @@
 # MVP Finance - Current Progress
 
 Last updated: 2025-12-25
-Current commit: pending
-Working tree: dirty
+Current commit: 843b2a3
+Working tree: clean
 
 ## When to Read This
 Use this file for deep dive context: feature inventory, file references, known issues, architecture notes, and backlog.
@@ -21,18 +21,18 @@ Use this file for deep dive context: feature inventory, file references, known i
 - [x] **WI-P6-009**: Fixed account name truncation in cards and made dialogs responsive.
 - [x] **WI-P6-010**: Enhanced chart aesthetics with line smoothing, hidden symbols, and dark-mode optimized gradients.
 
-## Phase 8: Recurring Contributions (Ready)
-- [ ] **WI-P8-001**: RecurringContributionEntity
-- [ ] **WI-P8-002**: RecurringEventExpansionService
-- [ ] **WI-P8-003**: API Endpoints
-- [ ] **WI-P8-004**: Settings UI
-- [ ] **WI-P8-005**: Calendar Integration
-- [ ] **WI-P8-006**: Projection Integration
-- [ ] **WI-P8-007**: Net Worth Simulation
+## Phase 8: Recurring Contributions (Complete)
+- [x] **WI-P8-001**: RecurringContributionEntity
+- [x] **WI-P8-002**: RecurringEventExpansionService
+- [x] **WI-P8-003**: API Endpoints
+- [x] **WI-P8-004**: Settings UI
+- [x] **WI-P8-005**: Calendar Integration
+- [x] **WI-P8-006**: Projection Integration
+- [x] **WI-P8-007**: Net Worth Simulation
 
-## Phase 9: Chart Enhancements (Ready)
-- [ ] **WI-P9-001**: Data Aggregation
-- [ ] **WI-P9-002**: Chart View Controls & Stepped Rendering
+## Phase 9: Chart Enhancements (Complete)
+- [x] **WI-P9-001**: Data Aggregation
+- [x] **WI-P9-002**: Chart View Controls & Stepped Rendering
 
 ## Quick Start
 
@@ -290,7 +290,7 @@ Before any commit:
 2. Remove image references from markdown
 3. Ensure `WORKLOG.md` and `TODO_NEXT.md` are up to date
 
-Current status: Working tree clean (as of 2025-12-24)
+Current status: Working tree clean (as of 2025-12-25)
 
 ## File Structure Overview
 
