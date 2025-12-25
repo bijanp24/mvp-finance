@@ -141,6 +141,11 @@
     color: var(--color-success);
   }
 
+  &.contribution {
+    background: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+  }
+
   &.debt-payment {
     background: rgba(192, 57, 43, 0.1);
     color: var(--color-warn);

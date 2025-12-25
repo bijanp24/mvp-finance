@@ -13,7 +13,11 @@ import {
   InvestmentProjectionResult,
   DebtChartData,
   InvestmentChartData,
-  NetWorthChartData
+  NetWorthChartData,
+  SimulationSnapshot,
+  ChartGranularity,
+  RecurringContribution,
+  ContributionDto
 } from '../models/api.models';
 
 @Injectable({ providedIn: 'root' })
@@ -25,6 +29,11 @@ export class ProjectionService {
   readonly investmentProjection = signal<InvestmentProjectionResult | null>(null);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+  
+  // Recurring contributions state
+  private readonly recurringContributions = signal<RecurringContribution[]>([]);
+  readonly includeContributions = signal(true);
+  readonly granularity = signal<ChartGranularity>('Monthly');
 
   // Computed chart data
   readonly debtChartData = computed<DebtChartData | null>(() => {
@@ -33,9 +42,11 @@ export class ProjectionService {
       return null;
     }
 
+    const aggregated = this.aggregateSnapshots(projection.snapshots, this.granularity());
+
     return {
-      dates: projection.snapshots.map(s => s.date),
-      debtBalances: projection.snapshots.map(s => s.totalDebt)
+      dates: aggregated.map(s => s.date),
+      debtBalances: aggregated.map(s => s.totalDebt)
     };
   });
 
@@ -45,9 +56,20 @@ export class ProjectionService {
       return null;
     }
 
+    // Convert investment projections to snapshots format for aggregation
+    const snapshots: SimulationSnapshot[] = projection.projections.map(p => ({
+      date: p.date,
+      cashBalance: 0,
+      totalDebt: 0,
+      debtBalances: {},
+      nominalValue: p.nominalValue
+    })) as SimulationSnapshot[];
+
+    const aggregated = this.aggregateSnapshots(snapshots, this.granularity());
+
     return {
-      dates: projection.projections.map(p => p.date),
-      values: projection.projections.map(p => p.nominalValue)
+      dates: aggregated.map(s => s.date),
+      values: aggregated.map(s => (s as any).nominalValue)
     };
   });
 
@@ -69,26 +91,87 @@ export class ProjectionService {
     const dates = Array.from(dateSet).sort();
 
     // Calculate net worth at each date
-    const netWorth: number[] = [];
-    const investments: number[] = [];
-    const debtBalances: number[] = [];
+    const combinedSnapshots: Array<{
+      date: string;
+      netWorth: number;
+      investment: number;
+      debt: number;
+    }> = [];
 
     dates.forEach(date => {
       const debtAtDate = debt?.snapshots?.find(s => s.date === date)?.totalDebt ?? 0;
       const investmentAtDate = investment?.projections?.find(p => p.date === date)?.nominalValue ?? 0;
       
-      investments.push(investmentAtDate);
-      debtBalances.push(debtAtDate);
-      netWorth.push(investmentAtDate - debtAtDate);
+      combinedSnapshots.push({
+        date,
+        netWorth: investmentAtDate - debtAtDate,
+        investment: investmentAtDate,
+        debt: debtAtDate
+      });
     });
 
+    // Convert to snapshot format for aggregation
+    const snapshots: SimulationSnapshot[] = combinedSnapshots.map(s => ({
+      date: s.date,
+      cashBalance: 0,
+      totalDebt: s.debt,
+      debtBalances: {},
+      netWorth: s.netWorth,
+      investment: s.investment
+    })) as SimulationSnapshot[];
+
+    const aggregated = this.aggregateSnapshots(snapshots, this.granularity());
+
     return {
-      dates,
-      netWorth,
-      investments,
-      debt: debtBalances
+      dates: aggregated.map(s => s.date),
+      netWorth: aggregated.map(s => (s as any).netWorth),
+      investments: aggregated.map(s => (s as any).investment),
+      debt: aggregated.map(s => s.totalDebt)
     };
   });
+
+  /**
+   * Aggregates simulation snapshots based on the specified granularity.
+   * - Daily: Returns all snapshots
+   * - Weekly: Returns snapshots for Fridays (end of trading week)
+   * - Monthly: Returns snapshots for last day of each month
+   * Always includes the final snapshot to close the loop.
+   */
+  private aggregateSnapshots(snapshots: SimulationSnapshot[], granularity: ChartGranularity): SimulationSnapshot[] {
+    if (granularity === 'Daily' || snapshots.length === 0) {
+      return snapshots;
+    }
+
+    const result: SimulationSnapshot[] = [];
+    let lastSnapshot: SimulationSnapshot | null = null;
+
+    for (const snapshot of snapshots) {
+      const date = new Date(snapshot.date);
+      let shouldInclude = false;
+
+      if (granularity === 'Weekly') {
+        // Include Fridays (end of trading week)
+        shouldInclude = date.getDay() === 5;
+      } else if (granularity === 'Monthly') {
+        // Include last day of month
+        const nextDay = new Date(date);
+        nextDay.setDate(date.getDate() + 1);
+        shouldInclude = nextDay.getDate() === 1;
+      }
+
+      if (shouldInclude) {
+        result.push(snapshot);
+      }
+      lastSnapshot = snapshot;
+    }
+
+    // Always include the final snapshot to close the loop
+    if (lastSnapshot && !result.includes(lastSnapshot)) {
+      result.push(lastSnapshot);
+    }
+
+    return result;
+  }
 
   readonly crossoverDate = computed<string | null>(() => {
     const debt = this.debtProjection();
@@ -151,6 +234,90 @@ export class ProjectionService {
     return null;
   });
 
+  // Load recurring contributions from API
+  loadRecurringContributions(): void {
+    this.apiService.getRecurringContributions().subscribe({
+      next: (contributions) => {
+        this.recurringContributions.set(contributions.filter(c => c.isActive));
+      },
+      error: (err) => {
+        console.error('Error loading recurring contributions:', err);
+        this.recurringContributions.set([]);
+      }
+    });
+  }
+
+  // Expand recurring contributions for a date range
+  private expandSchedule(
+    schedule: RecurringContribution,
+    startDate: Date,
+    endDate: Date
+  ): ContributionDto[] {
+    const contributions: ContributionDto[] = [];
+    const current = new Date(schedule.nextContributionDate);
+
+    while (current <= endDate) {
+      if (current >= startDate) {
+        contributions.push({
+          date: current.toISOString(),
+          amount: schedule.amount
+        });
+      }
+
+      // Advance to next occurrence based on frequency
+      switch (schedule.frequency) {
+        case 'Weekly':
+          current.setDate(current.getDate() + 7);
+          break;
+        case 'BiWeekly':
+          current.setDate(current.getDate() + 14);
+          break;
+        case 'SemiMonthly':
+          // Add 15 days (approximate)
+          current.setDate(current.getDate() + 15);
+          break;
+        case 'Monthly':
+          current.setMonth(current.getMonth() + 1);
+          break;
+        case 'Quarterly':
+          current.setMonth(current.getMonth() + 3);
+          break;
+        case 'Annually':
+          current.setFullYear(current.getFullYear() + 1);
+          break;
+      }
+    }
+
+    return contributions;
+  }
+
+  // Get all contributions for projection period
+  getContributionsForProjection(
+    startDate: Date,
+    endDate: Date,
+    targetAccountId?: number
+  ): ContributionDto[] {
+    if (!this.includeContributions()) {
+      return [];
+    }
+
+    const allContributions: ContributionDto[] = [];
+
+    for (const schedule of this.recurringContributions()) {
+      // Optionally filter by target account
+      if (targetAccountId && schedule.targetAccountId !== targetAccountId) {
+        continue;
+      }
+
+      const occurrences = this.expandSchedule(schedule, startDate, endDate);
+      allContributions.push(...occurrences);
+    }
+
+    return allContributions.sort((a, b) =>
+      new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+  }
+
   calculateProjections(
     accounts: Account[],
     timeRangeMonths: number = 12,
@@ -190,13 +357,22 @@ export class ProjectionService {
       ? this.apiService.calculateInvestmentProjection(investmentRequest)
       : of(null);
 
+    // Load recurring contributions first if not already loaded
+    const contributionsCall$ = this.recurringContributions().length === 0
+      ? this.apiService.getRecurringContributions()
+      : of(this.recurringContributions());
+
     return forkJoin({
       debt: debtCall$,
-      investment: investmentCall$
+      investment: investmentCall$,
+      contributions: contributionsCall$
     }).pipe(
       map(results => {
         this.debtProjection.set(results.debt);
         this.investmentProjection.set(results.investment);
+        if (results.contributions) {
+          this.recurringContributions.set(results.contributions.filter(c => c.isActive));
+        }
         this.loading.set(false);
       })
     );
@@ -303,6 +479,9 @@ export class ProjectionService {
     // Backend expects decimal format (0.07 for 7%)
     const nominalAnnualReturn = 0.07;
 
+    // Get contributions for all investment accounts
+    const contributions = this.getContributionsForProjection(startDate, endDate);
+
     return {
       initialBalance,
       startDate: startDate.toISOString(),
@@ -310,7 +489,7 @@ export class ProjectionService {
       nominalAnnualReturn,
       inflationRate: 0.03, // 3% inflation
       useMonthly: true, // Monthly granularity for better performance
-      contributions: [] // No recurring contributions for now
+      contributions
     };
   }
 }

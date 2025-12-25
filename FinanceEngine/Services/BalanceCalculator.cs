@@ -65,3 +65,4 @@ public enum EventType
 public record FinancialEvent(EventType Type, decimal Amount);
 
 
+

@@ -527,4 +527,274 @@ public class ForwardSimulationEngineTests
     }
 
     #endregion
+
+    #region Investment Tests
+
+    [Fact]
+    public void Simulate_WithInvestments_TracksGrowth()
+    {
+        // Arrange
+        var startDate = new DateTime(2025, 1, 1);
+        var endDate = new DateTime(2025, 12, 31);
+        var input = new ForwardSimulationInput(
+            StartDate: startDate,
+            EndDate: endDate,
+            InitialCash: 10000m,
+            Debts: Array.Empty<DebtAccount>(),
+            Events: Array.Empty<SimulationEvent>(),
+            InvestmentAccounts: new[] { new InvestmentAccount("401k", 50000m, 0.07m) },
+            RecurringContributions: Array.Empty<SimulationContribution>()
+        );
+
+        // Act
+        var result = ForwardSimulationEngine.Simulate(input);
+
+        // Assert
+        Assert.True(result.FinalInvestmentBalance > 50000m, "Investment should grow over time");
+        Assert.True(result.TotalInvestmentGrowth > 0m, "Total growth should be positive");
+        Assert.True(result.FinalInvestmentBalances["401k"].Balance > 50000m, "401k should grow");
+        Assert.True(result.FinalInvestmentBalances["401k"].TotalGrowth > 0m);
+    }
+
+    [Fact]
+    public void Simulate_WithContributions_ReducesCashIncreasesInvestments()
+    {
+        // Arrange
+        var startDate = new DateTime(2025, 1, 1);
+        var endDate = new DateTime(2025, 1, 31);
+        var input = new ForwardSimulationInput(
+            StartDate: startDate,
+            EndDate: endDate,
+            InitialCash: 10000m,
+            Debts: Array.Empty<DebtAccount>(),
+            Events: Array.Empty<SimulationEvent>(),
+            InvestmentAccounts: new[] { new InvestmentAccount("401k", 1000m, 0.07m) },
+            RecurringContributions: new[]
+            {
+                new SimulationContribution(new DateTime(2025, 1, 15), 500m, "Cash", "401k"),
+                new SimulationContribution(new DateTime(2025, 1, 30), 500m, "Cash", "401k")
+            }
+        );
+
+        // Act
+        var result = ForwardSimulationEngine.Simulate(input);
+
+        // Assert
+        Assert.Equal(9000m, result.FinalCashBalance, 2); // 10000 - 500 - 500
+        Assert.True(result.FinalInvestmentBalance > 2000m, "Investment should be contributions + initial + growth");
+        Assert.Equal(1000m, result.TotalContributed);
+        Assert.Equal(1000m, result.FinalInvestmentBalances["401k"].TotalContributed);
+    }
+
+    [Fact]
+    public void Simulate_NetWorth_CombinesAllAccounts()
+    {
+        // Arrange
+        var startDate = new DateTime(2025, 1, 1);
+        var endDate = new DateTime(2025, 1, 10);
+        var input = new ForwardSimulationInput(
+            StartDate: startDate,
+            EndDate: endDate,
+            InitialCash: 5000m,
+            Debts: new[] { new DebtAccount("Loan", 2000m, 0.05m, 100m) },
+            Events: Array.Empty<SimulationEvent>(),
+            InvestmentAccounts: new[] { new InvestmentAccount("401k", 10000m, 0.07m) },
+            RecurringContributions: Array.Empty<SimulationContribution>()
+        );
+
+        // Act
+        var result = ForwardSimulationEngine.Simulate(input);
+
+        // Assert
+        var expectedNetWorth = result.FinalCashBalance + result.FinalInvestmentBalance - result.FinalDebtBalances.Values.Sum();
+        Assert.Equal(expectedNetWorth, result.FinalNetWorth, 2);
+        Assert.True(result.FinalNetWorth > 10000m, "Net worth should be positive");
+    }
+
+    [Fact]
+    public void Simulate_MillionaireDate_DetectedCorrectly()
+    {
+        // Arrange - Start with $999,000 in investments at high return
+        var startDate = new DateTime(2025, 1, 1);
+        var endDate = new DateTime(2025, 12, 31);
+        var input = new ForwardSimulationInput(
+            StartDate: startDate,
+            EndDate: endDate,
+            InitialCash: 5000m,
+            Debts: Array.Empty<DebtAccount>(),
+            Events: Array.Empty<SimulationEvent>(),
+            InvestmentAccounts: new[] { new InvestmentAccount("Portfolio", 995000m, 0.10m) },
+            RecurringContributions: Array.Empty<SimulationContribution>()
+        );
+
+        // Act
+        var result = ForwardSimulationEngine.Simulate(input);
+
+        // Assert
+        Assert.NotNull(result.MillionaireDate);
+        Assert.True(result.MillionaireDate >= startDate);
+        Assert.True(result.MillionaireDate <= endDate);
+        
+        // Verify net worth at millionaire date is >= 1M
+        var millionaireSnapshot = result.Snapshots.First(s => s.Date == result.MillionaireDate.Value);
+        Assert.True(millionaireSnapshot.NetWorth >= 1_000_000m);
+    }
+
+    [Fact]
+    public void Simulate_NoInvestments_BackwardsCompatible()
+    {
+        // Arrange - Old-style input without investments
+        var startDate = new DateTime(2024, 1, 1);
+        var endDate = new DateTime(2024, 1, 10);
+        var input = new ForwardSimulationInput(
+            StartDate: startDate,
+            EndDate: endDate,
+            InitialCash: 1000m,
+            Debts: new[] { new DebtAccount("Card", 500m, 0.18m, 25m) },
+            Events: new[]
+            {
+                new SimulationEvent(new DateTime(2024, 1, 5), SimulationEventType.Income, "Paycheck", 2000m)
+            }
+        );
+
+        // Act
+        var result = ForwardSimulationEngine.Simulate(input);
+
+        // Assert
+        Assert.Equal(10, result.Snapshots.Count);
+        Assert.Equal(3000m, result.FinalCashBalance); // 1000 + 2000
+        Assert.Equal(0m, result.FinalInvestmentBalance);
+        Assert.Equal(0m, result.TotalInvestmentGrowth);
+        Assert.Equal(0m, result.TotalContributed);
+        Assert.Empty(result.FinalInvestmentBalances);
+        Assert.Null(result.MillionaireDate);
+    }
+
+    [Fact]
+    public void Simulate_MultipleInvestmentAccounts_TrackedSeparately()
+    {
+        // Arrange
+        var startDate = new DateTime(2025, 1, 1);
+        var endDate = new DateTime(2025, 6, 30);
+        var input = new ForwardSimulationInput(
+            StartDate: startDate,
+            EndDate: endDate,
+            InitialCash: 10000m,
+            Debts: Array.Empty<DebtAccount>(),
+            Events: Array.Empty<SimulationEvent>(),
+            InvestmentAccounts: new[]
+            {
+                new InvestmentAccount("401k", 50000m, 0.07m),
+                new InvestmentAccount("IRA", 30000m, 0.06m),
+                new InvestmentAccount("Brokerage", 20000m, 0.08m)
+            },
+            RecurringContributions: new[]
+            {
+                new SimulationContribution(new DateTime(2025, 1, 15), 500m, "Cash", "401k"),
+                new SimulationContribution(new DateTime(2025, 2, 15), 300m, "Cash", "IRA")
+            }
+        );
+
+        // Act
+        var result = ForwardSimulationEngine.Simulate(input);
+
+        // Assert
+        Assert.Equal(3, result.FinalInvestmentBalances.Count);
+        Assert.True(result.FinalInvestmentBalances["401k"].Balance > 50000m);
+        Assert.True(result.FinalInvestmentBalances["IRA"].Balance > 30000m);
+        Assert.True(result.FinalInvestmentBalances["Brokerage"].Balance > 20000m);
+        Assert.Equal(500m, result.FinalInvestmentBalances["401k"].TotalContributed);
+        Assert.Equal(300m, result.FinalInvestmentBalances["IRA"].TotalContributed);
+        Assert.Equal(0m, result.FinalInvestmentBalances["Brokerage"].TotalContributed);
+        Assert.Equal(800m, result.TotalContributed);
+    }
+
+    [Fact]
+    public void Simulate_InvestmentGrowth_CompoundsDaily()
+    {
+        // Arrange - Test that daily compounding works correctly
+        var startDate = new DateTime(2025, 1, 1);
+        var endDate = new DateTime(2025, 12, 31); // Full year
+        var input = new ForwardSimulationInput(
+            StartDate: startDate,
+            EndDate: endDate,
+            InitialCash: 0m,
+            Debts: Array.Empty<DebtAccount>(),
+            Events: Array.Empty<SimulationEvent>(),
+            InvestmentAccounts: new[] { new InvestmentAccount("Test", 10000m, 0.10m) }, // 10% annual
+            RecurringContributions: Array.Empty<SimulationContribution>()
+        );
+
+        // Act
+        var result = ForwardSimulationEngine.Simulate(input);
+
+        // Assert
+        // With 10% annual rate, should be approximately 10000 * 1.10 = 11000
+        // Due to daily compounding, it will be slightly higher
+        Assert.True(result.FinalInvestmentBalance >= 11000m, "Should grow by at least 10%");
+        Assert.True(result.FinalInvestmentBalance <= 11100m, "Should not grow by more than 11%");
+        Assert.True(result.TotalInvestmentGrowth >= 1000m);
+    }
+
+    [Fact]
+    public void Simulate_NetWorthSnapshot_UpdatesDaily()
+    {
+        // Arrange
+        var startDate = new DateTime(2025, 1, 1);
+        var endDate = new DateTime(2025, 1, 5);
+        var input = new ForwardSimulationInput(
+            StartDate: startDate,
+            EndDate: endDate,
+            InitialCash: 1000m,
+            Debts: new[] { new DebtAccount("Loan", 500m, 0.05m, 50m) },
+            Events: Array.Empty<SimulationEvent>(),
+            InvestmentAccounts: new[] { new InvestmentAccount("401k", 5000m, 0.07m) },
+            RecurringContributions: Array.Empty<SimulationContribution>()
+        );
+
+        // Act
+        var result = ForwardSimulationEngine.Simulate(input);
+
+        // Assert
+        Assert.Equal(5, result.Snapshots.Count);
+        foreach (var snapshot in result.Snapshots)
+        {
+            // Net worth should equal cash + investments - debt
+            var calculatedNetWorth = snapshot.CashBalance + 
+                                    snapshot.InvestmentBalances.Values.Sum(i => i.Balance) - 
+                                    snapshot.TotalDebt;
+            Assert.Equal(calculatedNetWorth, snapshot.NetWorth, 2);
+        }
+    }
+
+    [Fact]
+    public void Simulate_ContributionToNonExistentAccount_Ignored()
+    {
+        // Arrange
+        var startDate = new DateTime(2025, 1, 1);
+        var endDate = new DateTime(2025, 1, 10);
+        var input = new ForwardSimulationInput(
+            StartDate: startDate,
+            EndDate: endDate,
+            InitialCash: 10000m,
+            Debts: Array.Empty<DebtAccount>(),
+            Events: Array.Empty<SimulationEvent>(),
+            InvestmentAccounts: new[] { new InvestmentAccount("401k", 1000m, 0.07m) },
+            RecurringContributions: new[]
+            {
+                new SimulationContribution(new DateTime(2025, 1, 5), 500m, "Cash", "NonExistent")
+            }
+        );
+
+        // Act
+        var result = ForwardSimulationEngine.Simulate(input);
+
+        // Assert
+        // Cash should still be deducted even if target doesn't exist
+        Assert.Equal(9500m, result.FinalCashBalance, 2);
+        // But contribution shouldn't be tracked since it went nowhere
+        Assert.Equal(500m, result.TotalContributed);
+    }
+
+    #endregion
 }

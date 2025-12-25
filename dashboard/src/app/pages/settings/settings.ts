@@ -1,5 +1,6 @@
-import { Component, ChangeDetectionStrategy, inject, signal, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, OnInit, computed } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -7,12 +8,16 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatChipsModule } from '@angular/material/chips';
 import { ApiService } from '../../core/services/api.service';
-import { UpdateSettingsRequest } from '../../core/models/api.models';
+import { UpdateSettingsRequest, RecurringContribution, Account } from '../../core/models/api.models';
+import { RecurringContributionDialogComponent } from './recurring-contribution-dialog.component';
 
 @Component({
   selector: 'app-settings',
   imports: [
+    CommonModule,
     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
@@ -20,7 +25,9 @@ import { UpdateSettingsRequest } from '../../core/models/api.models';
     MatSelectModule,
     MatButtonModule,
     MatIconModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatDialogModule,
+    MatChipsModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -81,6 +88,67 @@ import { UpdateSettingsRequest } from '../../core/models/api.models';
               </button>
             </div>
           </form>
+        }
+      </div>
+
+      <div class="app-card settings-card">
+        <div class="section-header">
+          <h2>Recurring Contributions</h2>
+          <p class="section-description">Manage scheduled investment and savings contributions.</p>
+        </div>
+
+        @if (loadingContributions()) {
+          <div class="skeleton-form">
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line"></div>
+          </div>
+        } @else {
+          <div class="contributions-section">
+            <button mat-flat-button color="primary" (click)="openCreateContributionDialog()">
+              <mat-icon>add</mat-icon>
+              Add Contribution
+            </button>
+
+            @if (contributions().length === 0) {
+              <div class="empty-state">
+                <p>No recurring contributions configured yet.</p>
+              </div>
+            } @else {
+              <div class="contributions-list">
+                @for (contribution of contributions(); track contribution.id) {
+                  <div class="contribution-card">
+                    <div class="contribution-header">
+                      <h3>{{ contribution.name }}</h3>
+                      <mat-chip [class.active]="contribution.isActive" [class.inactive]="!contribution.isActive">
+                        {{ contribution.isActive ? 'Active' : 'Inactive' }}
+                      </mat-chip>
+                    </div>
+                    <div class="contribution-details">
+                      <p class="contribution-amount">\${{ contribution.amount | number:'1.2-2' }} {{ contribution.frequency }}</p>
+                      <p class="contribution-accounts">
+                        {{ contribution.sourceAccountName || 'Unknown' }} → {{ contribution.targetAccountName || 'Unknown' }}
+                      </p>
+                      <p class="contribution-next">Next: {{ formatDate(contribution.nextContributionDate) }}</p>
+                    </div>
+                    <div class="contribution-actions">
+                      <button mat-button (click)="openEditContributionDialog(contribution)">
+                        <mat-icon>edit</mat-icon>
+                        Edit
+                      </button>
+                      <button mat-button (click)="toggleContribution(contribution)">
+                        <mat-icon>{{ contribution.isActive ? 'pause' : 'play_arrow' }}</mat-icon>
+                        {{ contribution.isActive ? 'Deactivate' : 'Activate' }}
+                      </button>
+                      <button mat-button color="warn" (click)="deleteContribution(contribution)">
+                        <mat-icon>delete</mat-icon>
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
         }
       </div>
 
@@ -145,6 +213,97 @@ import { UpdateSettingsRequest } from '../../core/models/api.models';
       }
     }
 
+    .contributions-section {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-lg);
+    }
+
+    .contributions-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+    }
+
+    .contribution-card {
+      padding: var(--spacing-lg);
+      border: 1px solid var(--color-divider);
+      border-radius: var(--radius-md);
+      background: var(--color-surface);
+
+      .contribution-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-sm);
+
+        h3 {
+          margin: 0;
+          font-size: 1rem;
+          font-weight: 600;
+        }
+
+        mat-chip {
+          font-size: 0.75rem;
+          min-height: 24px;
+          padding: 0 8px;
+
+          &.active {
+            background-color: var(--color-success);
+            color: white;
+          }
+
+          &.inactive {
+            background-color: var(--color-text-muted);
+            color: white;
+          }
+        }
+      }
+
+      .contribution-details {
+        margin-bottom: var(--spacing-md);
+
+        p {
+          margin: 4px 0;
+          font-size: 0.875rem;
+        }
+
+        .contribution-amount {
+          font-weight: 600;
+          color: var(--color-primary);
+        }
+
+        .contribution-accounts {
+          color: var(--color-text-main);
+        }
+
+        .contribution-next {
+          color: var(--color-text-muted);
+          font-size: 0.8125rem;
+        }
+      }
+
+      .contribution-actions {
+        display: flex;
+        gap: var(--spacing-sm);
+        flex-wrap: wrap;
+
+        button {
+          font-size: 0.875rem;
+        }
+      }
+    }
+
+    .empty-state {
+      padding: var(--spacing-xl);
+      text-align: center;
+      color: var(--color-text-muted);
+
+      p {
+        margin: 0;
+      }
+    }
+
     .danger-zone {
       border-left: 4px solid var(--color-warn);
       
@@ -179,9 +338,14 @@ export class SettingsPage implements OnInit {
   private readonly apiService = inject(ApiService);
   private readonly fb = inject(FormBuilder);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly dialog = inject(MatDialog);
 
   readonly loading = signal(true);
   readonly saving = signal(false);
+  readonly loadingContributions = signal(true);
+  
+  readonly contributions = signal<RecurringContribution[]>([]);
+  readonly accounts = signal<Account[]>([]);
 
   readonly form: FormGroup;
 
@@ -216,6 +380,8 @@ export class SettingsPage implements OnInit {
 
   ngOnInit(): void {
     this.loadSettings();
+    this.loadContributions();
+    this.loadAccounts();
   }
 
   loadSettings(): void {
@@ -278,5 +444,98 @@ export class SettingsPage implements OnInit {
         }
       });
     }
+  }
+
+  loadContributions(): void {
+    this.loadingContributions.set(true);
+
+    this.apiService.getRecurringContributions().subscribe({
+      next: (contributions) => {
+        this.contributions.set(contributions);
+        this.loadingContributions.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading contributions:', error);
+        this.snackBar.open('Failed to load recurring contributions', 'Close', { duration: 3000 });
+        this.loadingContributions.set(false);
+      }
+    });
+  }
+
+  loadAccounts(): void {
+    this.apiService.getAccounts().subscribe({
+      next: (accounts) => {
+        this.accounts.set(accounts);
+      },
+      error: (error) => {
+        console.error('Error loading accounts:', error);
+      }
+    });
+  }
+
+  openCreateContributionDialog(): void {
+    const dialogRef = this.dialog.open(RecurringContributionDialogComponent, {
+      width: '600px',
+      data: { mode: 'create', accounts: this.accounts() }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadContributions();
+        this.snackBar.open('Contribution created successfully', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  openEditContributionDialog(contribution: RecurringContribution): void {
+    const dialogRef = this.dialog.open(RecurringContributionDialogComponent, {
+      width: '600px',
+      data: { mode: 'edit', contribution, accounts: this.accounts() }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadContributions();
+        this.snackBar.open('Contribution updated successfully', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  toggleContribution(contribution: RecurringContribution): void {
+    this.apiService.toggleRecurringContribution(contribution.id).subscribe({
+      next: () => {
+        this.loadContributions();
+        const status = contribution.isActive ? 'deactivated' : 'activated';
+        this.snackBar.open(`Contribution ${status} successfully`, 'Close', { duration: 3000 });
+      },
+      error: (error) => {
+        console.error('Error toggling contribution:', error);
+        this.snackBar.open('Failed to toggle contribution', 'Close', { duration: 3000 });
+      }
+    });
+  }
+
+  deleteContribution(contribution: RecurringContribution): void {
+    if (confirm(`Are you sure you want to delete "${contribution.name}"?`)) {
+      this.apiService.deleteRecurringContribution(contribution.id).subscribe({
+        next: () => {
+          this.loadContributions();
+          this.snackBar.open('Contribution deleted successfully', 'Close', { duration: 3000 });
+        },
+        error: (error) => {
+          console.error('Error deleting contribution:', error);
+          this.snackBar.open('Failed to delete contribution', 'Close', { duration: 3000 });
+        }
+      });
+    }
+  }
+
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
   }
 }

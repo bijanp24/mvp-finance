@@ -4,13 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSliderModule } from '@angular/material/slider';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { forkJoin } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { ProjectionService } from '../../core/services/projection.service';
 import { DebtProjectionChartComponent } from '../../features/charts/debt-projection-chart.component';
 import { InvestmentProjectionChartComponent } from '../../features/charts/investment-projection-chart.component';
 import { NetWorthChartComponent } from '../../features/charts/net-worth-chart.component';
-import { Account, UserSettings, SimulationResult } from '../../core/models/api.models';
+import { Account, UserSettings, SimulationResult, ChartGranularity } from '../../core/models/api.models';
 
 @Component({
   selector: 'app-projections',
@@ -20,6 +21,7 @@ import { Account, UserSettings, SimulationResult } from '../../core/models/api.m
     MatCardModule,
     MatButtonToggleModule,
     MatSliderModule,
+    MatSlideToggleModule,
     DebtProjectionChartComponent,
     InvestmentProjectionChartComponent,
     NetWorthChartComponent
@@ -46,6 +48,8 @@ export class ProjectionsPage {
   readonly debtProjection = this.projectionService.debtProjection;
   readonly investmentProjection = this.projectionService.investmentProjection;
   readonly crossoverDate = this.projectionService.crossoverDate;
+  readonly includeContributions = this.projectionService.includeContributions;
+  readonly granularity = this.projectionService.granularity;
 
   readonly debtComparison = computed(() => {
     const baseline = this.debtProjection();
@@ -65,6 +69,29 @@ export class ProjectionsPage {
       monthsSaved,
       interestSaved
     };
+  });
+
+  readonly totalScheduledContributions = computed(() => {
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setMonth(endDate.getMonth() + this.timeRangeMonths());
+    
+    const contributions = this.projectionService.getContributionsForProjection(
+      startDate,
+      endDate
+    );
+    return contributions.reduce((sum, c) => sum + c.amount, 0);
+  });
+
+  readonly contributionCount = computed(() => {
+    const startDate = new Date();
+    const endDate = new Date();
+    endDate.setMonth(endDate.getMonth() + this.timeRangeMonths());
+    
+    return this.projectionService.getContributionsForProjection(
+      startDate,
+      endDate
+    ).length;
   });
 
   constructor() {
@@ -112,6 +139,15 @@ export class ProjectionsPage {
     ).subscribe(result => {
       this.debtProjectionWithExtra.set(result);
     });
+  }
+
+  toggleContributions(include: boolean): void {
+    this.projectionService.includeContributions.set(include);
+    this.calculateProjections();
+  }
+
+  setGranularity(granularity: ChartGranularity): void {
+    this.projectionService.granularity.set(granularity);
   }
 
   private calculateProjections(): void {

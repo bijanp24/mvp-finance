@@ -542,6 +542,123 @@ Structured work items optimized for parallel agent execution. Each work item is 
 
 ---
 
+## Phase 8: Recurring Investments & Contributions
+**Status:** Ready
+**Estimated effort:** 3-4 sessions
+**Partial parallelization:** See individual items
+
+### WI-P8-001: RecurringContributionEntity - Database Entity
+- **Status:** [ ]
+- **Parallelizable:** No (must be first in phase)
+- **Depends on:** None
+- **Contract:** `contracts/WI-P8-001-recurring-contribution-entity.md`
+- **Files:**
+  - `FinanceEngine.Data/Entities/RecurringContributionEntity.cs` (NEW)
+  - `FinanceEngine.Data/FinanceDbContext.cs`
+  - New EF migration
+- **Task:** Create database entity for recurring contributions (investments, savings)
+- **Acceptance:** Entity created with frequency, amount, source/target accounts, next date anchor
+
+### WI-P8-002: RecurringEventExpansionService
+- **Status:** [ ]
+- **Parallelizable:** No
+- **Depends on:** WI-P8-001
+- **Contract:** `contracts/WI-P8-002-recurring-expansion-service.md`
+- **Files:**
+  - `FinanceEngine/Services/RecurringEventExpansionService.cs` (NEW)
+  - `FinanceEngine.Tests/Services/RecurringEventExpansionServiceTests.cs` (NEW)
+- **Task:** Create service to expand recurring schedules into event lists for projections
+- **Acceptance:** Service generates contribution events from schedule over date range
+
+### WI-P8-003: Recurring Contributions API Endpoints
+- **Status:** [ ]
+- **Parallelizable:** No
+- **Depends on:** WI-P8-001
+- **Contract:** `contracts/WI-P8-003-recurring-contributions-api.md`
+- **Files:**
+  - `FinanceEngine.Api/Endpoints/RecurringContributionEndpoints.cs` (NEW)
+  - `FinanceEngine.Tests/Endpoints/RecurringContributionEndpointsTests.cs` (NEW)
+- **Task:** CRUD endpoints for managing recurring contribution schedules
+- **Acceptance:** Full CRUD with validation, active/inactive toggle
+
+### WI-P8-004: Settings UI for Recurring Contributions
+- **Status:** [ ]
+- **Parallelizable:** No
+- **Depends on:** WI-P8-003
+- **Contract:** `contracts/WI-P8-004-recurring-contributions-ui.md`
+- **Files:**
+  - `dashboard/src/app/pages/settings/settings.ts`
+  - `dashboard/src/app/pages/settings/settings.html`
+  - `dashboard/src/app/pages/settings/settings.scss`
+  - `dashboard/src/app/core/models/api.models.ts`
+- **Task:** Add recurring contributions management section to Settings page
+- **Acceptance:** Users can add/edit/delete recurring contribution schedules
+
+### WI-P8-005: Calendar Integration for Contributions
+- **Status:** [ ]
+- **Parallelizable:** Yes (after WI-P8-002)
+- **Depends on:** WI-P8-002, WI-P8-003
+- **Contract:** `contracts/WI-P8-005-calendar-integration.md`
+- **Files:**
+  - `dashboard/src/app/core/services/calendar.service.ts`
+  - `dashboard/src/app/features/calendar/calendar.component.ts`
+  - `dashboard/src/app/features/calendar/calendar.component.html`
+- **Task:** Display scheduled contribution dates on calendar alongside paychecks
+- **Acceptance:** Calendar shows contribution markers with amount and target account
+
+### WI-P8-006: Investment Projection Integration
+- **Status:** [ ]
+- **Parallelizable:** Yes (after WI-P8-002)
+- **Depends on:** WI-P8-002
+- **Contract:** `contracts/WI-P8-006-projection-integration.md`
+- **Files:**
+  - `dashboard/src/app/core/services/projection.service.ts`
+  - `dashboard/src/app/pages/projections/projections.ts`
+- **Task:** Auto-populate investment projections from recurring contribution schedules
+- **Acceptance:** Investment curves reflect scheduled recurring contributions
+
+### WI-P8-007: Net Worth Simulation Enhancement
+- **Status:** [ ]
+- **Parallelizable:** Yes (after WI-P8-002)
+- **Depends on:** WI-P8-002
+- **Contract:** `contracts/WI-P8-007-net-worth-simulation.md`
+- **Files:**
+  - `FinanceEngine/Calculators/ForwardSimulationEngine.cs`
+  - `FinanceEngine/Models/SimulationModels.cs`
+  - `FinanceEngine.Tests/Calculators/ForwardSimulationEngineTests.cs`
+- **Task:** Extend simulation engine to track investment accounts with recurring contributions
+- **Acceptance:** Simulation outputs include investment growth and true net worth over time
+
+---
+
+## Phase 9: Chart Enhancements
+**Status:** Ready
+**Estimated effort:** 1-2 sessions
+**Parallelizable:** Yes
+
+### WI-P9-001: Projection Data Aggregation
+- **Status:** [ ]
+- **Parallelizable:** No
+- **Depends on:** Phase 7
+- **Contract:** `contracts/WI-P9-001-data-aggregation.md`
+- **Files:**
+  - `dashboard/src/app/core/services/projection.service.ts`
+- **Task:** Implement service logic to aggregate daily data into Weekly/Monthly snapshots
+- **Acceptance:** Service produces clean trend data without "sawtooth" noise
+
+### WI-P9-002: Chart View Controls & Stepped Rendering
+- **Status:** [ ]
+- **Parallelizable:** No
+- **Depends on:** WI-P9-001
+- **Contract:** `contracts/WI-P9-002-chart-view-controls.md`
+- **Files:**
+  - `dashboard/src/app/pages/projections/projections.html`
+  - `dashboard/src/app/features/charts/*.ts`
+- **Task:** Add granularity toggle and stepped line rendering for debt
+- **Acceptance:** Users can switch between granular details and smooth trends
+
+---
+
 ## Future Phases (Not Scheduled)
 ### Categories & Tags
 - Add category enum/table
@@ -556,10 +673,10 @@ Structured work items optimized for parallel agent execution. Each work item is 
 - Preview/confirm UI
 - Duplicate detection
 
-### Recurring Transactions
-- Recurrence pattern entity
-- Auto-generation service
-- Management UI
+### Generic Recurring Transactions
+- Unify all recurring events (income, expenses, contributions) into single entity
+- Auto-materialization background service
+- Management UI for all recurring event types
 
 ---
 

@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, input, computed } from '@angular/core';
 import { NgxEchartsModule } from 'ngx-echarts';
 import type { EChartsOption } from 'echarts';
-import { DebtChartData } from '../../core/models/api.models';
+import { DebtChartData, ChartGranularity } from '../../core/models/api.models';
 
 @Component({
   selector: 'app-debt-projection-chart',
@@ -26,6 +26,7 @@ export class DebtProjectionChartComponent {
   readonly data = input.required<DebtChartData | null>();
   readonly height = input<string>('400px');
   readonly compact = input<boolean>(false);
+  readonly granularity = input<ChartGranularity>('Monthly');
 
   readonly chartOptions = computed<EChartsOption>(() => {
     const chartData = this.data();
@@ -73,7 +74,9 @@ export class DebtProjectionChartComponent {
           name: 'Total Debt',
           type: 'line',
           data: chartData.debtBalances,
-          smooth: true,
+          // Use stepped lines for Daily/Weekly (shows discrete payments), smooth for Monthly (trend view)
+          step: this.granularity() === 'Monthly' ? false : 'end',
+          smooth: this.granularity() === 'Monthly',
           showSymbol: false,
           areaStyle: {
             color: {

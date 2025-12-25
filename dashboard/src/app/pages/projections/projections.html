@@ -25,6 +25,18 @@
           </mat-button-toggle-group>
         </div>
 
+        <div class="input-item">
+          <label class="input-label">Chart Granularity</label>
+          <mat-button-toggle-group
+            [value]="granularity()"
+            (change)="setGranularity($event.value)"
+            class="segmented-control">
+            <mat-button-toggle value="Daily">Daily</mat-button-toggle>
+            <mat-button-toggle value="Weekly">Weekly</mat-button-toggle>
+            <mat-button-toggle value="Monthly">Monthly</mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
+
         @if (debtChartData()) {
           <div class="input-item extra-payment">
             <div class="label-row">
@@ -34,6 +46,17 @@
             <mat-slider min="0" max="1000" step="50" discrete showTickMarks>
               <input matSliderThumb [(ngModel)]="extraPayment" (ngModelChange)="onExtraPaymentChange()">
             </mat-slider>
+          </div>
+        }
+
+        @if (investmentChartData()) {
+          <div class="input-item">
+            <label class="input-label">Investment Projections</label>
+            <mat-slide-toggle
+              [checked]="includeContributions()"
+              (change)="toggleContributions($event.checked)">
+              Include recurring contributions
+            </mat-slide-toggle>
           </div>
         }
       </div>
@@ -69,6 +92,15 @@
           <span class="label">Projected Net Worth</span>
           <h3 class="value">{{ formatCurrency(netWorthChartData()!.netWorth[netWorthChartData()!.netWorth.length - 1]) }}</h3>
           <span class="subtext">In {{ timeRangeMonths() }} months</span>
+        </div>
+      }
+
+      <!-- Scheduled Contributions Insight -->
+      @if (contributionCount() > 0) {
+        <div class="app-card insight-card">
+          <span class="label">Scheduled Contributions</span>
+          <h3 class="value">{{ contributionCount() }} contributions</h3>
+          <span class="subtext">{{ formatCurrency(totalScheduledContributions()) }} over projection period</span>
         </div>
       }
 
@@ -116,7 +148,8 @@
           <app-debt-projection-chart
             [data]="debtChartData()"
             [height]="'400px'"
-            [compact]="false">
+            [compact]="false"
+            [granularity]="granularity()">
           </app-debt-projection-chart>
         </div>
       }

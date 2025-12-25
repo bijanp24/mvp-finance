@@ -228,7 +228,51 @@ export interface SimulationSnapshot {
   debtBalances: Record<string, number>;
 }
 
+// Recurring Contribution models
+export type ContributionFrequency =
+  | 'Weekly'
+  | 'BiWeekly'
+  | 'SemiMonthly'
+  | 'Monthly'
+  | 'Quarterly'
+  | 'Annually';
+
+export interface RecurringContribution {
+  id: number;
+  name: string;
+  amount: number;
+  frequency: ContributionFrequency;
+  nextContributionDate: string;
+  sourceAccountId: number;
+  targetAccountId: number;
+  sourceAccountName?: string;
+  targetAccountName?: string;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface CreateRecurringContributionRequest {
+  name: string;
+  amount: number;
+  frequency: string;
+  nextContributionDate: string;
+  sourceAccountId: number;
+  targetAccountId: number;
+}
+
+export interface UpdateRecurringContributionRequest {
+  name: string;
+  amount: number;
+  frequency: string;
+  nextContributionDate: string;
+  sourceAccountId: number;
+  targetAccountId: number;
+  isActive: boolean;
+}
+
 // Chart-specific models
+export type ChartGranularity = 'Daily' | 'Weekly' | 'Monthly';
+
 export interface DebtChartData {
   dates: string[];
   debtBalances: number[];

@@ -5,5 +5,7 @@ public record ForwardSimulationInput(
     DateTime EndDate,
     decimal InitialCash,
     IEnumerable<DebtAccount> Debts,
-    IEnumerable<SimulationEvent> Events
+    IEnumerable<SimulationEvent> Events,
+    IEnumerable<InvestmentAccount>? InvestmentAccounts = null,
+    IEnumerable<SimulationContribution>? RecurringContributions = null
 );

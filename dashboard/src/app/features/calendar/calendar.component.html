@@ -47,6 +47,15 @@
                   </div>
                 }
 
+                <!-- Contribution indicators -->
+                @for (contribution of day.contributions; track contribution.name) {
+                  <div class="calendar-event contribution"
+                       [matTooltip]="contribution.name + ' - ' + formatCurrency(contribution.amount) + (contribution.targetAccountName ? ' to ' + contribution.targetAccountName : '')">
+                    <mat-icon>savings</mat-icon>
+                    <span class="event-text">{{ contribution.name }}</span>
+                  </div>
+                }
+
                 <!-- Debt payment indicators -->
                 @for (payment of day.debtPayments; track payment.accountName) {
                   <div class="calendar-event debt-payment"

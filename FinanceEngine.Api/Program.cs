@@ -45,11 +45,18 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Ensure database is created
+// Apply pending migrations (or create database for in-memory/testing)
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<FinanceDbContext>();
-    db.Database.EnsureCreated();
+    if (db.Database.IsRelational())
+    {
+        db.Database.Migrate();
+    }
+    else
+    {
+        db.Database.EnsureCreated();
+    }
 }
 
 // Map endpoint groups
@@ -57,6 +64,7 @@ app.MapGroup("/api/accounts").MapAccountEndpoints();
 app.MapGroup("/api/events").MapEventEndpoints();
 app.MapGroup("/api/calculators").MapCalculatorEndpoints();
 app.MapGroup("/api/settings").MapSettingsEndpoints();
+app.MapGroup("/api/recurring-contributions").MapRecurringContributionEndpoints();
 
 app.Run();
 

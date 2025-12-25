@@ -1,5 +1,12 @@
 import { Injectable } from '@angular/core';
-import { Account, UserSettings } from '../models/api.models';
+import { Account, UserSettings, RecurringContribution } from '../models/api.models';
+
+export interface ContributionEvent {
+  date: Date;
+  name: string;
+  amount: number;
+  targetAccountName?: string;
+}
 
 export interface CalendarDay {
   date: Date;
@@ -9,6 +16,7 @@ export interface CalendarDay {
     accountName: string;
     minimumPayment: number;
   }>;
+  contributions: ContributionEvent[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -18,7 +26,8 @@ export class CalendarService {
     month: number,
     year: number,
     settings: UserSettings,
-    accounts: Account[]
+    accounts: Account[],
+    contributions: RecurringContribution[] = []
   ): CalendarDay[][] {
     // Create calendar grid for the month
     const firstDay = new Date(year, month, 1);
@@ -41,6 +50,13 @@ export class CalendarService {
 
     const debtPayments = this.calculateDebtDueDates(accounts, month, year);
 
+    // Calculate contribution dates for this month
+    const contributionEvents = this.calculateContributionDates(
+      contributions.filter(c => c.isActive),
+      month,
+      year
+    );
+
     // Build calendar grid (6 weeks max)
     for (let week = 0; week < 6; week++) {
       currentWeek = [];
@@ -61,11 +77,16 @@ export class CalendarService {
             minimumPayment: dp.amount
           }));
 
+        // Find contributions for this date
+        const dayContributions = contributionEvents
+          .filter(ce => this.isSameDay(ce.date, currentDate));
+
         currentWeek.push({
           date: new Date(currentDate),
           isCurrentMonth,
           paychecks: dayPaychecks,
-          debtPayments: dayDebtPayments
+          debtPayments: dayDebtPayments,
+          contributions: dayContributions
         });
 
         startDate.setDate(startDate.getDate() + 1);
@@ -167,6 +188,75 @@ export class CalendarService {
       case 'Monthly': return 30;
       default: return 14;
     }
+  }
+
+  calculateContributionDates(
+    contributions: RecurringContribution[],
+    month: number,
+    year: number
+  ): ContributionEvent[] {
+    const events: ContributionEvent[] = [];
+    const firstDayOfMonth = new Date(year, month, 1);
+    const lastDayOfMonth = new Date(year, month + 1, 0);
+
+    for (const contribution of contributions) {
+      const occurrences = this.expandContributionSchedule(
+        contribution,
+        firstDayOfMonth,
+        lastDayOfMonth
+      );
+      events.push(...occurrences);
+    }
+
+    return events;
+  }
+
+  private expandContributionSchedule(
+    contribution: RecurringContribution,
+    startDate: Date,
+    endDate: Date
+  ): ContributionEvent[] {
+    const events: ContributionEvent[] = [];
+    let current = new Date(contribution.nextContributionDate);
+    const frequencyDays = this.getFrequencyDays(contribution.frequency);
+
+    // Start from the first occurrence on or after startDate
+    while (current < startDate) {
+      current = this.addDaysToDate(current, frequencyDays);
+    }
+
+    // Collect all occurrences within the date range
+    while (current <= endDate) {
+      if (current >= startDate) {
+        events.push({
+          date: new Date(current),
+          name: contribution.name,
+          amount: contribution.amount,
+          targetAccountName: contribution.targetAccountName
+        });
+      }
+      current = this.addDaysToDate(current, frequencyDays);
+    }
+
+    return events;
+  }
+
+  private getFrequencyDays(frequency: string): number {
+    switch (frequency) {
+      case 'Weekly': return 7;
+      case 'BiWeekly': return 14;
+      case 'SemiMonthly': return 15;
+      case 'Monthly': return 30;
+      case 'Quarterly': return 91;
+      case 'Annually': return 365;
+      default: return 30;
+    }
+  }
+
+  private addDaysToDate(date: Date, days: number): Date {
+    const result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result;
   }
 
   private isSameDay(date1: Date, date2: Date): boolean {

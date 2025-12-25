@@ -12,6 +12,7 @@ public class FinanceDbContext : DbContext
     public DbSet<AccountEntity> Accounts => Set<AccountEntity>();
     public DbSet<FinancialEventEntity> Events => Set<FinancialEventEntity>();
     public DbSet<IncomeScheduleEntity> IncomeSchedules => Set<IncomeScheduleEntity>();
+    public DbSet<RecurringContributionEntity> RecurringContributions => Set<RecurringContributionEntity>();
     public DbSet<UserSettingsEntity> UserSettings => Set<UserSettingsEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -66,6 +67,24 @@ public class FinanceDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(e => e.TargetAccountId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // RecurringContribution configuration
+        modelBuilder.Entity<RecurringContributionEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Amount).HasPrecision(18, 2);
+
+            entity.HasOne(e => e.SourceAccount)
+                .WithMany()
+                .HasForeignKey(e => e.SourceAccountId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.TargetAccount)
+                .WithMany()
+                .HasForeignKey(e => e.TargetAccountId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         // UserSettings configuration

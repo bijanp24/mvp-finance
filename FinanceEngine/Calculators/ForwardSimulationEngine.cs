@@ -28,12 +28,25 @@ public static class ForwardSimulationEngine
         var totalInterestPaid = 0m;
         DateTime? debtFreeDate = null;
 
-        // Order events by date
-        var events = input.Events.OrderBy(e => e.Date).ToList();
-        var eventIndex = 0;
+        // Initialize investment tracking
+        var investmentAccounts = input.InvestmentAccounts ?? Enumerable.Empty<InvestmentAccount>();
+        var investmentBalances = investmentAccounts.ToDictionary(i => i.Name, i => i.InitialBalance);
+        var investmentRates = investmentAccounts.ToDictionary(i => i.Name, i => i.AnnualReturnRate);
+        var investmentGrowthTracking = investmentAccounts.ToDictionary(i => i.Name, i => 0m);
+        var investmentContributionTracking = investmentAccounts.ToDictionary(i => i.Name, i => 0m);
+        var totalInvestmentGrowth = 0m;
+        var totalContributed = 0m;
+        DateTime? millionaireDate = null;
 
-        // Calculate daily interest rates
-        var dailyRates = debtAPRs.ToDictionary(
+        // Order events and contributions by date
+        var events = input.Events.OrderBy(e => e.Date).ToList();
+        var contributions = (input.RecurringContributions ?? Enumerable.Empty<SimulationContribution>())
+            .OrderBy(c => c.Date).ToList();
+        var eventIndex = 0;
+        var contributionIndex = 0;
+
+        // Calculate daily interest rates for debts
+        var dailyDebtRates = debtAPRs.ToDictionary(
             kvp => kvp.Key,
             kvp => (decimal)(Math.Pow(1.0 + (double)kvp.Value, 1.0 / 365.0) - 1.0)
         );
@@ -43,16 +56,28 @@ public static class ForwardSimulationEngine
         while (currentDate <= input.EndDate)
         {
             var interestAccruedToday = 0m;
+            var dailyInvestmentGrowth = 0m;
             var eventDescription = "Daily balance";
 
-            // Accrue interest on all debts (if not the first day)
+            // 1. Apply daily investment growth
+            foreach (var accountName in investmentBalances.Keys.ToList())
+            {
+                var balance = investmentBalances[accountName];
+                var growth = CalculateDailyInvestmentGrowth(balance, investmentRates[accountName]);
+                investmentBalances[accountName] += growth;
+                investmentGrowthTracking[accountName] += growth;
+                dailyInvestmentGrowth += growth;
+            }
+            totalInvestmentGrowth += dailyInvestmentGrowth;
+
+            // 2. Accrue interest on all debts (if not the first day)
             if (currentDate > input.StartDate)
             {
                 foreach (var debtName in debtBalances.Keys.ToList())
                 {
                     if (debtBalances[debtName] > 0)
                     {
-                        var dailyInterest = debtBalances[debtName] * dailyRates[debtName];
+                        var dailyInterest = debtBalances[debtName] * dailyDebtRates[debtName];
                         debtBalances[debtName] += dailyInterest;
                         interestAccruedToday += dailyInterest;
                         totalInterestPaid += dailyInterest;
@@ -60,7 +85,16 @@ public static class ForwardSimulationEngine
                 }
             }
 
-            // Process all events for this date
+            // 3. Process contributions for this date
+            while (contributionIndex < contributions.Count && contributions[contributionIndex].Date.Date == currentDate.Date)
+            {
+                var contribution = contributions[contributionIndex];
+                ProcessContribution(contribution, ref currentCash, investmentBalances, investmentContributionTracking);
+                totalContributed += contribution.Amount;
+                contributionIndex++;
+            }
+
+            // 4. Process all events for this date
             while (eventIndex < events.Count && events[eventIndex].Date.Date == currentDate.Date)
             {
                 var evt = events[eventIndex];
@@ -106,14 +140,32 @@ public static class ForwardSimulationEngine
                 eventIndex++;
             }
 
-            // Create snapshot
+            // 5. Calculate net worth
             var totalDebt = debtBalances.Values.Sum();
+            var totalInvestments = investmentBalances.Values.Sum();
+            var netWorth = CalculateNetWorth(currentCash, totalInvestments, totalDebt);
+
+            // 6. Check millionaire milestone
+            if (millionaireDate == null && netWorth >= 1_000_000m)
+            {
+                millionaireDate = currentDate;
+            }
+
+            // 7. Create snapshot
+            var investmentSnapshots = investmentBalances.ToDictionary(
+                kvp => kvp.Key,
+                kvp => new InvestmentSnapshot(kvp.Key, kvp.Value, 0m) // Daily growth per account would need tracking
+            );
+
             snapshots.Add(new SimulationSnapshot(
                 Date: currentDate,
                 CashBalance: currentCash,
                 DebtBalances: new Dictionary<string, decimal>(debtBalances),
+                InvestmentBalances: investmentSnapshots,
                 TotalDebt: totalDebt,
                 InterestAccruedThisPeriod: interestAccruedToday,
+                DailyInvestmentGrowth: dailyInvestmentGrowth,
+                NetWorth: netWorth,
                 EventDescription: eventDescription
             ));
 
@@ -126,12 +178,58 @@ public static class ForwardSimulationEngine
             currentDate = currentDate.AddDays(1);
         }
 
+        // Build final investment balances
+        var finalInvestmentBalances = investmentBalances.ToDictionary(
+            kvp => kvp.Key,
+            kvp => new FinalInvestmentBalance(
+                kvp.Key,
+                kvp.Value,
+                investmentGrowthTracking[kvp.Key],
+                investmentContributionTracking[kvp.Key]
+            )
+        );
+
         return new ForwardSimulationResult(
             Snapshots: snapshots,
             DebtFreeDate: debtFreeDate,
+            MillionaireDate: millionaireDate,
             FinalCashBalance: currentCash,
+            FinalInvestmentBalance: investmentBalances.Values.Sum(),
+            FinalNetWorth: snapshots.Last().NetWorth,
             FinalDebtBalances: debtBalances,
-            TotalInterestPaid: totalInterestPaid
+            FinalInvestmentBalances: finalInvestmentBalances,
+            TotalInterestPaid: totalInterestPaid,
+            TotalInvestmentGrowth: totalInvestmentGrowth,
+            TotalContributed: totalContributed
         );
+    }
+
+    private static decimal CalculateDailyInvestmentGrowth(decimal balance, decimal annualReturnRate)
+    {
+        // Convert annual rate to daily rate using compound interest formula
+        var dailyRate = Math.Pow(1.0 + (double)annualReturnRate, 1.0 / 365.0) - 1.0;
+        return balance * (decimal)dailyRate;
+    }
+
+    private static void ProcessContribution(
+        SimulationContribution contribution,
+        ref decimal cashBalance,
+        Dictionary<string, decimal> investmentBalances,
+        Dictionary<string, decimal> contributionTracking)
+    {
+        // Deduct from cash
+        cashBalance -= contribution.Amount;
+
+        // Add to target investment
+        if (investmentBalances.ContainsKey(contribution.TargetAccountName))
+        {
+            investmentBalances[contribution.TargetAccountName] += contribution.Amount;
+            contributionTracking[contribution.TargetAccountName] += contribution.Amount;
+        }
+    }
+
+    private static decimal CalculateNetWorth(decimal cash, decimal totalInvestments, decimal totalDebt)
+    {
+        return cash + totalInvestments - totalDebt;
     }
 }

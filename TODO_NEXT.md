@@ -1,12 +1,13 @@
 # TODO_NEXT.md
 
-Last updated: 2025-12-25
+Last updated: 2025-12-24
 
 Read this first when resuming work.
 
 ## Top Priority Next Step
-- Phase 7 (Visual Polish) is complete.
-- Review roadmap for next major functional features (Categories, CSV Import, Recurring Transactions).
+- **Phase 8: Recurring Investments & Contributions** is ready for implementation.
+- Start with WI-P8-001 (database entity) - blocking item for rest of phase.
+- Contracts created in `contracts/WI-P8-*.md` for all 7 work items.
 
 ## Current Status
 **Phases 1-7 Complete:**
@@ -16,7 +17,9 @@ Read this first when resuming work.
 - **Phase 4:** Test Coverage (5/5 done) - 117 backend + 39 frontend = 156 tests
 - **Phase 5:** Polish & UX (3/3 done) - Loading skeletons, balance calculator refactor, code cleanup
 - **Phase 6:** Frontend Redesign (7/7 done) - Full app visual refresh complete
-- **Phase 7:** Visual Polish (3/3 done) - Dark theme, account fix, chart aesthetics
+**Phase 7:** Visual Polish (3/3 done) - Dark theme, account fix, chart aesthetics
+**Phase 8:** Recurring Contributions (0/7 done) - Planned
+**Phase 9:** Chart Enhancements (0/2 done) - Planned
 
 **Branch:** wi/p7-visual-polish
 **Working tree:** dirty
@@ -24,11 +27,27 @@ Read this first when resuming work.
 ## Parallelizable Work Items
 | Work Item ID | Description | Parallelizable | Notes |
 |-------------|-------------|----------------|-------|
-| WI-P6-003 | Dashboard redesign | Yes | Ready |
-| WI-P6-004 | Accounts redesign | Yes | Ready |
-| WI-P6-005 | Transactions redesign | Yes | Ready |
-| WI-P6-006 | Projections redesign | Yes | Ready |
-| WI-P6-007 | Calendar and settings redesign | Yes | Ready |
+| WI-P8-001 | Recurring Contribution Entity | No | Start of Phase 8 |
+| WI-P9-001 | Data Aggregation | Yes | Independent frontend logic |
+| WI-P9-002 | Chart Controls | No | Depends on WI-P9-001 |
+
+
+## Phase 8 Work Items
+| Work Item ID | Description | Parallelizable | Dependencies |
+|-------------|-------------|----------------|--------------|
+| WI-P8-001 | RecurringContributionEntity | No | None (start here) |
+| WI-P8-002 | RecurringEventExpansionService | No | WI-P8-001 |
+| WI-P8-003 | API Endpoints | No | WI-P8-001 |
+| WI-P8-004 | Settings UI | No | WI-P8-003 |
+| WI-P8-005 | Calendar Integration | Yes | WI-P8-002, WI-P8-003 |
+| WI-P8-006 | Projection Integration | Yes | WI-P8-002 |
+| WI-P8-007 | Net Worth Simulation | Yes | WI-P8-002 |
+
+**Execution Order:**
+1. WI-P8-001 (entity) - must complete first
+2. WI-P8-002 + WI-P8-003 can run in parallel after WI-P8-001
+3. WI-P8-004 waits for WI-P8-003
+4. WI-P8-005, WI-P8-006, WI-P8-007 can run in parallel after WI-P8-002
 
 ## Recently Completed (2025-12-25)
 - WI-P6-001: Visual System and Theme Tokens land in `styles.scss` and `index.html`.
@@ -55,39 +74,40 @@ Read this first when resuming work.
 - Settings: `dashboard/src/app/pages/settings/settings.ts`, `FinanceEngine.Api/Endpoints/SettingsEndpoints.cs`
 - API models: `dashboard/src/app/core/models/api.models.ts`
 - Balance calculation: `FinanceEngine/Services/BalanceCalculator.cs`
+- Recurring contributions (Phase 8): `contracts/WI-P8-*.md`
 
 ## Test Coverage
 - Backend: 117 tests (settings, events, accounts, calculator endpoints)
 - Frontend: 39 tests (dashboard, transactions components)
 - Total: 156 tests
 
-## Potential Next Steps
+## Future Phases (After Phase 8)
 
-### Option 1: Categories & Tags
+### Categories & Tags
 - Add category enum/table
 - Tag many-to-many relationship
 - Category picker in transaction form
 - Filter by category
 - Budget tracking by category
 
-### Option 2: CSV Import
+### CSV Import
 - File upload endpoint
 - CSV parser with column mapping
 - Preview/confirm UI
 - Duplicate detection
 
-### Option 3: Recurring Transactions
-- Recurrence pattern entity
-- Auto-generation service
-- Management UI
+### Generic Recurring Transactions
+- Unify all recurring events (income, expenses, contributions)
+- Auto-materialization background service
+- Single management UI
 
-### Option 4: Deployment and DevOps
+### Deployment and DevOps
 - Set up CI/CD pipeline
 - Docker containerization
 - Production deployment (Azure/AWS)
 - Add README badges
 
-### Option 5: E2E Testing
+### E2E Testing
 - Playwright or Cypress setup
 - Critical path tests
 - Performance testing

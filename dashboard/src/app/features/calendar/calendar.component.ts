@@ -7,7 +7,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { forkJoin } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { CalendarService } from '../../core/services/calendar.service';
-import { UserSettings, Account } from '../../core/models/api.models';
+import { UserSettings, Account, RecurringContribution } from '../../core/models/api.models';
 
 @Component({
   selector: 'app-calendar',
@@ -31,18 +31,21 @@ export class CalendarComponent {
   readonly currentYear = signal(new Date().getFullYear());
   readonly settings = signal<UserSettings | null>(null);
   readonly accounts = signal<Account[]>([]);
+  readonly contributions = signal<RecurringContribution[]>([]);
 
   // Computed calendar grid
   readonly calendarGrid = computed(() => {
     const settings = this.settings();
     const accounts = this.accounts();
+    const contributions = this.contributions();
     if (!settings || !accounts) return [];
 
     return this.calendarService.generateCalendarGrid(
       this.currentMonth(),
       this.currentYear(),
       settings,
-      accounts
+      accounts,
+      contributions
     );
   });
 
@@ -59,10 +62,12 @@ export class CalendarComponent {
   loadData(): void {
     forkJoin({
       settings: this.apiService.getSettings(),
-      accounts: this.apiService.getAccounts()
-    }).subscribe(({ settings, accounts }) => {
+      accounts: this.apiService.getAccounts(),
+      contributions: this.apiService.getRecurringContributions()
+    }).subscribe(({ settings, accounts, contributions }) => {
       this.settings.set(settings);
       this.accounts.set(accounts);
+      this.contributions.set(contributions);
     });
   }
 

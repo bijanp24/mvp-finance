@@ -18,7 +18,10 @@ import {
   InvestmentProjectionRequest,
   InvestmentProjectionResult,
   UserSettings,
-  UpdateSettingsRequest
+  UpdateSettingsRequest,
+  RecurringContribution,
+  CreateRecurringContributionRequest,
+  UpdateRecurringContributionRequest
 } from '../models/api.models';
 
 @Injectable({
@@ -113,5 +116,26 @@ export class ApiService {
 
   updateSettings(request: UpdateSettingsRequest): Observable<UserSettings> {
     return this.http.put<UserSettings>(`${this.baseUrl}/settings`, request);
+  }
+
+  // Recurring Contribution endpoints
+  getRecurringContributions(): Observable<RecurringContribution[]> {
+    return this.http.get<RecurringContribution[]>(`${this.baseUrl}/recurring-contributions`);
+  }
+
+  createRecurringContribution(request: CreateRecurringContributionRequest): Observable<RecurringContribution> {
+    return this.http.post<RecurringContribution>(`${this.baseUrl}/recurring-contributions`, request);
+  }
+
+  updateRecurringContribution(id: number, request: UpdateRecurringContributionRequest): Observable<RecurringContribution> {
+    return this.http.put<RecurringContribution>(`${this.baseUrl}/recurring-contributions/${id}`, request);
+  }
+
+  deleteRecurringContribution(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/recurring-contributions/${id}`);
+  }
+
+  toggleRecurringContribution(id: number): Observable<RecurringContribution> {
+    return this.http.patch<RecurringContribution>(`${this.baseUrl}/recurring-contributions/${id}/toggle`, {});
   }
 }
