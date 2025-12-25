@@ -47,21 +47,25 @@ export class InvestmentProjectionChartComponent {
         type: 'category',
         data: chartData.dates,
         axisLabel: {
+          color: '#94a3b8',
           formatter: (value: string) => {
             const date = new Date(value);
             return this.compact()
               ? date.toLocaleDateString('en-US', { month: 'short' })
               : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
           }
-        }
+        },
+        axisLine: { lineStyle: { color: '#334155' } }
       },
       yAxis: {
         type: 'value',
         axisLabel: {
+          color: '#94a3b8',
           formatter: (value: number) => {
             return '$' + (value / 1000).toFixed(0) + 'k';
           }
-        }
+        },
+        splitLine: { lineStyle: { color: '#1e293b' } }
       },
       series: [
         {
@@ -69,15 +73,23 @@ export class InvestmentProjectionChartComponent {
           type: 'line',
           data: chartData.values,
           smooth: true,
+          showSymbol: false,
           areaStyle: {
-            color: 'rgba(76, 175, 80, 0.2)'
+            color: {
+              type: 'linear',
+              x: 0, y: 0, x2: 0, y2: 1,
+              colorStops: [
+                { offset: 0, color: 'rgba(74, 222, 128, 0.2)' },
+                { offset: 1, color: 'rgba(74, 222, 128, 0)' }
+              ]
+            }
           },
           lineStyle: {
-            color: '#4caf50',
-            width: 2
+            color: '#4ade80',
+            width: 3
           },
           itemStyle: {
-            color: '#4caf50'
+            color: '#4ade80'
           }
         }
       ],

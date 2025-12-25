@@ -94,6 +94,10 @@
       font-size: 1.125rem;
       margin: 0;
       font-family: 'Fraunces', serif;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 240px;
     }
   }
 

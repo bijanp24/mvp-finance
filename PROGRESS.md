@@ -15,6 +15,11 @@ Use this file for deep dive context: feature inventory, file references, known i
 - [x] **WI-P6-005**: Redesigned Transactions page with sidebar form and status-categorized rows.
 - [x] **WI-P6-006**: Redesigned Projections page with logical flow, insights grid, and standardized charts.
 - [x] **WI-P6-007**: Redesigned Calendar and Settings pages for visual consistency and polished UX.
+
+## Phase 7: Visual Polish (Complete)
+- [x] **WI-P6-008**: Implemented dark slate/blue theme across the entire application.
+- [x] **WI-P6-009**: Fixed account name truncation in cards and made dialogs responsive.
+- [x] **WI-P6-010**: Enhanced chart aesthetics with line smoothing, hidden symbols, and dark-mode optimized gradients.
 - [ ] **WI-P6-005**: Transactions redesign
 - [ ] **WI-P6-006**: Projections redesign
 - [ ] **WI-P6-007**: Calendar and settings redesign

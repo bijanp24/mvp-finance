@@ -5,27 +5,21 @@ Last updated: 2025-12-25
 Read this first when resuming work.
 
 ## Top Priority Next Step
-- Start Phase 7 (Visual Polish) to address user feedback.
-- **WI-P6-008:** Implement Dark Theme.
-- **WI-P6-009:** Fix Account Name Truncation.
-- **WI-P6-010:** Enhance Chart Aesthetics.
+- Phase 7 (Visual Polish) is complete.
+- Review roadmap for next major functional features (Categories, CSV Import, Recurring Transactions).
 
 ## Current Status
-**Phases 1-6 Complete:**
+**Phases 1-7 Complete:**
 - **Phase 1:** Quick Wins (3/3 done)
 - **Phase 2:** Core MVP Features (5/5 done)
 - **Phase 3:** Data Integrity - Reconciliation (3/3 done)
 - **Phase 4:** Test Coverage (5/5 done) - 117 backend + 39 frontend = 156 tests
 - **Phase 5:** Polish & UX (3/3 done) - Loading skeletons, balance calculator refactor, code cleanup
 - **Phase 6:** Frontend Redesign (7/7 done) - Full app visual refresh complete
+- **Phase 7:** Visual Polish (3/3 done) - Dark theme, account fix, chart aesthetics
 
-**Phase 7: Visual Polish (0/3 done)**
-- [ ] WI-P6-008: Dark Theme
-- [ ] WI-P6-009: Account Name Truncation
-- [ ] WI-P6-010: Chart Aesthetics
-
-**Branch:** master
-**Working tree:** clean
+**Branch:** wi/p7-visual-polish
+**Working tree:** dirty
 
 ## Parallelizable Work Items
 | Work Item ID | Description | Parallelizable | Notes |

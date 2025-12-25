@@ -48,21 +48,25 @@ export class DebtProjectionChartComponent {
         type: 'category',
         data: chartData.dates,
         axisLabel: {
+          color: '#94a3b8',
           formatter: (value: string) => {
             const date = new Date(value);
             return this.compact()
               ? date.toLocaleDateString('en-US', { month: 'short' })
               : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
           }
-        }
+        },
+        axisLine: { lineStyle: { color: '#334155' } }
       },
       yAxis: {
         type: 'value',
         axisLabel: {
+          color: '#94a3b8',
           formatter: (value: number) => {
             return '$' + (value / 1000).toFixed(0) + 'k';
           }
-        }
+        },
+        splitLine: { lineStyle: { color: '#1e293b' } }
       },
       series: [
         {
@@ -70,15 +74,23 @@ export class DebtProjectionChartComponent {
           type: 'line',
           data: chartData.debtBalances,
           smooth: true,
+          showSymbol: false,
           areaStyle: {
-            color: 'rgba(244, 67, 54, 0.2)'
+            color: {
+              type: 'linear',
+              x: 0, y: 0, x2: 0, y2: 1,
+              colorStops: [
+                { offset: 0, color: 'rgba(248, 113, 113, 0.2)' },
+                { offset: 1, color: 'rgba(248, 113, 113, 0)' }
+              ]
+            }
           },
           lineStyle: {
-            color: '#f44336',
-            width: 2
+            color: '#f87171',
+            width: 3
           },
           itemStyle: {
-            color: '#f44336'
+            color: '#f87171'
           }
         }
       ],

@@ -3,20 +3,20 @@
 @include mat.core();
 
 :root {
-  // Palette - Light, Warm, Intentional
-  --color-bg: #fdfcfb;
-  --color-surface: #ffffff;
-  --color-primary: #1a2c38;
-  --color-primary-light: #334d5e;
-  --color-accent: #8c6a5d;
-  --color-accent-light: #b4968c;
-  --color-warn: #c0392b;
-  --color-success: #27ae60;
+  // Palette - Dark, Sleek, Intentional
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-primary: #38bdf8;
+  --color-primary-light: #7dd3fc;
+  --color-accent: #fbbf24;
+  --color-accent-light: #fcd34d;
+  --color-warn: #f87171;
+  --color-success: #4ade80;
   
-  --color-text-main: #1a2c38;
-  --color-text-muted: #6b7781;
-  --color-border: #e9e5e2;
-  --color-divider: #f1eeeb;
+  --color-text-main: #f8fafc;
+  --color-text-muted: #94a3b8;
+  --color-border: #334155;
+  --color-divider: #1e293b;
 
   // Spacing
   --spacing-xs: 4px;
@@ -33,17 +33,17 @@
   --radius-full: 9999px;
 
   // Shadows
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
 }
 
 // Angular Material Theme Setup
-$dashboard-primary: mat.m2-define-palette(mat.$m2-blue-grey-palette, 900);
-$dashboard-accent: mat.m2-define-palette(mat.$m2-brown-palette, 600);
+$dashboard-primary: mat.m2-define-palette(mat.$m2-light-blue-palette, 400);
+$dashboard-accent: mat.m2-define-palette(mat.$m2-amber-palette, 400);
 $dashboard-warn: mat.m2-define-palette(mat.$m2-red-palette);
 
-$dashboard-theme: mat.m2-define-light-theme((
+$dashboard-theme: mat.m2-define-dark-theme((
   color: (
     primary: $dashboard-primary,
     accent: $dashboard-accent,
@@ -74,8 +74,8 @@ body {
   background-color: var(--color-bg);
   color: var(--color-text-main);
   background-image: 
-    radial-gradient(at 0% 0%, rgba(140, 106, 93, 0.03) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(26, 44, 56, 0.03) 0px, transparent 50%);
+    radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.05) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(251, 191, 36, 0.05) 0px, transparent 50%);
   background-attachment: fixed;
 }
 

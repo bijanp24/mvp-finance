@@ -4,6 +4,31 @@ Last updated: 2025-12-25
 
 Append-only. Add new entries at the top.
 
+## 2025-12-25 (Phase 7: Visual Polish - Feedback Response)
+- Agent: Interactive CLI Agent
+- Status: Completed
+- Branch: wi/p7-visual-polish
+- Commit: pending
+- Scope: Address user feedback: Dark theme, account name truncation, and chart aesthetics.
+- Changes:
+  - **WI-P6-008 (Dark Theme)**:
+    - Updated `styles.scss` with a sleek dark slate/blue palette.
+    - Switched Material theme to `mat.m2-define-dark-theme`.
+    - Adjusted global background gradients for dark mode.
+  - **WI-P6-009 (Account Name Truncation)**:
+    - Updated `accounts.scss` to use `text-overflow: ellipsis` and `max-width` for account names on cards.
+    - Made `AccountDialogComponent` more responsive by replacing `min-width` with a responsive `width` and `max-width`.
+  - **WI-P6-010 (Chart Aesthetics)**:
+    - Enhanced all chart components (`debt`, `investment`, `net-worth`) with dark mode colors and grid lines.
+    - Enabled `smooth: true` consistently and hidden series symbols (`showSymbol: false`) to reduce noise.
+    - Improved area gradients for a modern look in dark mode.
+- Tests: Production build successful.
+- Decisions:
+  - Opted for a "slate" dark theme (#0f172a) instead of pure black for better readability and a more professional feel.
+  - Reduced series symbols on charts to make trends more apparent without jagged "discrete moment" visual noise.
+- Next steps:
+  - Handoff complete. Ready for new feature exploration.
+
 ## 2025-12-25 (WI-P6-007: Calendar and Settings Redesign)
 - Agent: Interactive CLI Agent
 - Status: Completed

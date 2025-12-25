@@ -167,10 +167,12 @@ export interface AccountDialogData {
   `,
   styles: [`
     mat-dialog-content {
-      min-width: 500px;
+      width: 100%;
+      max-width: 500px;
       max-height: 70vh;
       overflow-y: auto;
       padding-top: 20px;
+      box-sizing: border-box;
     }
 
     form {

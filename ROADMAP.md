@@ -502,23 +502,23 @@ Structured work items optimized for parallel agent execution. Each work item is 
 ---
 
 ## Phase 7: Visual Polish (Feedback Response)
-**Status:** Ready
+**Status:** Complete
 **Estimated effort:** 1 session
 **Parallelizable:** Yes
 
 ### WI-P6-008: Dark Theme Implementation
-- **Status:** [READY]
+- **Status:** [DONE]
 - **Parallelizable:** Yes
 - **Depends on:** Phase 6
 - **Files:**
   - `dashboard/src/styles.scss`
 - **Task:** Switch to a dark theme as per user feedback.
 - **Details:**
-  - Update root CSS variables for dark background/surface and light text.
-  - Adjust gradients and shadows for dark mode.
+  - Updated root CSS variables for dark background/surface and light text.
+  - Switched to `mat.m2-define-dark-theme`.
 
 ### WI-P6-009: Fix Account Name Truncation
-- **Status:** [READY]
+- **Status:** [DONE]
 - **Parallelizable:** Yes
 - **Depends on:** Phase 6
 - **Files:**
@@ -526,18 +526,19 @@ Structured work items optimized for parallel agent execution. Each work item is 
   - `dashboard/src/app/pages/accounts/accounts.scss`
 - **Task:** Fix visual bug where account name is cut off.
 - **Details:**
-  - Ensure text wrapping/overflow is handled in dialogs and cards.
+  - Added `text-overflow: ellipsis` to account cards.
+  - Made account dialog responsive.
 
 ### WI-P6-010: Enhance Chart Aesthetics
-- **Status:** [READY]
+- **Status:** [DONE]
 - **Parallelizable:** Yes
 - **Depends on:** Phase 6
 - **Files:**
   - `dashboard/src/app/features/charts/*.ts`
 - **Task:** Improve chart visuals for discrete transactions.
 - **Details:**
-  - Enable smoothing (`smooth: true`).
-  - Optimize for dark theme.
+  - Enabled smoothing (`smooth: true`) and hidden symbols for a cleaner look.
+  - Updated colors for dark theme.
 
 ---
 
@@ -593,6 +594,9 @@ Track which agent is working on what to prevent conflicts.
 | WI-P6-005 | Interactive Agent | 2025-12-25 | 2025-12-25 |
 | WI-P6-006 | Interactive Agent | 2025-12-25 | 2025-12-25 |
 | WI-P6-007 | Interactive Agent | 2025-12-25 | 2025-12-25 |
+| WI-P6-008 | Interactive Agent | 2025-12-25 | 2025-12-25 |
+| WI-P6-009 | Interactive Agent | 2025-12-25 | 2025-12-25 |
+| WI-P6-010 | Interactive Agent | 2025-12-25 | 2025-12-25 |
 
 ---
 
