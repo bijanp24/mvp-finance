@@ -5,8 +5,8 @@ Last updated: 2025-12-25
 Read this first when resuming work.
 
 ## Top Priority Next Step
-- Start WI-P6-003 (Dashboard Redesign); apply new tokens and card styles to the dashboard page.
-- Ensure any page-level styles in `dashboard.scss` are migrated to use global tokens.
+- Start WI-P6-004 (Accounts Redesign); apply new tokens and card styles to the accounts list and dialog.
+- Follow with WI-P6-005 (Transactions Redesign).
 
 ## Current Status
 **Phases 1-5 Complete:**
@@ -16,11 +16,12 @@ Read this first when resuming work.
 - **Phase 4:** Test Coverage (5/5 done) - 117 backend + 39 frontend = 156 tests
 - **Phase 5:** Polish & UX (3/3 done) - Loading skeletons, balance calculator refactor, code cleanup
 
-**Phase 6:** Frontend Redesign (2/7 done)
+**Phase 6:** Frontend Redesign (3/7 done)
 - [x] WI-P6-001: Visual System and Theme Tokens
 - [x] WI-P6-002: App Shell and Navigation Redesign
+- [x] WI-P6-003: Dashboard Page Redesign
 
-**Branch:** wi/p6-001-visual-system
+**Branch:** wi/p6-003-dashboard-redesign
 **Working tree:** dirty
 
 ## Parallelizable Work Items

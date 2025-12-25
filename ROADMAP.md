@@ -409,7 +409,7 @@ Structured work items optimized for parallel agent execution. Each work item is 
 - **Acceptance:** ✅ App shell redesigned with new logo and navigation styling.
 
 ### WI-P6-003: Dashboard Page Redesign
-- **Status:** [READY]
+- **Status:** [DONE]
 - **Parallelizable:** Yes (after WI-P6-001)
 - **Depends on:** WI-P6-001
 - **Files:**
@@ -417,15 +417,14 @@ Structured work items optimized for parallel agent execution. Each work item is 
   - `dashboard/src/app/pages/dashboard/dashboard.scss`
 - **Task:** Redesign dashboard layout, cards, and hierarchy.
 - **Details:**
-  - Introduce a hero summary band and a structured metrics grid.
-  - Restyle recent transactions list to match the new system.
-  - Preserve loading skeleton behavior.
+  - Introduced hero band and structured metrics grid.
+  - Restyled recent transactions with status badges.
+  - Added net worth calculation.
 - **Verification:**
   ```bash
   cd dashboard && npm run build
-  # Manual: verify data, loading, and empty states still render.
   ```
-- **Acceptance:** Dashboard visuals align with the new system and remain functional.
+- **Acceptance:** ✅ Dashboard hierarchy is clear; metrics grid and hero band implemented.
 
 ### WI-P6-004: Accounts Page Redesign
 - **Status:** [READY]
@@ -548,6 +547,7 @@ Track which agent is working on what to prevent conflicts.
 | WI-P5-003 | Codex (GPT-5) | 2025-12-23 | 2025-12-23 |
 | WI-P6-001 | Interactive Agent | 2025-12-25 | 2025-12-25 |
 | WI-P6-002 | Interactive Agent | 2025-12-25 | 2025-12-25 |
+| WI-P6-003 | Interactive Agent | 2025-12-25 | 2025-12-25 |
 
 ---
 

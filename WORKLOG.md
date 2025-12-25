@@ -4,6 +4,31 @@ Last updated: 2025-12-25
 
 Append-only. Add new entries at the top.
 
+## 2025-12-25 (WI-P6-003: Dashboard Redesign)
+- Agent: Interactive CLI Agent
+- Status: Completed
+- Branch: wi/p6-003-dashboard-redesign
+- Commit: pending
+- Scope: Phase 6 - Full redesign of the dashboard page
+- Changes:
+  - **Template (`dashboard.html`)**:
+    - Introduced a Hero Band for "Safe to Spend" and "Next Paycheck" metrics.
+    - Added a Metrics Grid for Total Cash, Total Debt, Investments, and Net Worth.
+    - Redesigned the Recent Transactions list with better layout and status badges.
+    - Improved projections preview with standard chart card containers.
+  - **Styles (`dashboard.scss`)**:
+    - Applied new visual system tokens for spacing, typography, and colors.
+    - Implemented a clean, card-based layout with a hero section.
+    - Refined skeleton loaders to match the new dashboard structure.
+  - **Component (`dashboard.ts`)**:
+    - Added a `netWorth` computed signal to calculate assets minus debts.
+- Tests: All 14 dashboard unit tests passed. Production build successful.
+- Decisions:
+  - Used a hero band to emphasize the most important immediate metric ("Safe to Spend").
+  - Consolidated metrics into a 4-column grid for better hierarchy on wide screens.
+- Next steps:
+  - Start WI-P6-004 (Accounts redesign).
+
 ## 2025-12-25 (WI-P6-001 & WI-P6-002: Visual System and App Shell Redesign)
 - Agent: Interactive CLI Agent
 - Status: Completed

@@ -67,6 +67,10 @@ export class DashboardPage {
       .reduce((sum, a) => sum + a.currentBalance, 0);
   });
 
+  readonly netWorth = computed(() => {
+    return (this.totalCash() + this.totalInvestments()) - this.totalDebt();
+  });
+
   constructor() {
     this.loadDashboardData();
   }
