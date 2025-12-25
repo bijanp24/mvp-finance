@@ -12,7 +12,8 @@ Use this file for deep dive context: feature inventory, file references, known i
 - [x] **WI-P6-002**: Redesigned app shell (top bar, navigation, layout spacing).
 - [x] **WI-P6-003**: Redesigned Dashboard page with hero band, metrics grid, and refined transaction list.
 - [x] **WI-P6-004**: Redesigned Accounts page with type-grouped cards and balance emphasis.
-- [ ] **WI-P6-005**: Transactions redesign (Next)
+- [x] **WI-P6-005**: Redesigned Transactions page with sidebar form and status-categorized rows.
+- [ ] **WI-P6-006**: Projections redesign (Next)
 - [ ] **WI-P6-005**: Transactions redesign
 - [ ] **WI-P6-006**: Projections redesign
 - [ ] **WI-P6-007**: Calendar and settings redesign

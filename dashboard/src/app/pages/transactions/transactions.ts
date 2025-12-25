@@ -184,7 +184,9 @@ export class TransactionsPage {
     });
 
     // Scroll to form
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (typeof window !== 'undefined' && window.scrollTo) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   onSubmit(): void {
@@ -271,6 +273,27 @@ export class TransactionsPage {
       day: 'numeric',
       year: 'numeric'
     }).format(date);
+  }
+
+  getEventIcon(type: string): string {
+    switch (type) {
+      case 'Income': return 'account_balance';
+      case 'Expense': return 'shopping_cart';
+      case 'DebtPayment': return 'payment';
+      case 'DebtCharge': return 'credit_card';
+      case 'SavingsContribution': return 'savings';
+      case 'InvestmentContribution': return 'trending_up';
+      default: return 'receipt';
+    }
+  }
+
+  isIncome(type: string): boolean {
+    return type === 'Income';
+  }
+
+  isExpense(type: string): boolean {
+    return type === 'Expense' || type === 'DebtPayment' || type === 'DebtCharge' ||
+           type === 'SavingsContribution' || type === 'InvestmentContribution';
   }
 
   private formatDate(date: Date): string {

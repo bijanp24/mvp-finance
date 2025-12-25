@@ -445,7 +445,7 @@ Structured work items optimized for parallel agent execution. Each work item is 
 - **Acceptance:** ✅ Accounts page matches new visual system; cards used instead of table.
 
 ### WI-P6-005: Transactions Page Redesign
-- **Status:** [READY]
+- **Status:** [DONE]
 - **Parallelizable:** Yes (after WI-P6-001)
 - **Depends on:** WI-P6-001
 - **Files:**
@@ -453,14 +453,14 @@ Structured work items optimized for parallel agent execution. Each work item is 
   - `dashboard/src/app/pages/transactions/transactions.scss`
 - **Task:** Redesign transaction form and list layout.
 - **Details:**
-  - Improve form grouping and spacing hierarchy.
-  - Restyle status filters and list rows.
-  - Preserve reconciliation and editing behavior.
+  - Implemented two-column layout with sidebar form.
+  - Refined form field grouping and segmented status filters.
+  - Redesigned transaction rows with icon categorization and status chips.
 - **Verification:**
   ```bash
   cd dashboard && npm run build
   ```
-- **Acceptance:** Transactions UI matches new design system with no functional regressions.
+- **Acceptance:** ✅ Transactions UI matches new design system; sidebar form implemented.
 
 ### WI-P6-006: Projections Page Redesign
 - **Status:** [READY]
@@ -550,6 +550,7 @@ Track which agent is working on what to prevent conflicts.
 | WI-P6-002 | Interactive Agent | 2025-12-25 | 2025-12-25 |
 | WI-P6-003 | Interactive Agent | 2025-12-25 | 2025-12-25 |
 | WI-P6-004 | Interactive Agent | 2025-12-25 | 2025-12-25 |
+| WI-P6-005 | Interactive Agent | 2025-12-25 | 2025-12-25 |
 
 ---
 

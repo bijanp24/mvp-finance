@@ -1,240 +1,170 @@
 <div class="transactions-container">
+  <header class="page-header">
+    <h1>Transactions</h1>
+  </header>
+
   <div class="transactions-layout">
     <!-- Quick Add Form -->
-    <mat-card class="quick-add-card">
-      <mat-card-header>
-        <mat-card-title>{{ editingEventId() ? 'Edit Transaction' : 'Quick Add Transaction' }}</mat-card-title>
-      </mat-card-header>
+    <aside class="form-section">
+      <div class="app-card sticky-form">
+        <div class="section-header">
+          <h2>{{ editingEventId() ? 'Edit Transaction' : 'Quick Add' }}</h2>
+        </div>
 
-      <mat-card-content>
         <form [formGroup]="transactionForm" (ngSubmit)="onSubmit()">
-          <!-- Transaction Type Toggle -->
-          <mat-button-toggle-group formControlName="type" class="type-toggle">
-            @for (type of eventTypes; track type.value) {
-              <mat-button-toggle [value]="type.value">
-                <mat-icon>{{ type.icon }}</mat-icon>
-                {{ type.label }}
-              </mat-button-toggle>
-            }
-          </mat-button-toggle-group>
-
-          <!-- Amount -->
-          <mat-form-field appearance="outline">
-            <mat-label>Amount</mat-label>
-            <input matInput type="number" formControlName="amount" placeholder="0.00" required>
-            <span matTextPrefix>$&nbsp;</span>
-            @if (transactionForm.get('amount')?.hasError('required') && transactionForm.get('amount')?.touched) {
-              <mat-error>Amount is required</mat-error>
-            }
-            @if (transactionForm.get('amount')?.hasError('min')) {
-              <mat-error>Amount must be greater than 0</mat-error>
-            }
-            @if (transactionForm.get('amount')?.hasError('max')) {
-              <mat-error>Amount cannot exceed $1,000,000</mat-error>
-            }
-          </mat-form-field>
-
-          <!-- Date -->
-          <mat-form-field appearance="outline">
-            <mat-label>Date</mat-label>
-            <input matInput [matDatepicker]="picker" formControlName="date" required>
-            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-            <mat-datepicker #picker></mat-datepicker>
-          </mat-form-field>
-
-          <!-- Source Account (for Income, Expense, DebtPayment, etc.) -->
-          @if (transactionForm.get('type')?.value === 'Income' ||
-               transactionForm.get('type')?.value === 'Expense' ||
-               transactionForm.get('type')?.value === 'DebtPayment' ||
-               transactionForm.get('type')?.value === 'SavingsContribution' ||
-               transactionForm.get('type')?.value === 'InvestmentContribution') {
-            <mat-form-field appearance="outline">
-              <mat-label>From Account</mat-label>
-              <mat-select formControlName="accountId" required>
-                @for (account of cashAccounts(); track account.id) {
-                  <mat-option [value]="account.id">{{ account.name }}</mat-option>
-                }
-              </mat-select>
-              @if (transactionForm.get('accountId')?.hasError('required') && transactionForm.get('accountId')?.touched) {
-                <mat-error>Account is required</mat-error>
+          <!-- Amount Section -->
+          <div class="form-group amount-group">
+            <mat-form-field appearance="outline" class="amount-field">
+              <mat-label>Amount</mat-label>
+              <input matInput type="number" formControlName="amount" placeholder="0.00" required>
+              <span matTextPrefix>$&nbsp;</span>
+              @if (transactionForm.get('amount')?.hasError('required') && transactionForm.get('amount')?.touched) {
+                <mat-error>Required</mat-error>
+              }
+              @if (transactionForm.get('amount')?.hasError('max')) {
+                <mat-error>Too large</mat-error>
               }
             </mat-form-field>
-          }
 
-          <!-- Target Account (for payments, contributions, charges) -->
-          @if (showTargetAccount()) {
-            <mat-form-field appearance="outline">
-              <mat-label>To Account</mat-label>
-              <mat-select formControlName="targetAccountId" required>
-                @for (account of filteredTargetAccounts(); track account.id) {
-                  <mat-option [value]="account.id">{{ account.name }}</mat-option>
-                }
-              </mat-select>
-              @if (transactionForm.get('targetAccountId')?.hasError('required') && transactionForm.get('targetAccountId')?.touched) {
-                <mat-error>Target account is required</mat-error>
-              }
+            <mat-form-field appearance="outline" class="date-field">
+              <mat-label>Date</mat-label>
+              <input matInput [matDatepicker]="picker" formControlName="date" required>
+              <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
             </mat-form-field>
-          }
+          </div>
 
-          <!-- Debt Account (for charges) -->
-          @if (transactionForm.get('type')?.value === 'DebtCharge') {
-            <mat-form-field appearance="outline">
-              <mat-label>Debt Account</mat-label>
-              <mat-select formControlName="targetAccountId" required>
-                @for (account of accounts(); track account.id) {
-                  @if (account.type === 'Debt') {
+          <!-- Type Selection -->
+          <div class="form-group">
+            <label class="form-label">Transaction Type</label>
+            <mat-button-toggle-group formControlName="type" class="type-toggle-grid">
+              @for (type of eventTypes; track type.value) {
+                <mat-button-toggle [value]="type.value" [title]="type.label">
+                  <mat-icon>{{ type.icon }}</mat-icon>
+                  <span class="toggle-label">{{ type.label }}</span>
+                </mat-button-toggle>
+              }
+            </mat-button-toggle-group>
+          </div>
+
+          <!-- Account Selection -->
+          <div class="form-group">
+            @if (transactionForm.get('type')?.value !== 'DebtCharge') {
+              <mat-form-field appearance="outline">
+                <mat-label>From Account</mat-label>
+                <mat-select formControlName="accountId" required>
+                  @for (account of cashAccounts(); track account.id) {
                     <mat-option [value]="account.id">{{ account.name }}</mat-option>
                   }
-                }
-              </mat-select>
-              @if (transactionForm.get('targetAccountId')?.hasError('required') && transactionForm.get('targetAccountId')?.touched) {
-                <mat-error>Debt account is required</mat-error>
-              }
-            </mat-form-field>
-          }
+                </mat-select>
+              </mat-form-field>
+            }
+
+            @if (showTargetAccount() || transactionForm.get('type')?.value === 'DebtCharge') {
+              <mat-form-field appearance="outline">
+                <mat-label>{{ transactionForm.get('type')?.value === 'DebtCharge' ? 'Debt Account' : 'To Account' }}</mat-label>
+                <mat-select formControlName="targetAccountId" required>
+                  @for (account of filteredTargetAccounts(); track account.id) {
+                    <mat-option [value]="account.id">{{ account.name }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            }
+          </div>
 
           <!-- Description -->
           <mat-form-field appearance="outline">
-            <mat-label>Description</mat-label>
+            <mat-label>Description / Notes</mat-label>
             <input matInput formControlName="description" placeholder="e.g., Grocery shopping">
           </mat-form-field>
 
-          <!-- Action Buttons -->
           <div class="form-actions">
-            <button mat-stroked-button type="button" (click)="resetForm()">
+            <button mat-button type="button" (click)="resetForm()">
               {{ editingEventId() ? 'Cancel' : 'Clear' }}
             </button>
-            <button mat-raised-button color="primary" type="submit" [disabled]="!transactionForm.valid || saving()">
-              @if (saving()) {
-                {{ editingEventId() ? 'Updating...' : 'Saving...' }}
-              } @else {
-                {{ editingEventId() ? 'Update Transaction' : 'Save Transaction' }}
-              }
+            <button mat-flat-button color="primary" type="submit" [disabled]="!transactionForm.valid || saving()">
+              {{ editingEventId() ? 'Update' : 'Save Transaction' }}
             </button>
           </div>
         </form>
-      </mat-card-content>
-    </mat-card>
+      </div>
+    </aside>
 
-    <!-- Recent Transactions -->
-    <mat-card class="recent-transactions-card">
-      <mat-card-header>
-        <mat-card-title>
-          Recent Transactions
-          @if (pendingCount() > 0) {
-            <span class="pending-badge">{{ pendingCount() }} pending</span>
-          }
-        </mat-card-title>
-        <div class="status-filter">
-          <mat-button-toggle-group [value]="statusFilter()" (change)="setStatusFilter($event.value)">
-            <mat-button-toggle value="All">All</mat-button-toggle>
-            <mat-button-toggle value="Pending">Pending</mat-button-toggle>
-            <mat-button-toggle value="Cleared">Cleared</mat-button-toggle>
-          </mat-button-toggle-group>
+    <!-- Main Content Area: Recent Transactions -->
+    <main class="list-section">
+      <div class="app-card">
+        <div class="section-header">
+          <div class="header-main">
+            <h2>Recent Activity</h2>
+            @if (pendingCount() > 0) {
+              <span class="pending-count">{{ pendingCount() }} pending</span>
+            }
+          </div>
+          
+          <div class="filter-controls">
+            <mat-button-toggle-group [value]="statusFilter()" (change)="setStatusFilter($event.value)" class="segmented-control">
+              <mat-button-toggle value="All">All</mat-button-toggle>
+              <mat-button-toggle value="Pending">Pending</mat-button-toggle>
+              <mat-button-toggle value="Cleared">Cleared</mat-button-toggle>
+            </mat-button-toggle-group>
+          </div>
         </div>
-      </mat-card-header>
 
-      <mat-card-content>
         @if (loading()) {
-          <div class="skeleton-transactions" aria-busy="true">
-            <div class="skeleton-table-header" aria-hidden="true">
-              <div class="skeleton-line skeleton-header-cell"></div>
-              <div class="skeleton-line skeleton-header-cell"></div>
-              <div class="skeleton-line skeleton-header-cell"></div>
-              <div class="skeleton-line skeleton-header-cell"></div>
-              <div class="skeleton-line skeleton-header-cell"></div>
-            </div>
-            <div class="skeleton-table-rows" aria-hidden="true">
-              <div class="skeleton-table-row"></div>
-              <div class="skeleton-table-row"></div>
-              <div class="skeleton-table-row"></div>
-              <div class="skeleton-table-row"></div>
-              <div class="skeleton-table-row"></div>
-            </div>
+          <div class="skeleton-list" aria-busy="true">
+            @for (i of [1,2,3,4,5]; track i) {
+              <div class="skeleton-row"></div>
+            }
           </div>
         } @else if (filteredEvents().length === 0) {
           <div class="empty-state">
             <mat-icon>receipt_long</mat-icon>
-            <p>No transactions yet. Add your first transaction above!</p>
+            <p>No transactions found for the selected filter.</p>
           </div>
         } @else {
-          <div class="table-container">
-            <table mat-table [dataSource]="filteredEvents()" class="transactions-table">
-              <!-- Date Column -->
-              <ng-container matColumnDef="date">
-                <th mat-header-cell *matHeaderCellDef>Date</th>
-                <td mat-cell *matCellDef="let event">{{ formatDisplayDate(event.date) }}</td>
-              </ng-container>
+          <div class="transaction-list">
+            @for (event of filteredEvents(); track event.id) {
+              <div class="transaction-row">
+                <div class="transaction-icon" [class]="event.type.toLowerCase()">
+                  <mat-icon>{{ getEventIcon(event.type) }}</mat-icon>
+                </div>
+                
+                <div class="transaction-info">
+                  <span class="description">{{ event.description || event.type }}</span>
+                  <span class="account">
+                    {{ getAccountName(event.accountId) }}
+                    @if (event.targetAccountId) {
+                      <mat-icon class="arrow">arrow_forward</mat-icon>
+                      {{ getAccountName(event.targetAccountId) }}
+                    }
+                  </span>
+                </div>
 
-              <!-- Type Column -->
-              <ng-container matColumnDef="type">
-                <th mat-header-cell *matHeaderCellDef>Type</th>
-                <td mat-cell *matCellDef="let event">
-                  <mat-chip [highlighted]="true" [color]="getEventTypeColor(event.type)">
-                    {{ event.type }}
-                  </mat-chip>
-                </td>
-              </ng-container>
-
-              <!-- Description Column -->
-              <ng-container matColumnDef="description">
-                <th mat-header-cell *matHeaderCellDef>Description</th>
-                <td mat-cell *matCellDef="let event">{{ event.description || '-' }}</td>
-              </ng-container>
-
-              <!-- Account Column -->
-              <ng-container matColumnDef="account">
-                <th mat-header-cell *matHeaderCellDef>Account</th>
-                <td mat-cell *matCellDef="let event">
-                  {{ getAccountName(event.accountId) }}
-                  @if (event.targetAccountId) {
-                    <span> → {{ getAccountName(event.targetAccountId) }}</span>
-                  }
-                </td>
-              </ng-container>
-
-              <!-- Amount Column -->
-              <ng-container matColumnDef="amount">
-                <th mat-header-cell *matHeaderCellDef>Amount</th>
-                <td mat-cell *matCellDef="let event" [class.positive]="event.type === 'Income'" [class.negative]="event.type === 'Expense'">
-                  {{ formatCurrency(event.amount) }}
-                </td>
-              </ng-container>
-
-              <!-- Status Column -->
-              <ng-container matColumnDef="status">
-                <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let event">
-                  <button mat-stroked-button
-                          [class.pending]="event.status === 'Pending'"
-                          [class.cleared]="event.status === 'Cleared'"
-                          (click)="toggleStatus(event)"
-                          class="status-button">
+                <div class="transaction-meta">
+                  <span class="date">{{ formatDisplayDate(event.date) }}</span>
+                  <button class="status-chip" [class]="event.status.toLowerCase()" (click)="toggleStatus(event)" [title]="'Mark as ' + (event.status === 'Pending' ? 'Cleared' : 'Pending')">
                     <mat-icon>{{ event.status === 'Cleared' ? 'check_circle' : 'pending' }}</mat-icon>
                     {{ event.status }}
                   </button>
-                </td>
-              </ng-container>
+                </div>
 
-              <!-- Actions Column -->
-              <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef>Actions</th>
-                <td mat-cell *matCellDef="let event">
-                  <button mat-icon-button (click)="editEvent(event)" aria-label="Edit transaction">
+                <div class="transaction-amount" [class.income]="isIncome(event.type)" [class.expense]="isExpense(event.type)">
+                  {{ isIncome(event.type) ? '+' : '-' }}{{ formatCurrency(event.amount) }}
+                </div>
+
+                <div class="transaction-actions">
+                  <button mat-icon-button (click)="editEvent(event)" aria-label="Edit">
                     <mat-icon>edit</mat-icon>
                   </button>
-                  <button mat-icon-button (click)="deleteEvent(event)" aria-label="Delete transaction">
+                  <button mat-icon-button (click)="deleteEvent(event)" aria-label="Delete">
                     <mat-icon>delete</mat-icon>
                   </button>
-                </td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-            </table>
+                </div>
+              </div>
+            }
           </div>
         }
-      </mat-card-content>
-    </mat-card>
+      </div>
+    </main>
   </div>
 </div>

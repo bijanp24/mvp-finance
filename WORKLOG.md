@@ -4,6 +4,33 @@ Last updated: 2025-12-25
 
 Append-only. Add new entries at the top.
 
+## 2025-12-25 (WI-P6-005: Transactions Redesign)
+- Agent: Interactive CLI Agent
+- Status: Completed
+- Branch: wi/p6-005-transactions-redesign
+- Commit: pending
+- Scope: Phase 6 - Redesign of the transactions page
+- Changes:
+  - **Template (`transactions.html`)**:
+    - Implemented a two-column layout (sidebar form + main list).
+    - Redesigned the "Quick Add" form with field grouping and clearer labels.
+    - Switched status filters to a segmented-style `mat-button-toggle-group`.
+    - Redesigned the transaction list with icon-based categorization and improved alignment.
+    - Added status chips for easy visual identification of Pending/Cleared states.
+  - **Styles (`transactions.scss`)**:
+    - Applied visual system tokens for all elements.
+    - Implemented a responsive layout that stacks on mobile.
+    - Enhanced amount emphasis and transaction row hover states.
+  - **Component (`transactions.ts`)**:
+    - Added helper methods `getEventIcon`, `isIncome`, and `isExpense` (synced with Dashboard).
+    - Added a safety check for `window.scrollTo` to support testing environments.
+- Tests: All 23 transaction unit tests passed. Production build successful.
+- Decisions:
+  - Sidebar form improves accessibility by keeping it visible while scrolling the transaction list on wide screens.
+  - Icon-based rows provide faster scannability for transaction types.
+- Next steps:
+  - Start WI-P6-006 (Projections redesign).
+
 ## 2025-12-25 (WI-P6-004: Accounts Redesign)
 - Agent: Interactive CLI Agent
 - Status: Completed

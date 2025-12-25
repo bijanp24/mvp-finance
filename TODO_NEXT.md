@@ -5,8 +5,8 @@ Last updated: 2025-12-25
 Read this first when resuming work.
 
 ## Top Priority Next Step
-- Start WI-P6-005 (Transactions Redesign); refresh the transaction form and list to match the new visual system.
-- Follow with WI-P6-006 (Projections Redesign).
+- Start WI-P6-006 (Projections Redesign); standardize chart cards and create a narrative layout flow.
+- Follow with WI-P6-007 (Calendar and Settings Redesign).
 
 ## Current Status
 **Phases 1-5 Complete:**
@@ -16,13 +16,14 @@ Read this first when resuming work.
 - **Phase 4:** Test Coverage (5/5 done) - 117 backend + 39 frontend = 156 tests
 - **Phase 5:** Polish & UX (3/3 done) - Loading skeletons, balance calculator refactor, code cleanup
 
-**Phase 6:** Frontend Redesign (4/7 done)
+**Phase 6:** Frontend Redesign (5/7 done)
 - [x] WI-P6-001: Visual System and Theme Tokens
 - [x] WI-P6-002: App Shell and Navigation Redesign
 - [x] WI-P6-003: Dashboard Page Redesign
 - [x] WI-P6-004: Accounts Page Redesign
+- [x] WI-P6-005: Transactions Page Redesign
 
-**Branch:** wi/p6-004-accounts-redesign
+**Branch:** wi/p6-005-transactions-redesign
 **Working tree:** dirty
 
 ## Parallelizable Work Items
