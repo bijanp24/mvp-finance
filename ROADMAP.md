@@ -501,8 +501,47 @@ Structured work items optimized for parallel agent execution. Each work item is 
 
 ---
 
-## Future Phases (Not Scheduled)
+## Phase 7: Visual Polish (Feedback Response)
+**Status:** Ready
+**Estimated effort:** 1 session
+**Parallelizable:** Yes
 
+### WI-P6-008: Dark Theme Implementation
+- **Status:** [READY]
+- **Parallelizable:** Yes
+- **Depends on:** Phase 6
+- **Files:**
+  - `dashboard/src/styles.scss`
+- **Task:** Switch to a dark theme as per user feedback.
+- **Details:**
+  - Update root CSS variables for dark background/surface and light text.
+  - Adjust gradients and shadows for dark mode.
+
+### WI-P6-009: Fix Account Name Truncation
+- **Status:** [READY]
+- **Parallelizable:** Yes
+- **Depends on:** Phase 6
+- **Files:**
+  - `dashboard/src/app/pages/accounts/account-dialog.component.ts`
+  - `dashboard/src/app/pages/accounts/accounts.scss`
+- **Task:** Fix visual bug where account name is cut off.
+- **Details:**
+  - Ensure text wrapping/overflow is handled in dialogs and cards.
+
+### WI-P6-010: Enhance Chart Aesthetics
+- **Status:** [READY]
+- **Parallelizable:** Yes
+- **Depends on:** Phase 6
+- **Files:**
+  - `dashboard/src/app/features/charts/*.ts`
+- **Task:** Improve chart visuals for discrete transactions.
+- **Details:**
+  - Enable smoothing (`smooth: true`).
+  - Optimize for dark theme.
+
+---
+
+## Future Phases (Not Scheduled)
 ### Categories & Tags
 - Add category enum/table
 - Tag many-to-many relationship

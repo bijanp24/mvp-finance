@@ -5,9 +5,10 @@ Last updated: 2025-12-25
 Read this first when resuming work.
 
 ## Top Priority Next Step
-- Phase 6 (Frontend Redesign) is complete.
-- Review "Potential Next Steps" in ROADMAP or TODO_NEXT to pick the next major feature initiative.
-- Options include: Transaction Categories & Tags, CSV Import, or Recurring Transactions.
+- Start Phase 7 (Visual Polish) to address user feedback.
+- **WI-P6-008:** Implement Dark Theme.
+- **WI-P6-009:** Fix Account Name Truncation.
+- **WI-P6-010:** Enhance Chart Aesthetics.
 
 ## Current Status
 **Phases 1-6 Complete:**
@@ -18,8 +19,13 @@ Read this first when resuming work.
 - **Phase 5:** Polish & UX (3/3 done) - Loading skeletons, balance calculator refactor, code cleanup
 - **Phase 6:** Frontend Redesign (7/7 done) - Full app visual refresh complete
 
-**Branch:** wi/p6-007-calendar-settings-redesign
-**Working tree:** dirty
+**Phase 7: Visual Polish (0/3 done)**
+- [ ] WI-P6-008: Dark Theme
+- [ ] WI-P6-009: Account Name Truncation
+- [ ] WI-P6-010: Chart Aesthetics
+
+**Branch:** master
+**Working tree:** clean
 
 ## Parallelizable Work Items
 | Work Item ID | Description | Parallelizable | Notes |
