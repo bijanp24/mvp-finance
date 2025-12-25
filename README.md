@@ -100,6 +100,7 @@ The markdown files form a structured handoff system designed for multi-agent wor
 
 | File | Purpose | When to Read |
 |------|---------|--------------|
+| `ONBOARDING.md` | Comprehensive guide for new engineers | **For new contributors - start here** |
 | `CLAUDE.md` | Auto-load pointer for Claude Code | Automatically loaded |
 | `AGENTS.md` | Source of truth for conventions, rules, Angular/backend standards | First, when starting any work |
 | `TODO_NEXT.md` | Immediate next actions, parallelizable work items | Second, to pick a task |
@@ -108,9 +109,13 @@ The markdown files form a structured handoff system designed for multi-agent wor
 | `PROGRESS.md` | Deep dive: feature inventory, known issues, architecture notes | For detailed context |
 | `Orchestration.md` | Formal multi-agent SOP for Cursor parallel execution | When running parallel workers |
 | `mvp-finance.md` | Product spec: goals, algorithms, domain concepts | For understanding the "why" |
-| `README.md` | This file: quick start and pipeline philosophy | For new contributors |
+| `README.md` | This file: quick start and pipeline philosophy | For overview |
 
-### Reading Order for New Agents
+### Reading Order for New Engineers
+
+**New to the project?** Start with `ONBOARDING.md` for a comprehensive guide.
+
+### Reading Order for AI Agents
 
 1. `AGENTS.md` (conventions and safety rules)
 2. `TODO_NEXT.md` (what to do next)
