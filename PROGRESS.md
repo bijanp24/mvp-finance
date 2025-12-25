@@ -1,11 +1,20 @@
 # MVP Finance - Current Progress
 
-Last updated: 2025-12-24
-Current commit: 745f3a1 (Codex Review Refactor)
-Working tree: clean
+Last updated: 2025-12-25
+Current commit: pending
+Working tree: dirty
 
 ## When to Read This
 Use this file for deep dive context: feature inventory, file references, known issues, architecture notes, and backlog.
+
+## Phase 6: Frontend Redesign (In Progress)
+- [x] **WI-P6-001**: Established new visual system with CSS tokens, warm light-forward theme, and Fraunces/Manrope typography.
+- [x] **WI-P6-002**: Redesigned app shell (top bar, navigation, layout spacing).
+- [ ] **WI-P6-003**: Dashboard redesign (Next)
+- [ ] **WI-P6-004**: Accounts redesign
+- [ ] **WI-P6-005**: Transactions redesign
+- [ ] **WI-P6-006**: Projections redesign
+- [ ] **WI-P6-007**: Calendar and settings redesign
 
 ## Quick Start
 

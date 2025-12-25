@@ -1,8 +1,32 @@
 # WORKLOG.md
 
-Last updated: 2025-12-24
+Last updated: 2025-12-25
 
 Append-only. Add new entries at the top.
+
+## 2025-12-25 (WI-P6-001 & WI-P6-002: Visual System and App Shell Redesign)
+- Agent: Interactive CLI Agent
+- Status: Completed
+- Branch: wi/p6-001-visual-system
+- Commit: pending
+- Scope: Phase 6 - Establish new visual system and redesign global app shell
+- Changes:
+  - **WI-P6-001 (Visual System)**:
+    - Updated `dashboard/src/styles.scss` with a comprehensive set of CSS tokens for colors, spacing, radius, and shadows.
+    - Switched from a dark theme to a light-forward, warm theme with a subtle background gradient.
+    - Added Fraunces (headings) and Manrope (body) Google Fonts via `dashboard/src/index.html`.
+    - Modified `dashboard/angular.json` to disable font inlining (`optimization.fonts.inline: false`) to resolve build errors (400 Bad Request during esbuild inlining).
+  - **WI-P6-002 (App Shell Redesign)**:
+    - Updated `dashboard/src/app/app.html` and `dashboard/src/app/app.scss` for a refined layout.
+    - Redesigned the top bar with a logo styled in Fraunces and a user icon placeholder.
+    - Redesigned the sidenav with improved spacing, borders, and clear active states.
+    - Set a max-width and centered layout for the main content area.
+- Tests: Build passed successfully (`cd dashboard && npm run build`).
+- Decisions:
+  - Disabled font inlining in `angular.json` as it was causing 400 errors with the Google Fonts URL during the production build.
+  - Moved font imports from SCSS to HTML to avoid issues with CSS-in-JS style font handling in the new Angular build system.
+- Next steps:
+  - Start WI-P6-003 (Dashboard redesign) to apply the new tokens to the main dashboard page.
 
 ## 2025-12-24 (Planning - Frontend Redesign Phase 6)
 - Agent: Codex (GPT-5)

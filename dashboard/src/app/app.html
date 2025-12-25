@@ -1,35 +1,38 @@
-<mat-toolbar color="primary">
-  <button mat-icon-button (click)="toggleSidenav()">
+<mat-toolbar>
+  <button mat-icon-button (click)="toggleSidenav()" aria-label="Toggle sidenav">
     <mat-icon>menu</mat-icon>
   </button>
-  <span>MVP Finance</span>
+  <span class="logo">MVP Finance</span>
   <span class="spacer"></span>
+  <button mat-icon-button aria-label="User profile">
+    <mat-icon>account_circle</mat-icon>
+  </button>
 </mat-toolbar>
 
 <mat-sidenav-container>
   <mat-sidenav mode="side" [opened]="sidenavOpened()">
     <mat-nav-list>
-      <a mat-list-item routerLink="/dashboard" routerLinkActive="active">
+      <a mat-list-item routerLink="/dashboard" routerLinkActive="active" title="Dashboard">
         <mat-icon matListItemIcon>dashboard</mat-icon>
         <span matListItemTitle>Dashboard</span>
       </a>
-      <a mat-list-item routerLink="/transactions" routerLinkActive="active">
+      <a mat-list-item routerLink="/transactions" routerLinkActive="active" title="Transactions">
         <mat-icon matListItemIcon>receipt_long</mat-icon>
         <span matListItemTitle>Transactions</span>
       </a>
-      <a mat-list-item routerLink="/accounts" routerLinkActive="active">
+      <a mat-list-item routerLink="/accounts" routerLinkActive="active" title="Accounts">
         <mat-icon matListItemIcon>account_balance_wallet</mat-icon>
         <span matListItemTitle>Accounts</span>
       </a>
-      <a mat-list-item routerLink="/calendar" routerLinkActive="active">
+      <a mat-list-item routerLink="/calendar" routerLinkActive="active" title="Calendar">
         <mat-icon matListItemIcon>calendar_month</mat-icon>
         <span matListItemTitle>Calendar</span>
       </a>
-      <a mat-list-item routerLink="/projections" routerLinkActive="active">
+      <a mat-list-item routerLink="/projections" routerLinkActive="active" title="Projections">
         <mat-icon matListItemIcon>trending_up</mat-icon>
         <span matListItemTitle>Projections</span>
       </a>
-      <a mat-list-item routerLink="/settings" routerLinkActive="active">
+      <a mat-list-item routerLink="/settings" routerLinkActive="active" title="Settings">
         <mat-icon matListItemIcon>settings</mat-icon>
         <span matListItemTitle>Settings</span>
       </a>
@@ -37,8 +40,8 @@
   </mat-sidenav>
 
   <mat-sidenav-content>
-    <div class="content-wrapper">
+    <main class="content-wrapper">
       <router-outlet />
-    </div>
+    </main>
   </mat-sidenav-content>
 </mat-sidenav-container>

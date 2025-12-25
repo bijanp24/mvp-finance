@@ -373,7 +373,7 @@ Structured work items optimized for parallel agent execution. Each work item is 
 **Partial parallelization:** See individual items
 
 ### WI-P6-001: Visual System and Theme Tokens
-- **Status:** [READY]
+- **Status:** [DONE]
 - **Parallelizable:** No
 - **Depends on:** None
 - **Files:**
@@ -388,10 +388,10 @@ Structured work items optimized for parallel agent execution. Each work item is 
   ```bash
   cd dashboard && npm run build
   ```
-- **Acceptance:** Global theme and tokens are in place and do not break builds.
+- **Acceptance:** ✅ Global theme and tokens are in place; font inlining disabled in angular.json.
 
 ### WI-P6-002: App Shell and Navigation Redesign
-- **Status:** [READY]
+- **Status:** [DONE]
 - **Parallelizable:** No
 - **Depends on:** WI-P6-001
 - **Files:**
@@ -406,7 +406,7 @@ Structured work items optimized for parallel agent execution. Each work item is 
   ```bash
   cd dashboard && npm run build
   ```
-- **Acceptance:** App shell matches new design direction and remains accessible.
+- **Acceptance:** ✅ App shell redesigned with new logo and navigation styling.
 
 ### WI-P6-003: Dashboard Page Redesign
 - **Status:** [READY]
@@ -546,6 +546,8 @@ Track which agent is working on what to prevent conflicts.
 | WI-P5-001 | Codex (GPT-5) | 2025-12-23 | 2025-12-23 |
 | WI-P5-002 | Codex (GPT-5) | 2025-12-23 | 2025-12-23 |
 | WI-P5-003 | Codex (GPT-5) | 2025-12-23 | 2025-12-23 |
+| WI-P6-001 | Interactive Agent | 2025-12-25 | 2025-12-25 |
+| WI-P6-002 | Interactive Agent | 2025-12-25 | 2025-12-25 |
 
 ---
 

@@ -1,13 +1,12 @@
 # TODO_NEXT.md
 
-Last updated: 2025-12-24
+Last updated: 2025-12-25
 
 Read this first when resuming work.
 
 ## Top Priority Next Step
-- Start WI-P6-001 (Visual System and Theme Tokens); verify with `cd dashboard && npm run build`.
-- Follow with WI-P6-002 (App Shell and Navigation Redesign) after tokens land.
-- Pick one page redesign item (WI-P6-003 through WI-P6-007) to begin layout work.
+- Start WI-P6-003 (Dashboard Redesign); apply new tokens and card styles to the dashboard page.
+- Ensure any page-level styles in `dashboard.scss` are migrated to use global tokens.
 
 ## Current Status
 **Phases 1-5 Complete:**
@@ -17,26 +16,25 @@ Read this first when resuming work.
 - **Phase 4:** Test Coverage (5/5 done) - 117 backend + 39 frontend = 156 tests
 - **Phase 5:** Polish & UX (3/3 done) - Loading skeletons, balance calculator refactor, code cleanup
 
-**Phase 6:** Frontend Redesign (0/7 ready)
+**Phase 6:** Frontend Redesign (2/7 done)
+- [x] WI-P6-001: Visual System and Theme Tokens
+- [x] WI-P6-002: App Shell and Navigation Redesign
 
-**Branch:** master
+**Branch:** wi/p6-001-visual-system
 **Working tree:** dirty
 
 ## Parallelizable Work Items
 | Work Item ID | Description | Parallelizable | Notes |
 |-------------|-------------|----------------|-------|
-| WI-P6-003 | Dashboard redesign | Yes | After WI-P6-001 |
-| WI-P6-004 | Accounts redesign | Yes | After WI-P6-001 |
-| WI-P6-005 | Transactions redesign | Yes | After WI-P6-001 |
-| WI-P6-006 | Projections redesign | Yes | After WI-P6-001 |
-| WI-P6-007 | Calendar and settings redesign | Yes | After WI-P6-001 |
+| WI-P6-003 | Dashboard redesign | Yes | Ready |
+| WI-P6-004 | Accounts redesign | Yes | Ready |
+| WI-P6-005 | Transactions redesign | Yes | Ready |
+| WI-P6-006 | Projections redesign | Yes | Ready |
+| WI-P6-007 | Calendar and settings redesign | Yes | Ready |
 
-## Recently Completed (2025-12-24)
-
-### Phase 5: Polish & UX (Codex Review Refactor)
-- WI-P5-001: Loading skeletons on dashboard, accounts, and transactions pages
-- WI-P5-002: Extracted balance calculation to `FinanceEngine/Services/BalanceCalculator.cs`
-- WI-P5-003: Removed commented migration from Program.cs (46 lines)
+## Recently Completed (2025-12-25)
+- WI-P6-001: Visual System and Theme Tokens land in `styles.scss` and `index.html`.
+- WI-P6-002: App Shell and Navigation Redesign in `app.html` and `app.scss`.
 
 ### Phase 4: Test Coverage
 - WI-P4-000: Jest setup for Angular testing

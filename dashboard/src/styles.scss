@@ -2,29 +2,94 @@
 
 @include mat.core();
 
-// Define theme
-$dashboard-primary: mat.m2-define-palette(mat.$m2-indigo-palette);
-$dashboard-accent: mat.m2-define-palette(mat.$m2-pink-palette, A200, A100, A400);
+:root {
+  // Palette - Light, Warm, Intentional
+  --color-bg: #fdfcfb;
+  --color-surface: #ffffff;
+  --color-primary: #1a2c38;
+  --color-primary-light: #334d5e;
+  --color-accent: #8c6a5d;
+  --color-accent-light: #b4968c;
+  --color-warn: #c0392b;
+  --color-success: #27ae60;
+  
+  --color-text-main: #1a2c38;
+  --color-text-muted: #6b7781;
+  --color-border: #e9e5e2;
+  --color-divider: #f1eeeb;
+
+  // Spacing
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --spacing-xxl: 48px;
+
+  // Radius
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  // Shadows
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+// Angular Material Theme Setup
+$dashboard-primary: mat.m2-define-palette(mat.$m2-blue-grey-palette, 900);
+$dashboard-accent: mat.m2-define-palette(mat.$m2-brown-palette, 600);
 $dashboard-warn: mat.m2-define-palette(mat.$m2-red-palette);
 
-$dashboard-theme: mat.m2-define-dark-theme((
+$dashboard-theme: mat.m2-define-light-theme((
   color: (
     primary: $dashboard-primary,
     accent: $dashboard-accent,
     warn: $dashboard-warn,
   ),
-  typography: mat.m2-define-typography-config(),
+  typography: mat.m2-define-typography-config(
+    $font-family: 'Manrope, sans-serif',
+    $headline-1: mat.m2-define-typography-level(112px, 112px, 300, 'Fraunces', -0.05em),
+    $headline-2: mat.m2-define-typography-level(56px, 56px, 400, 'Fraunces'),
+    $headline-3: mat.m2-define-typography-level(45px, 48px, 400, 'Fraunces'),
+    $headline-4: mat.m2-define-typography-level(34px, 40px, 400, 'Fraunces'),
+    $headline-5: mat.m2-define-typography-level(24px, 32px, 400, 'Fraunces'),
+    $headline-6: mat.m2-define-typography-level(20px, 32px, 500, 'Fraunces'),
+  ),
   density: 0,
 ));
 
 @include mat.all-component-themes($dashboard-theme);
 
-// Global styles
+// Global overrides
 html, body {
   height: 100%;
 }
 
 body {
   margin: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-family: 'Manrope', sans-serif;
+  background-color: var(--color-bg);
+  color: var(--color-text-main);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(140, 106, 93, 0.03) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(26, 44, 56, 0.03) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Fraunces', serif;
+  font-variant-ligatures: common-ligatures;
+  margin-top: 0;
+}
+
+// Utility classes for cards
+.app-card {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-border);
+  padding: var(--spacing-lg);
 }
