@@ -1,18 +1,13 @@
 # TODO_NEXT.md
 
-Last updated: 2025-12-24
+Last updated: 2025-12-25
 
 Read this first when resuming work.
 
 ## Top Priority Next Step
-- **Fix Net Worth Calculation:** The current net worth projection is faulty. The data alignment between debt and investment projections is failing, leading to incorrect values.
-- **Investigate Investment Growth Graph:** The investment growth data appears inaccurate.
-    - Investigate data source accuracy (API response vs. expected).
-    - Verify calculation logic in `InvestmentProjectionCalculator.cs`.
-    - Validate rendering component and ECharts configuration.
-    - Quantify the discrepancy to understand the scale of the error.
-- Review roadmap for next major functional features.
-
+- **URGENT: Sync Documentation:** Update all markdown files (`ROADMAP.md`, `WORKLOG.md`, `PROGRESS.md`). These files are currently **OUT OF SYNC** and contain incorrect status information due to a usage timeout during the previous update. 
+- Follow the reading order specified in `AGENTS.md` to restore consistency.
+- **DO NOT** trust the status or task lists in the files following this one until they have been audited and corrected.
 
 ## Current Status
 **Phases 1-7 Complete:**
