@@ -1,6 +1,6 @@
 # ROADMAP.md
 
-Last updated: 2025-12-24
+Last updated: 2025-12-25
 Created by: Claude Opus 4.5 (via Claude Code CLI)
 
 ## Purpose
@@ -714,6 +714,18 @@ Track which agent is working on what to prevent conflicts.
 | WI-P6-008 | Interactive Agent | 2025-12-25 | 2025-12-25 |
 | WI-P6-009 | Interactive Agent | 2025-12-25 | 2025-12-25 |
 | WI-P6-010 | Interactive Agent | 2025-12-25 | 2025-12-25 |
+| WI-P7-001 | Interactive Agent | 2025-12-25 | 2025-12-25 |
+| WI-P7-002 | Interactive Agent | 2025-12-25 | 2025-12-25 |
+| WI-P7-003 | Interactive Agent | 2025-12-25 | 2025-12-25 |
+| WI-P8-001 | Interactive Agent | 2025-12-25 | 2025-12-25 |
+| WI-P8-002 | Interactive Agent | 2025-12-25 | 2025-12-25 |
+| WI-P8-003 | Interactive Agent | 2025-12-25 | 2025-12-25 |
+| WI-P8-004 | Interactive Agent | 2025-12-25 | 2025-12-25 |
+| WI-P8-005 | Interactive Agent | 2025-12-25 | 2025-12-25 |
+| WI-P8-006 | Interactive Agent | 2025-12-25 | 2025-12-25 |
+| WI-P8-007 | Interactive Agent | 2025-12-25 | 2025-12-25 |
+| WI-P9-001 | Interactive Agent | 2025-12-25 | 2025-12-25 |
+| WI-P9-002 | Interactive Agent | 2025-12-25 | 2025-12-25 |
 
 ---
 

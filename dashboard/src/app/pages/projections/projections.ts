@@ -1,11 +1,12 @@
-import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ApiService } from '../../core/services/api.service';
 import { ProjectionService } from '../../core/services/projection.service';
 import { DebtProjectionChartComponent } from '../../features/charts/debt-projection-chart.component';
@@ -39,10 +40,28 @@ export class ProjectionsPage {
   readonly settings = signal<UserSettings | null>(null);
   readonly extraPayment = signal(0);
   readonly debtProjectionWithExtra = signal<SimulationResult | null>(null);
+  
+  private extraPaymentSubject = new Subject<number>();
 
-  readonly debtChartData = this.projectionService.debtChartData;
+  // Use effective projection (scenario or baseline) for charts
+  readonly effectiveDebtProjection = computed(() => {
+    return this.debtProjectionWithExtra() ?? this.projectionService.debtProjection();
+  });
+
+  // Re-computed chart data using the effective projection
+  readonly debtChartData = computed(() => {
+    return this.projectionService.getDebtChartData(this.effectiveDebtProjection());
+  });
+
   readonly investmentChartData = this.projectionService.investmentChartData;
-  readonly netWorthChartData = this.projectionService.netWorthChartData;
+
+  readonly netWorthChartData = computed(() => {
+    return this.projectionService.getNetWorthChartData(
+      this.effectiveDebtProjection(),
+      this.projectionService.investmentProjection()
+    );
+  });
+
   readonly loading = this.projectionService.loading;
 
   readonly debtProjection = this.projectionService.debtProjection;
@@ -52,8 +71,8 @@ export class ProjectionsPage {
   readonly granularity = this.projectionService.granularity;
 
   readonly debtComparison = computed(() => {
-    const baseline = this.debtProjection();
-    const withExtra = this.debtProjectionWithExtra();
+    const baseline = this.projectionService.debtProjection(); // Always compare against baseline
+    const withExtra = this.effectiveDebtProjection();
     
     if (!baseline || !withExtra || !baseline.debtFreeDate || !withExtra.debtFreeDate) {
       return null;
@@ -96,6 +115,14 @@ export class ProjectionsPage {
 
   constructor() {
     this.loadData();
+    
+    // Debounce slider inputs to avoid API spam
+    this.extraPaymentSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged()
+    ).subscribe(amount => {
+      this.calculateExtraPaymentScenario(amount);
+    });
   }
 
   loadData(): void {
@@ -114,12 +141,17 @@ export class ProjectionsPage {
     this.calculateProjections();
     // Recalculate extra payment scenario if active
     if (this.extraPayment() > 0) {
-      this.onExtraPaymentChange();
+      this.calculateExtraPaymentScenario(this.extraPayment());
     }
   }
 
   onExtraPaymentChange(): void {
-    if (this.extraPayment() === 0) {
+    // Push to subject for debouncing
+    this.extraPaymentSubject.next(this.extraPayment());
+  }
+
+  private calculateExtraPaymentScenario(amount: number): void {
+    if (amount === 0) {
       // Reset to baseline
       this.debtProjectionWithExtra.set(null);
       return;
@@ -134,7 +166,7 @@ export class ProjectionsPage {
     this.projectionService.calculateDebtProjectionWithExtra(
       debtAccounts,
       this.timeRangeMonths(),
-      this.extraPayment(),
+      amount,
       this.settings() || undefined
     ).subscribe(result => {
       this.debtProjectionWithExtra.set(result);

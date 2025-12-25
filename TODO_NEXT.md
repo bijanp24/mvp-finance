@@ -5,9 +5,14 @@ Last updated: 2025-12-24
 Read this first when resuming work.
 
 ## Top Priority Next Step
-- **Phase 8: Recurring Investments & Contributions** is ready for implementation.
-- Start with WI-P8-001 (database entity) - blocking item for rest of phase.
-- Contracts created in `contracts/WI-P8-*.md` for all 7 work items.
+- **Fix Net Worth Calculation:** The current net worth projection is faulty. The data alignment between debt and investment projections is failing, leading to incorrect values.
+- **Investigate Investment Growth Graph:** The investment growth data appears inaccurate.
+    - Investigate data source accuracy (API response vs. expected).
+    - Verify calculation logic in `InvestmentProjectionCalculator.cs`.
+    - Validate rendering component and ECharts configuration.
+    - Quantify the discrepancy to understand the scale of the error.
+- Review roadmap for next major functional features.
+
 
 ## Current Status
 **Phases 1-7 Complete:**

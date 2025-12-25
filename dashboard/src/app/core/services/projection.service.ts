@@ -35,9 +35,8 @@ export class ProjectionService {
   readonly includeContributions = signal(true);
   readonly granularity = signal<ChartGranularity>('Monthly');
 
-  // Computed chart data
-  readonly debtChartData = computed<DebtChartData | null>(() => {
-    const projection = this.debtProjection();
+  // Helper to transform simulation result to chart data (public for scenarios)
+  getDebtChartData(projection: SimulationResult | null): DebtChartData | null {
     if (!projection || !projection.snapshots || projection.snapshots.length === 0) {
       return null;
     }
@@ -48,6 +47,78 @@ export class ProjectionService {
       dates: aggregated.map(s => s.date),
       debtBalances: aggregated.map(s => s.totalDebt)
     };
+  }
+
+  // Helper to transform simulation result to net worth data (public for scenarios)
+  getNetWorthChartData(debtProjection: SimulationResult | null, investmentProjection: InvestmentProjectionResult | null): NetWorthChartData | null {
+    // Need at least one projection
+    if (!debtProjection?.snapshots?.length && !investmentProjection?.projections?.length) {
+      return null;
+    }
+
+    // Collect all unique dates
+    const dateSet = new Set<string>();
+    debtProjection?.snapshots?.forEach(s => dateSet.add(s.date));
+    investmentProjection?.projections?.forEach(p => dateSet.add(p.date));
+
+    // Sort chronologically
+    const dates = Array.from(dateSet).sort();
+
+    // Use a carry-forward approach to handle date mismatches
+    let lastDebt = 0;
+    let lastInvestment = 0;
+    
+    // Create maps for faster lookup
+    const debtMap = new Map(debtProjection?.snapshots?.map(s => [s.date, s.totalDebt]) || []);
+    const investmentMap = new Map(investmentProjection?.projections?.map(p => [p.date, p.nominalValue]) || []);
+
+    const combinedSnapshots: Array<{
+      date: string;
+      netWorth: number;
+      investment: number;
+      debt: number;
+    }> = [];
+
+    dates.forEach(date => {
+      // Update values if present, otherwise keep last known value
+      if (debtMap.has(date)) {
+        lastDebt = debtMap.get(date)!;
+      }
+      if (investmentMap.has(date)) {
+        lastInvestment = investmentMap.get(date)!;
+      }
+      
+      combinedSnapshots.push({
+        date,
+        netWorth: lastInvestment - lastDebt,
+        investment: lastInvestment,
+        debt: lastDebt
+      });
+    });
+
+    // Convert to snapshot format for aggregation
+    const snapshots: SimulationSnapshot[] = combinedSnapshots.map(s => ({
+      date: s.date,
+      cashBalance: 0,
+      totalDebt: s.debt,
+      debtBalances: {},
+      netWorth: s.netWorth,
+      investment: s.investment
+    })) as SimulationSnapshot[];
+
+    const aggregated = this.aggregateSnapshots(snapshots, this.granularity());
+
+    return {
+      dates: aggregated.map(s => s.date),
+      netWorth: aggregated.map(s => (s as any).netWorth),
+      investments: aggregated.map(s => (s as any).investment),
+      debt: aggregated.map(s => s.totalDebt)
+    };
+  }
+
+  // Computed chart data (uses the helpers)
+  readonly debtChartData = computed<DebtChartData | null>(() => {
+    return this.getDebtChartData(this.debtProjection());
   });
 
   readonly investmentChartData = computed<InvestmentChartData | null>(() => {
@@ -74,100 +145,56 @@ export class ProjectionService {
   });
 
   readonly netWorthChartData = computed<NetWorthChartData | null>(() => {
-    const debt = this.debtProjection();
-    const investment = this.investmentProjection();
-
-    // Need at least one projection
-    if (!debt?.snapshots?.length && !investment?.projections?.length) {
-      return null;
-    }
-
-    // Collect all unique dates
-    const dateSet = new Set<string>();
-    debt?.snapshots?.forEach(s => dateSet.add(s.date));
-    investment?.projections?.forEach(p => dateSet.add(p.date));
-
-    // Sort chronologically
-    const dates = Array.from(dateSet).sort();
-
-    // Calculate net worth at each date
-    const combinedSnapshots: Array<{
-      date: string;
-      netWorth: number;
-      investment: number;
-      debt: number;
-    }> = [];
-
-    dates.forEach(date => {
-      const debtAtDate = debt?.snapshots?.find(s => s.date === date)?.totalDebt ?? 0;
-      const investmentAtDate = investment?.projections?.find(p => p.date === date)?.nominalValue ?? 0;
-      
-      combinedSnapshots.push({
-        date,
-        netWorth: investmentAtDate - debtAtDate,
-        investment: investmentAtDate,
-        debt: debtAtDate
-      });
-    });
-
-    // Convert to snapshot format for aggregation
-    const snapshots: SimulationSnapshot[] = combinedSnapshots.map(s => ({
-      date: s.date,
-      cashBalance: 0,
-      totalDebt: s.debt,
-      debtBalances: {},
-      netWorth: s.netWorth,
-      investment: s.investment
-    })) as SimulationSnapshot[];
-
-    const aggregated = this.aggregateSnapshots(snapshots, this.granularity());
-
-    return {
-      dates: aggregated.map(s => s.date),
-      netWorth: aggregated.map(s => (s as any).netWorth),
-      investments: aggregated.map(s => (s as any).investment),
-      debt: aggregated.map(s => s.totalDebt)
-    };
+    return this.getNetWorthChartData(this.debtProjection(), this.investmentProjection());
   });
 
   /**
    * Aggregates simulation snapshots based on the specified granularity.
    * - Daily: Returns all snapshots
    * - Weekly: Returns snapshots for Fridays (end of trading week)
-   * - Monthly: Returns snapshots for last day of each month
-   * Always includes the final snapshot to close the loop.
+   * - Monthly: Returns the last available snapshot for each month
    */
-  private aggregateSnapshots(snapshots: SimulationSnapshot[], granularity: ChartGranularity): SimulationSnapshot[] {
+  public aggregateSnapshots(snapshots: SimulationSnapshot[], granularity: ChartGranularity): SimulationSnapshot[] {
     if (granularity === 'Daily' || snapshots.length === 0) {
       return snapshots;
     }
 
     const result: SimulationSnapshot[] = [];
-    let lastSnapshot: SimulationSnapshot | null = null;
 
-    for (const snapshot of snapshots) {
-      const date = new Date(snapshot.date);
+    for (let i = 0; i < snapshots.length; i++) {
+      const current = snapshots[i];
+      const currentDate = new Date(current.date);
       let shouldInclude = false;
 
       if (granularity === 'Weekly') {
         // Include Fridays (end of trading week)
-        shouldInclude = date.getDay() === 5;
+        shouldInclude = currentDate.getDay() === 5;
       } else if (granularity === 'Monthly') {
-        // Include last day of month
-        const nextDay = new Date(date);
-        nextDay.setDate(date.getDate() + 1);
-        shouldInclude = nextDay.getDate() === 1;
+        // Include if the next snapshot belongs to a different month (or year),
+        // effectively capturing the last record available for the current month.
+        const nextSnapshot = snapshots[i + 1];
+        if (!nextSnapshot) {
+          shouldInclude = true; // Always include the very last point
+        } else {
+          const nextDate = new Date(nextSnapshot.date);
+          shouldInclude = nextDate.getMonth() !== currentDate.getMonth() || 
+                          nextDate.getFullYear() !== currentDate.getFullYear();
+        }
       }
 
       if (shouldInclude) {
-        result.push(snapshot);
+        result.push(current);
       }
-      lastSnapshot = snapshot;
     }
 
-    // Always include the final snapshot to close the loop
-    if (lastSnapshot && !result.includes(lastSnapshot)) {
+    // Ensure the final snapshot is included if it wasn't caught by the loop logic
+    // (The Monthly logic above catches it, but Weekly might miss it if last day isn't Friday)
+    const lastSnapshot = snapshots[snapshots.length - 1];
+    if (result.length > 0 && result[result.length - 1].date !== lastSnapshot.date) {
       result.push(lastSnapshot);
+    } else if (result.length === 0 && snapshots.length > 0) {
+        // Fallback: if nothing was selected (e.g. weekly data with no Fridays), return at least the last point
+        result.push(lastSnapshot);
     }
 
     return result;

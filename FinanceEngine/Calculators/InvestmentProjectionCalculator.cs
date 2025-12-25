@@ -8,6 +8,10 @@ public static class InvestmentProjectionCalculator
 {
     public static InvestmentProjectionResult Calculate(InvestmentProjectionInput input)
     {
+        // TODO: Verify calculation accuracy.
+        // - Ensure dailyNominalRate correctly reflects nominalAnnualReturn.
+        // - Validate contribution timing (beginning vs end of day).
+        // - Quantify any rounding errors over long periods.
         if (input == null)
             throw new ArgumentNullException(nameof(input));
 
