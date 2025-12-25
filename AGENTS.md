@@ -5,6 +5,7 @@ Last updated: 2025-12-25
 ## Purpose
 - Consolidated agent guide for this repo; keep it short and actionable.
 - If other agent instruction files exist, treat this as the source of truth.
+- **New human contributors:** See `ONBOARDING.md` for a comprehensive getting started guide.
 
 ## Current Version: v2 (Goal-Driven Budgeting)
 - v1 (Phases 1-9) is complete and archived in `docs/v1-archive/`
