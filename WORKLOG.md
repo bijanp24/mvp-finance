@@ -4,6 +4,29 @@ Last updated: 2025-12-25
 
 Append-only. Add new entries at the top.
 
+## 2025-12-25 (WI-P6-006: Projections Redesign)
+- Agent: Interactive CLI Agent
+- Status: Completed
+- Branch: wi/p6-006-projections-redesign
+- Commit: pending
+- Scope: Phase 6 - Redesign of the projections page
+- Changes:
+  - **Template (`projections.html`)**:
+    - Reorganized the page into a logical 3-step flow: Inputs/Scenarios -> Key Insights -> Detailed Charts.
+    - Redesigned the inputs section with a cleaner grid for timeframe and extra payment slider.
+    - Introduced an "Insights Grid" with highlight cards for Debt-Free Date, Crossover Milestone, Projected Net Worth, and Total Interest.
+    - Standardized chart containers as full-width `app-card`s.
+  - **Styles (`projections.scss`)**:
+    - Applied visual system tokens for all elements.
+    - Implemented highlight card styles using primary and accent gradients.
+    - Refined the segmented controls and slider styling to match the new system.
+- Tests: Build successful.
+- Decisions:
+  - Moving inputs to the top and following with immediate insights creates a better "what-if" feedback loop for the user.
+  - Prioritized Net Worth as the top chart to give a holistic view of financial health.
+- Next steps:
+  - Start WI-P6-007 (Calendar and Settings redesign).
+
 ## 2025-12-25 (WI-P6-005: Transactions Redesign)
 - Agent: Interactive CLI Agent
 - Status: Completed

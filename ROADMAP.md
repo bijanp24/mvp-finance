@@ -463,7 +463,7 @@ Structured work items optimized for parallel agent execution. Each work item is 
 - **Acceptance:** ✅ Transactions UI matches new design system; sidebar form implemented.
 
 ### WI-P6-006: Projections Page Redesign
-- **Status:** [READY]
+- **Status:** [DONE]
 - **Parallelizable:** Yes (after WI-P6-001)
 - **Depends on:** WI-P6-001
 - **Files:**
@@ -471,14 +471,14 @@ Structured work items optimized for parallel agent execution. Each work item is 
   - `dashboard/src/app/pages/projections/projections.scss`
 - **Task:** Redesign projections layout and chart containers.
 - **Details:**
-  - Create a clear narrative flow from inputs to insights.
-  - Standardize chart card styling and spacing.
-  - Ensure sliders and milestone cards fit the new system.
+  - Implemented 3-step narrative flow (Inputs -> Insights -> Charts).
+  - Redesigned insights grid with highlight cards for key milestones.
+  - Standardized chart card styling and input controls.
 - **Verification:**
   ```bash
   cd dashboard && npm run build
   ```
-- **Acceptance:** Projections page matches new design system with charts intact.
+- **Acceptance:** ✅ Projections page follows a logical story flow; charts are standardized in cards.
 
 ### WI-P6-007: Calendar and Settings Redesign
 - **Status:** [READY]
@@ -551,6 +551,7 @@ Track which agent is working on what to prevent conflicts.
 | WI-P6-003 | Interactive Agent | 2025-12-25 | 2025-12-25 |
 | WI-P6-004 | Interactive Agent | 2025-12-25 | 2025-12-25 |
 | WI-P6-005 | Interactive Agent | 2025-12-25 | 2025-12-25 |
+| WI-P6-006 | Interactive Agent | 2025-12-25 | 2025-12-25 |
 
 ---
 

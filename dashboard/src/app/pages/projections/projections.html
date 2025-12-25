@@ -1,167 +1,139 @@
-<div class="projections-page">
-  <mat-card class="header-card" appearance="outlined">
-    <mat-card-header>
-      <mat-card-title>Financial Projections</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      <mat-button-toggle-group
-        [value]="timeRangeMonths()"
-        (change)="onTimeRangeChange($event.value)"
-        aria-label="Time range selection">
-        <mat-button-toggle [value]="3">3 Months</mat-button-toggle>
-        <mat-button-toggle [value]="6">6 Months</mat-button-toggle>
-        <mat-button-toggle [value]="12">1 Year</mat-button-toggle>
-        <mat-button-toggle [value]="24">2 Years</mat-button-toggle>
-        <mat-button-toggle [value]="60">5 Years</mat-button-toggle>
-      </mat-button-toggle-group>
+<div class="projections-container">
+  <header class="page-header">
+    <h1>Projections</h1>
+  </header>
 
-      <!-- Extra Payment Slider -->
-      @if (debtChartData()) {
-        <div class="extra-payment-slider">
-          <label for="extra-payment">Extra Monthly Payment: {{ formatCurrency(extraPayment()) }}</label>
-          <mat-slider min="0" max="500" step="25" discrete showTickMarks>
-            <input matSliderThumb [(ngModel)]="extraPayment" (ngModelChange)="onExtraPaymentChange()" id="extra-payment">
-          </mat-slider>
-          
-          @if (debtComparison(); as comparison) {
-            <div class="comparison-stats">
-              <div class="stat-item">
-                <span class="label">New Debt-Free Date:</span>
-                <span class="value highlight">{{ formatDate(comparison.newPayoffDate) }}</span>
-              </div>
-              <div class="stat-item">
-                <span class="label">Months Saved:</span>
-                <span class="value highlight">{{ comparison.monthsSaved }}</span>
-              </div>
-              <div class="stat-item">
-                <span class="label">Interest Saved:</span>
-                <span class="value highlight">{{ formatCurrency(comparison.interestSaved) }}</span>
-              </div>
+  <!-- Step 1: Inputs & Scenarios -->
+  <section class="inputs-section">
+    <div class="app-card">
+      <div class="section-header">
+        <h2>Scenarios & Inputs</h2>
+      </div>
+      
+      <div class="input-grid">
+        <div class="input-item">
+          <label class="input-label">Projection Timeframe</label>
+          <mat-button-toggle-group
+            [value]="timeRangeMonths()"
+            (change)="onTimeRangeChange($event.value)"
+            class="segmented-control">
+            <mat-button-toggle [value]="3">3M</mat-button-toggle>
+            <mat-button-toggle [value]="6">6M</mat-button-toggle>
+            <mat-button-toggle [value]="12">1Y</mat-button-toggle>
+            <mat-button-toggle [value]="24">2Y</mat-button-toggle>
+            <mat-button-toggle [value]="60">5Y</mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
+
+        @if (debtChartData()) {
+          <div class="input-item extra-payment">
+            <div class="label-row">
+              <label class="input-label">Extra Monthly Debt Payment</label>
+              <span class="value">{{ formatCurrency(extraPayment()) }}</span>
             </div>
+            <mat-slider min="0" max="1000" step="50" discrete showTickMarks>
+              <input matSliderThumb [(ngModel)]="extraPayment" (ngModelChange)="onExtraPaymentChange()">
+            </mat-slider>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Step 2: Key Insights Grid -->
+  <section class="insights-section">
+    <div class="insights-grid">
+      <!-- Debt Free Milestone -->
+      @if (debtProjection()) {
+        <div class="app-card insight-card accent">
+          <span class="label">Projected Debt Free</span>
+          <h3 class="value">{{ formatDate(debtProjection()!.debtFreeDate) }}</h3>
+          @if (debtComparison(); as comp) {
+            <span class="subtext positive">{{ comp.monthsSaved }} months saved with extra payment</span>
           }
         </div>
       }
-    </mat-card-content>
-  </mat-card>
 
-  <!-- Crossover Milestone -->
-  @if (crossoverDate()) {
-    <mat-card class="milestone-card" appearance="outlined">
-      <mat-card-header>
-        <mat-card-title>Crossover Milestone 🎯</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <p class="milestone-date">{{ formatDate(crossoverDate()!) }}</p>
-        <p class="milestone-description">
-          Your investment returns will exceed your debt interest costs
-        </p>
-      </mat-card-content>
-    </mat-card>
-  }
-
-  <!-- Debt Projection -->
-  <mat-card class="projection-card" appearance="outlined">
-    <mat-card-header>
-      <mat-card-title>Debt Projection</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      @if (loading()) {
-        <div class="loading">Calculating projections...</div>
-      } @else if (debtChartData()) {
-        <app-debt-projection-chart
-          [data]="debtChartData()"
-          [height]="'600px'"
-          [compact]="false">
-        </app-debt-projection-chart>
-
-        @if (debtProjection()) {
-          <div class="summary">
-            <h3>Summary</h3>
-            <div class="summary-stats">
-              <div class="stat">
-                <span class="label">Projected Debt-Free Date:</span>
-                <span class="value">{{ formatDate(debtProjection()!.debtFreeDate) }}</span>
-              </div>
-              <div class="stat">
-                <span class="label">Total Interest to be Paid:</span>
-                <span class="value">{{ formatCurrency(debtProjection()!.totalInterestPaid) }}</span>
-              </div>
-            </div>
-          </div>
-        }
-      } @else {
-        <div class="empty-state">No debt accounts to project</div>
-      }
-    </mat-card-content>
-  </mat-card>
-
-  <!-- Investment Projection -->
-  <mat-card class="projection-card" appearance="outlined">
-    <mat-card-header>
-      <mat-card-title>Investment Growth</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      @if (loading()) {
-        <div class="loading">Calculating projections...</div>
-      } @else if (investmentChartData()) {
-        <app-investment-projection-chart
-          [data]="investmentChartData()"
-          [height]="'600px'"
-          [compact]="false">
-        </app-investment-projection-chart>
-
-        @if (investmentProjection()) {
-          <div class="summary">
-            <h3>Summary</h3>
-            <div class="summary-stats">
-              <div class="stat">
-                <span class="label">Projected Value:</span>
-                <span class="value">{{ formatCurrency(investmentProjection()!.finalNominalValue) }}</span>
-              </div>
-              <div class="stat">
-                <span class="label">Total Growth:</span>
-                <span class="value">{{ formatCurrency(investmentProjection()!.totalNominalGrowth) }}</span>
-              </div>
-            </div>
-          </div>
-        }
-      } @else {
-        <div class="empty-state">No investment accounts to project</div>
-      }
-    </mat-card-content>
-  </mat-card>
-
-  <!-- Net Worth Projection -->
-  <mat-card class="projection-card" appearance="outlined">
-    <mat-card-header>
-      <mat-card-title>Net Worth Projection</mat-card-title>
-    </mat-card-header>
-    <mat-card-content>
-      @if (loading()) {
-        <div class="loading">Calculating projections...</div>
-      } @else if (netWorthChartData()) {
-        <app-net-worth-chart
-          [data]="netWorthChartData()"
-          [height]="'600px'"
-          [compact]="false">
-        </app-net-worth-chart>
-
-        <div class="summary">
-          <h3>Summary</h3>
-          <div class="summary-stats">
-            <div class="stat">
-              <span class="label">Current Net Worth:</span>
-              <span class="value">{{ formatCurrency(netWorthChartData()!.netWorth[0]) }}</span>
-            </div>
-            <div class="stat">
-              <span class="label">Projected Net Worth:</span>
-              <span class="value">{{ formatCurrency(netWorthChartData()!.netWorth[netWorthChartData()!.netWorth.length - 1]) }}</span>
-            </div>
-          </div>
+      <!-- Crossover Milestone -->
+      @if (crossoverDate()) {
+        <div class="app-card insight-card crossover">
+          <span class="label">Crossover Date 🎯</span>
+          <h3 class="value">{{ formatDate(crossoverDate()!) }}</h3>
+          <span class="subtext">Returns will exceed interest costs</span>
         </div>
-      } @else {
-        <div class="empty-state">Add accounts to see net worth projection</div>
       }
-    </mat-card-content>
-  </mat-card>
+
+      <!-- Net Worth Insight -->
+      @if (netWorthChartData()) {
+        <div class="app-card insight-card">
+          <span class="label">Projected Net Worth</span>
+          <h3 class="value">{{ formatCurrency(netWorthChartData()!.netWorth[netWorthChartData()!.netWorth.length - 1]) }}</h3>
+          <span class="subtext">In {{ timeRangeMonths() }} months</span>
+        </div>
+      }
+
+      <!-- Interest Insight -->
+      @if (debtProjection()) {
+        <div class="app-card insight-card">
+          <span class="label">Total Interest Cost</span>
+          <h3 class="value">{{ formatCurrency(debtProjection()!.totalInterestPaid) }}</h3>
+          @if (debtComparison(); as comp) {
+            <span class="subtext positive">Saving {{ formatCurrency(comp.interestSaved) }}</span>
+          }
+        </div>
+      }
+    </div>
+  </section>
+
+  <!-- Step 3: Detailed Charts -->
+  <section class="charts-section">
+    @if (loading()) {
+      <div class="skeleton-charts">
+        <div class="skeleton-chart-card"></div>
+        <div class="skeleton-chart-card"></div>
+      </div>
+    } @else {
+      <!-- Net Worth Chart (Top priority visualization) -->
+      @if (netWorthChartData()) {
+        <div class="app-card chart-card">
+          <div class="section-header">
+            <h2>Net Worth Trajectory</h2>
+          </div>
+          <app-net-worth-chart
+            [data]="netWorthChartData()"
+            [height]="'400px'"
+            [compact]="false">
+          </app-net-worth-chart>
+        </div>
+      }
+
+      <!-- Debt Chart -->
+      @if (debtChartData()) {
+        <div class="app-card chart-card">
+          <div class="section-header">
+            <h2>Debt Payoff Curve</h2>
+          </div>
+          <app-debt-projection-chart
+            [data]="debtChartData()"
+            [height]="'400px'"
+            [compact]="false">
+          </app-debt-projection-chart>
+        </div>
+      }
+
+      <!-- Investment Chart -->
+      @if (investmentChartData()) {
+        <div class="app-card chart-card">
+          <div class="section-header">
+            <h2>Investment Growth</h2>
+          </div>
+          <app-investment-projection-chart
+            [data]="investmentChartData()"
+            [height]="'400px'"
+            [compact]="false">
+          </app-investment-projection-chart>
+        </div>
+      }
+    }
+  </section>
 </div>
