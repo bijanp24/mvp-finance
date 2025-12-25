@@ -5,26 +5,20 @@ Last updated: 2025-12-25
 Read this first when resuming work.
 
 ## Top Priority Next Step
-- Start WI-P6-007 (Calendar and Settings Redesign); align the calendar features and settings page with the new visual system.
-- Perform a final visual audit and accessibility check across all redesigned pages.
+- Phase 6 (Frontend Redesign) is complete.
+- Review "Potential Next Steps" in ROADMAP or TODO_NEXT to pick the next major feature initiative.
+- Options include: Transaction Categories & Tags, CSV Import, or Recurring Transactions.
 
 ## Current Status
-**Phases 1-5 Complete:**
+**Phases 1-6 Complete:**
 - **Phase 1:** Quick Wins (3/3 done)
 - **Phase 2:** Core MVP Features (5/5 done)
 - **Phase 3:** Data Integrity - Reconciliation (3/3 done)
 - **Phase 4:** Test Coverage (5/5 done) - 117 backend + 39 frontend = 156 tests
 - **Phase 5:** Polish & UX (3/3 done) - Loading skeletons, balance calculator refactor, code cleanup
+- **Phase 6:** Frontend Redesign (7/7 done) - Full app visual refresh complete
 
-**Phase 6:** Frontend Redesign (6/7 done)
-- [x] WI-P6-001: Visual System and Theme Tokens
-- [x] WI-P6-002: App Shell and Navigation Redesign
-- [x] WI-P6-003: Dashboard Page Redesign
-- [x] WI-P6-004: Accounts Page Redesign
-- [x] WI-P6-005: Transactions Page Redesign
-- [x] WI-P6-006: Projections Page Redesign
-
-**Branch:** wi/p6-006-projections-redesign
+**Branch:** wi/p6-007-calendar-settings-redesign
 **Working tree:** dirty
 
 ## Parallelizable Work Items

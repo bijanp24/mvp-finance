@@ -368,7 +368,7 @@ Structured work items optimized for parallel agent execution. Each work item is 
 ---
 
 ## Phase 6: Frontend Redesign
-**Status:** Ready
+**Status:** Complete
 **Estimated effort:** 3-4 sessions
 **Partial parallelization:** See individual items
 
@@ -481,7 +481,7 @@ Structured work items optimized for parallel agent execution. Each work item is 
 - **Acceptance:** ✅ Projections page follows a logical story flow; charts are standardized in cards.
 
 ### WI-P6-007: Calendar and Settings Redesign
-- **Status:** [READY]
+- **Status:** [DONE]
 - **Parallelizable:** Yes (after WI-P6-001)
 - **Depends on:** WI-P6-001
 - **Files:**
@@ -490,13 +490,14 @@ Structured work items optimized for parallel agent execution. Each work item is 
   - `dashboard/src/app/pages/settings/settings.ts`
 - **Task:** Refresh calendar and settings pages for visual consistency and a11y polish.
 - **Details:**
-  - Align spacing, typography, and card treatments with the new system.
-  - Improve focus indicators and contrast for form controls.
+  - Aligned calendar grid and event badges with the new visual system.
+  - Redesigned settings form with a grid layout and improved card hierarchy.
+  - Improved responsive behavior for calendar events.
 - **Verification:**
   ```bash
   cd dashboard && npm run build
   ```
-- **Acceptance:** Calendar and settings match the redesign and pass basic a11y checks.
+- **Acceptance:** ✅ Calendar and settings match the redesign and pass basic a11y checks.
 
 ---
 
@@ -552,6 +553,7 @@ Track which agent is working on what to prevent conflicts.
 | WI-P6-004 | Interactive Agent | 2025-12-25 | 2025-12-25 |
 | WI-P6-005 | Interactive Agent | 2025-12-25 | 2025-12-25 |
 | WI-P6-006 | Interactive Agent | 2025-12-25 | 2025-12-25 |
+| WI-P6-007 | Interactive Agent | 2025-12-25 | 2025-12-25 |
 
 ---
 

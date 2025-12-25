@@ -5,6 +5,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ApiService } from '../../core/services/api.service';
 import { UpdateSettingsRequest } from '../../core/models/api.models';
@@ -18,23 +19,31 @@ import { UpdateSettingsRequest } from '../../core/models/api.models';
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
+    MatIconModule,
     MatSnackBarModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="settings-container">
-      <h1>Settings</h1>
+      <header class="page-header">
+        <h1>Settings</h1>
+      </header>
 
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>Income & Safety Buffer</mat-card-title>
-        </mat-card-header>
+      <div class="app-card settings-card">
+        <div class="section-header">
+          <h2>Income & Buffer</h2>
+          <p class="section-description">Configure your recurring income and safety threshold for cash flow projections.</p>
+        </div>
 
-        <mat-card-content>
-          @if (loading()) {
-            <p>Loading settings...</p>
-          } @else {
-            <form [formGroup]="form">
+        @if (loading()) {
+          <div class="skeleton-form">
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line"></div>
+          </div>
+        } @else {
+          <form [formGroup]="form">
+            <div class="form-grid">
               <mat-form-field appearance="outline">
                 <mat-label>Pay Frequency</mat-label>
                 <mat-select formControlName="payFrequency" required>
@@ -43,105 +52,126 @@ import { UpdateSettingsRequest } from '../../core/models/api.models';
                   <mat-option value="SemiMonthly">Semi-Monthly (Twice per month)</mat-option>
                   <mat-option value="Monthly">Monthly (Once per month)</mat-option>
                 </mat-select>
-                @if (form.get('payFrequency')?.hasError('required') && form.get('payFrequency')?.touched) {
-                  <mat-error>Pay frequency is required</mat-error>
-                }
               </mat-form-field>
 
               <mat-form-field appearance="outline">
                 <mat-label>Next Paycheck Date</mat-label>
-                <input
-                  matInput
-                  type="date"
-                  formControlName="nextPaycheckDate">
-                <mat-hint>When is your next paycheck? We'll calculate future dates from this.</mat-hint>
-                @if (form.get('nextPaycheckDate')?.hasError('tooOld') && form.get('nextPaycheckDate')?.touched) {
-                  <mat-error>Date cannot be more than 90 days in the past</mat-error>
-                }
+                <input matInput type="date" formControlName="nextPaycheckDate">
+                <mat-hint>Base date for future paycheck calculations</mat-hint>
               </mat-form-field>
 
               <mat-form-field appearance="outline">
                 <mat-label>Paycheck Amount</mat-label>
-                <input
-                  matInput
-                  type="number"
-                  formControlName="paycheckAmount"
-                  placeholder="0.00"
-                  required>
+                <input matInput type="number" formControlName="paycheckAmount" placeholder="0.00" required>
                 <span matTextPrefix>$&nbsp;</span>
-                @if (form.get('paycheckAmount')?.hasError('required') && form.get('paycheckAmount')?.touched) {
-                  <mat-error>Paycheck amount is required</mat-error>
-                }
-                @if (form.get('paycheckAmount')?.hasError('min')) {
-                  <mat-error>Paycheck amount must be greater than 0</mat-error>
-                }
               </mat-form-field>
 
               <mat-form-field appearance="outline">
                 <mat-label>Safety Buffer</mat-label>
-                <input
-                  matInput
-                  type="number"
-                  formControlName="safetyBuffer"
-                  placeholder="0.00"
-                  required>
+                <input matInput type="number" formControlName="safetyBuffer" placeholder="0.00" required>
                 <span matTextPrefix>$&nbsp;</span>
                 <mat-hint>Minimum cash cushion to maintain</mat-hint>
-                @if (form.get('safetyBuffer')?.hasError('required') && form.get('safetyBuffer')?.touched) {
-                  <mat-error>Safety buffer is required</mat-error>
-                }
-                @if (form.get('safetyBuffer')?.hasError('min')) {
-                  <mat-error>Safety buffer cannot be negative</mat-error>
-                }
               </mat-form-field>
-            </form>
-          }
-        </mat-card-content>
+            </div>
 
-        <mat-card-actions align="end">
-          <button
-            mat-raised-button
-            color="primary"
-            (click)="onSave()"
-            [disabled]="!form.valid || saving()">
-            {{ saving() ? 'Saving...' : 'Save Settings' }}
-          </button>
-        </mat-card-actions>
-      </mat-card>
+            <div class="form-actions">
+              <button mat-flat-button color="primary" (click)="onSave()" [disabled]="!form.valid || saving()">
+                <mat-icon>{{ saving() ? 'sync' : 'save' }}</mat-icon>
+                {{ saving() ? 'Saving...' : 'Save Settings' }}
+              </button>
+            </div>
+          </form>
+        }
+      </div>
+
+      <div class="app-card danger-zone">
+        <div class="section-header">
+          <h2>Data Management</h2>
+          <p class="section-description">Manage your account data and persistence.</p>
+        </div>
+        <p class="info-text">Automatic cloud sync is currently enabled for your account.</p>
+        <button mat-stroked-button color="warn" disabled>
+          <mat-icon>delete_forever</mat-icon>
+          Reset All Data
+        </button>
+      </div>
     </div>
   `,
   styles: [`
     .settings-container {
-      padding: 24px;
-      max-width: 800px;
-    }
-
-    h1 {
-      margin: 0 0 24px 0;
-      font-size: 32px;
-      font-weight: 400;
-    }
-
-    mat-card {
-      margin-bottom: 24px;
-    }
-
-    mat-card-content {
-      padding-top: 20px;
-    }
-
-    form {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: var(--spacing-xxl);
+      max-width: 900px;
     }
 
-    mat-form-field {
-      width: 100%;
+    .page-header h1 {
+      font-size: 2.5rem;
+      margin: 0;
+      color: var(--color-primary);
     }
 
-    mat-card-actions {
-      padding: 16px 24px;
+    .section-header {
+      margin-bottom: var(--spacing-xl);
+
+      h2 {
+        font-size: 1.25rem;
+        margin: 0 0 4px 0;
+        font-family: 'Fraunces', serif;
+      }
+
+      .section-description {
+        margin: 0;
+        font-size: 0.875rem;
+        color: var(--color-text-muted);
+      }
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--spacing-lg);
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      padding-top: var(--spacing-lg);
+      border-top: 1px solid var(--color-divider);
+
+      button {
+        padding: 0 var(--spacing-xl);
+      }
+    }
+
+    .danger-zone {
+      border-left: 4px solid var(--color-warn);
+      
+      .info-text {
+        font-size: 0.875rem;
+        color: var(--color-text-main);
+        margin-bottom: var(--spacing-lg);
+      }
+    }
+
+    .skeleton-form {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+
+      .skeleton-line {
+        height: 56px;
+        background: var(--color-border);
+        border-radius: var(--radius-sm);
+        animation: pulse 1.5s infinite ease-in-out;
+      }
+    }
+
+    @keyframes pulse {
+      0% { opacity: 0.6; }
+      50% { opacity: 0.3; }
+      100% { opacity: 0.6; }
     }
   `]
 })

@@ -7,14 +7,14 @@ Working tree: dirty
 ## When to Read This
 Use this file for deep dive context: feature inventory, file references, known issues, architecture notes, and backlog.
 
-## Phase 6: Frontend Redesign (In Progress)
+## Phase 6: Frontend Redesign (Complete)
 - [x] **WI-P6-001**: Established new visual system with CSS tokens, warm light-forward theme, and Fraunces/Manrope typography.
 - [x] **WI-P6-002**: Redesigned app shell (top bar, navigation, layout spacing).
 - [x] **WI-P6-003**: Redesigned Dashboard page with hero band, metrics grid, and refined transaction list.
 - [x] **WI-P6-004**: Redesigned Accounts page with type-grouped cards and balance emphasis.
 - [x] **WI-P6-005**: Redesigned Transactions page with sidebar form and status-categorized rows.
 - [x] **WI-P6-006**: Redesigned Projections page with logical flow, insights grid, and standardized charts.
-- [ ] **WI-P6-007**: Calendar and settings redesign (Next)
+- [x] **WI-P6-007**: Redesigned Calendar and Settings pages for visual consistency and polished UX.
 - [ ] **WI-P6-005**: Transactions redesign
 - [ ] **WI-P6-006**: Projections redesign
 - [ ] **WI-P6-007**: Calendar and settings redesign

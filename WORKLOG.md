@@ -4,6 +4,31 @@ Last updated: 2025-12-25
 
 Append-only. Add new entries at the top.
 
+## 2025-12-25 (WI-P6-007: Calendar and Settings Redesign)
+- Agent: Interactive CLI Agent
+- Status: Completed
+- Branch: wi/p6-007-calendar-settings-redesign
+- Commit: pending
+- Scope: Phase 6 - Redesign of the calendar and settings pages
+- Changes:
+  - **Calendar (`calendar.component.html/scss`)**:
+    - Aligned with the new `app-card` visual system.
+    - Redesigned the calendar header with better month labels and controls.
+    - Revamped the grid with subtle borders and consistent spacing.
+    - Updated event badges (Paycheck, Debt Payment) with icon+text and better contrast.
+    - Improved responsiveness: hides text on mobile to maintain grid structure.
+  - **Settings (`settings.ts`)**:
+    - Converted inline styles and template to use the new visual tokens.
+    - Implemented a cleaner card-based layout with section descriptions.
+    - Organized form fields into a responsive grid.
+    - Redesigned the "Danger Zone" with a clear visual warning indicator.
+- Tests: Build successful. Final visual audit of all redesigned pages completed.
+- Decisions:
+  - Using icons in calendar badges allows for high information density while maintaining readability on smaller screens.
+  - Grouping settings fields into a grid improves the scannability of the configuration page.
+- Next steps:
+  - Phase 6 is complete. Review ROADMAP for future feature additions.
+
 ## 2025-12-25 (WI-P6-006: Projections Redesign)
 - Agent: Interactive CLI Agent
 - Status: Completed
