@@ -4,6 +4,12 @@ import { Observable } from 'rxjs';
 import {
   Account,
   CreateAccountRequest,
+  Category,
+  CreateCategoryRequest,
+  UpdateCategoryRequest,
+  Budget,
+  CreateBudgetRequest,
+  UpdateBudgetRequest,
   FinancialEvent,
   CreateEventRequest,
   UpdateEventRequest,
@@ -57,11 +63,54 @@ export class ApiService {
     return this.http.get<{ accountId: number; balance: number }>(`${this.baseUrl}/accounts/${id}/balance`);
   }
 
+  // Category endpoints
+  getCategories(activeOnly: boolean = true): Observable<Category[]> {
+    return this.http.get<Category[]>(`${this.baseUrl}/categories`, { params: { activeOnly } });
+  }
+
+  getCategory(id: number): Observable<Category> {
+    return this.http.get<Category>(`${this.baseUrl}/categories/${id}`);
+  }
+
+  createCategory(request: CreateCategoryRequest): Observable<Category> {
+    return this.http.post<Category>(`${this.baseUrl}/categories`, request);
+  }
+
+  updateCategory(id: number, request: UpdateCategoryRequest): Observable<Category> {
+    return this.http.put<Category>(`${this.baseUrl}/categories/${id}`, request);
+  }
+
+  deleteCategory(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/categories/${id}`);
+  }
+
+  // Budget endpoints
+  getBudgets(params?: { activeOnly?: boolean; categoryId?: number }): Observable<Budget[]> {
+    return this.http.get<Budget[]>(`${this.baseUrl}/budgets`, { params: params as any });
+  }
+
+  getBudget(id: number): Observable<Budget> {
+    return this.http.get<Budget>(`${this.baseUrl}/budgets/${id}`);
+  }
+
+  createBudget(request: CreateBudgetRequest): Observable<Budget> {
+    return this.http.post<Budget>(`${this.baseUrl}/budgets`, request);
+  }
+
+  updateBudget(id: number, request: UpdateBudgetRequest): Observable<Budget> {
+    return this.http.put<Budget>(`${this.baseUrl}/budgets/${id}`, request);
+  }
+
+  deleteBudget(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/budgets/${id}`);
+  }
+
   // Event endpoints
   getEvents(params?: {
     accountId?: number;
     type?: string;
     status?: EventStatus;
+    categoryId?: number;
     startDate?: string;
     endDate?: string;
     limit?: number;

@@ -1,0 +1,241 @@
+.budgets-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 32px;
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .header-title {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 500;
+  }
+
+  .total-budget {
+    font-size: 16px;
+    color: var(--text-secondary, #666);
+  }
+}
+
+.budget-group {
+  margin-bottom: 32px;
+
+  .group-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+
+    h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .count {
+      background: var(--surface-variant, #e0e0e0);
+      color: var(--text-secondary, #666);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+  }
+}
+
+.budget-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.budget-card {
+  padding: 20px;
+  transition: opacity 0.2s ease;
+
+  &.inactive {
+    opacity: 0.6;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+
+  .category-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .category-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      color: white;
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  .category-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .category-name {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .frequency {
+    font-size: 13px;
+    color: var(--text-secondary, #666);
+  }
+
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .amount-container {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+
+  .amount {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text-primary, #1a1a1a);
+  }
+
+  .frequency-label {
+    font-size: 14px;
+    color: var(--text-secondary, #666);
+  }
+
+  .monthly-equivalent {
+    font-size: 13px;
+    color: var(--text-secondary, #666);
+  }
+
+  .notes {
+    font-size: 13px;
+    color: var(--text-secondary, #666);
+    font-style: italic;
+    margin-top: 4px;
+  }
+
+  .inactive-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 6px 12px;
+    background: var(--surface-variant, #f5f5f5);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-secondary, #666);
+    width: fit-content;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 32px;
+  text-align: center;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: var(--text-disabled, #bbb);
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    margin: 0 0 8px;
+    font-size: 20px;
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0 0 24px;
+    color: var(--text-secondary, #666);
+  }
+}
+
+// Skeleton loading styles
+.skeleton-container {
+  .skeleton-section {
+    margin-bottom: 32px;
+  }
+
+  .skeleton-header {
+    height: 24px;
+    width: 180px;
+    background: var(--skeleton-bg, #e0e0e0);
+    border-radius: 4px;
+    margin-bottom: 16px;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  .skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .skeleton-card {
+    height: 160px;
+    background: var(--skeleton-bg, #e0e0e0);
+    border-radius: 12px;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

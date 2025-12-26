@@ -32,6 +32,76 @@ export interface CreateAccountRequest {
   paymentDueDateOverride?: string;
 }
 
+// Category models
+export type CategoryType = 'Recurring' | 'OneTime';
+
+export interface Category {
+  id: number;
+  name: string;
+  type: CategoryType;
+  icon?: string;
+  color?: string;
+  sortOrder: number;
+  isActive: boolean;
+}
+
+export interface CreateCategoryRequest {
+  name: string;
+  type: string;
+  icon?: string;
+  color?: string;
+  sortOrder?: number;
+}
+
+export interface UpdateCategoryRequest {
+  name?: string;
+  type?: string;
+  icon?: string;
+  color?: string;
+  sortOrder?: number;
+  isActive?: boolean;
+}
+
+// Budget models
+export type BudgetFrequency = 'Monthly' | 'BiWeekly' | 'Weekly';
+
+export interface Budget {
+  id: number;
+  categoryId: number;
+  categoryName: string;
+  amount: number;
+  frequency: BudgetFrequency;
+  effectiveDate: string;
+  endDate?: string;
+  linkedAccountId?: number;
+  linkedAccountName?: string;
+  notes?: string;
+  isActive: boolean;
+}
+
+export interface CreateBudgetRequest {
+  categoryId: number;
+  amount: number;
+  frequency: string;
+  effectiveDate: string;
+  endDate?: string;
+  linkedAccountId?: number;
+  notes?: string;
+}
+
+export interface UpdateBudgetRequest {
+  categoryId?: number;
+  amount?: number;
+  frequency?: string;
+  effectiveDate?: string;
+  endDate?: string;
+  clearEndDate?: boolean;
+  linkedAccountId?: number;
+  clearLinkedAccount?: boolean;
+  notes?: string;
+  isActive?: boolean;
+}
+
 // Event models
 export type EventStatus = 'Pending' | 'Cleared';
 
@@ -43,6 +113,8 @@ export interface FinancialEvent {
   description: string;
   accountId?: number;
   targetAccountId?: number;
+  categoryId?: number;
+  categoryName?: string;
   status: EventStatus;
 }
 
@@ -53,6 +125,7 @@ export interface CreateEventRequest {
   description?: string;
   accountId?: number;
   targetAccountId?: number;
+  categoryId?: number;
 }
 
 export interface UpdateEventRequest {
@@ -62,6 +135,8 @@ export interface UpdateEventRequest {
   description?: string;
   accountId?: number;
   targetAccountId?: number;
+  categoryId?: number;
+  clearCategory?: boolean;
 }
 
 export interface UpdateStatusRequest {

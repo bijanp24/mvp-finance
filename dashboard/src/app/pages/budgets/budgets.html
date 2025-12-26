@@ -1,0 +1,126 @@
+<div class="budgets-container">
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1>Budgets</h1>
+        @if (budgets().length > 0) {
+          <span class="total-budget">{{ formatCurrency(totalMonthlyBudget()) }}/month</span>
+        }
+      </div>
+      <button mat-flat-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon>
+        Add Budget
+      </button>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="skeleton-container" aria-busy="true">
+      <div class="skeleton-section">
+        <div class="skeleton-header"></div>
+        <div class="skeleton-grid">
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        </div>
+      </div>
+    </div>
+  } @else if (budgets().length === 0) {
+    <div class="app-card empty-state">
+      <mat-icon>account_balance</mat-icon>
+      <h2>No budgets set</h2>
+      <p>Create budgets to track your spending by category.</p>
+      <button mat-flat-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon>
+        Create Budget
+      </button>
+    </div>
+  } @else {
+    <!-- Recurring Expenses -->
+    @if (recurringBudgets().length > 0) {
+      <section class="budget-group">
+        <div class="group-header">
+          <h2>Recurring Expenses</h2>
+          <span class="count">{{ recurringBudgets().length }}</span>
+        </div>
+        <div class="budget-grid">
+          @for (budget of recurringBudgets(); track budget.id) {
+            <ng-container *ngTemplateOutlet="budgetCard; context: { $implicit: budget }"></ng-container>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Discretionary Spending -->
+    @if (oneTimeBudgets().length > 0) {
+      <section class="budget-group">
+        <div class="group-header">
+          <h2>Discretionary Spending</h2>
+          <span class="count">{{ oneTimeBudgets().length }}</span>
+        </div>
+        <div class="budget-grid">
+          @for (budget of oneTimeBudgets(); track budget.id) {
+            <ng-container *ngTemplateOutlet="budgetCard; context: { $implicit: budget }"></ng-container>
+          }
+        </div>
+      </section>
+    }
+  }
+</div>
+
+<!-- Reusable Budget Card Template -->
+<ng-template #budgetCard let-budget>
+  <div class="app-card budget-card" [class.inactive]="!budget.isActive">
+    <div class="card-header">
+      <div class="category-info">
+        <div class="category-icon" [style.background-color]="getCategoryColor(budget.categoryId)">
+          <mat-icon>{{ getCategoryIcon(budget.categoryId) }}</mat-icon>
+        </div>
+        <div class="category-text">
+          <h3 class="category-name">{{ budget.categoryName }}</h3>
+          <span class="frequency">{{ budget.frequency }}</span>
+        </div>
+      </div>
+      <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Budget actions">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="openEditDialog(budget)">
+          <mat-icon>edit</mat-icon>
+          <span>Edit</span>
+        </button>
+        <button mat-menu-item (click)="toggleBudgetActive(budget)">
+          <mat-icon>{{ budget.isActive ? 'pause' : 'play_arrow' }}</mat-icon>
+          <span>{{ budget.isActive ? 'Deactivate' : 'Activate' }}</span>
+        </button>
+        <button mat-menu-item (click)="deleteBudget(budget)">
+          <mat-icon>delete</mat-icon>
+          <span>Delete</span>
+        </button>
+      </mat-menu>
+    </div>
+
+    <div class="card-body">
+      <div class="amount-container">
+        <span class="amount">{{ formatCurrency(budget.amount) }}</span>
+        <span class="frequency-label">{{ formatFrequency(budget.frequency) }}</span>
+      </div>
+
+      @if (budget.frequency !== 'Monthly') {
+        <div class="monthly-equivalent">
+          ~{{ formatCurrency(getMonthlyAmount(budget)) }}/month
+        </div>
+      }
+
+      @if (budget.notes) {
+        <div class="notes">{{ budget.notes }}</div>
+      }
+
+      @if (!budget.isActive) {
+        <div class="inactive-badge">
+          <mat-icon>pause_circle</mat-icon>
+          Inactive
+        </div>
+      }
+    </div>
+  </div>
+</ng-template>
