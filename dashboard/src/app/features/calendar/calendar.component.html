@@ -64,6 +64,15 @@
                     <span class="event-text">{{ payment.accountName }}</span>
                   </div>
                 }
+
+                <!-- Budget expense indicators -->
+                @for (budget of day.budgets; track budget.categoryName) {
+                  <div class="calendar-event budget-expense"
+                       [matTooltip]="budget.categoryName + ': ' + formatCurrency(budget.amount) + ' (' + budget.frequency + ')'">
+                    <mat-icon>receipt</mat-icon>
+                    <span class="event-text">{{ budget.categoryName }}</span>
+                  </div>
+                }
               </div>
             </div>
           }

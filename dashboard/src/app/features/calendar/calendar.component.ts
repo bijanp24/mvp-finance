@@ -7,7 +7,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { forkJoin } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { CalendarService } from '../../core/services/calendar.service';
-import { UserSettings, Account, RecurringContribution } from '../../core/models/api.models';
+import { UserSettings, Account, RecurringContribution, Budget } from '../../core/models/api.models';
 
 @Component({
   selector: 'app-calendar',
@@ -32,12 +32,14 @@ export class CalendarComponent {
   readonly settings = signal<UserSettings | null>(null);
   readonly accounts = signal<Account[]>([]);
   readonly contributions = signal<RecurringContribution[]>([]);
+  readonly budgets = signal<Budget[]>([]);
 
   // Computed calendar grid
   readonly calendarGrid = computed(() => {
     const settings = this.settings();
     const accounts = this.accounts();
     const contributions = this.contributions();
+    const budgets = this.budgets();
     if (!settings || !accounts) return [];
 
     return this.calendarService.generateCalendarGrid(
@@ -45,7 +47,8 @@ export class CalendarComponent {
       this.currentYear(),
       settings,
       accounts,
-      contributions
+      contributions,
+      budgets
     );
   });
 
@@ -63,11 +66,13 @@ export class CalendarComponent {
     forkJoin({
       settings: this.apiService.getSettings(),
       accounts: this.apiService.getAccounts(),
-      contributions: this.apiService.getRecurringContributions()
-    }).subscribe(({ settings, accounts, contributions }) => {
+      contributions: this.apiService.getRecurringContributions(),
+      budgets: this.apiService.getBudgets()
+    }).subscribe(({ settings, accounts, contributions, budgets }) => {
       this.settings.set(settings);
       this.accounts.set(accounts);
       this.contributions.set(contributions);
+      this.budgets.set(budgets);
     });
   }
 

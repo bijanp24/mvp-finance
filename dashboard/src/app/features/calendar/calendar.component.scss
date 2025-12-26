@@ -151,6 +151,11 @@
     color: var(--color-warn);
   }
 
+  &.budget-expense {
+    background: rgba(140, 106, 93, 0.1);
+    color: var(--color-accent);
+  }
+
   .event-text {
     overflow: hidden;
     text-overflow: ellipsis;

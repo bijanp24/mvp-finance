@@ -1,11 +1,19 @@
 import { Injectable } from '@angular/core';
-import { Account, UserSettings, RecurringContribution } from '../models/api.models';
+import { Account, UserSettings, RecurringContribution, Budget } from '../models/api.models';
 
 export interface ContributionEvent {
   date: Date;
   name: string;
   amount: number;
   targetAccountName?: string;
+}
+
+export interface BudgetEvent {
+  date: Date;
+  categoryName: string;
+  amount: number;
+  frequency: string;
+  color?: string;
 }
 
 export interface CalendarDay {
@@ -17,6 +25,7 @@ export interface CalendarDay {
     minimumPayment: number;
   }>;
   contributions: ContributionEvent[];
+  budgets: BudgetEvent[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -27,7 +36,8 @@ export class CalendarService {
     year: number,
     settings: UserSettings,
     accounts: Account[],
-    contributions: RecurringContribution[] = []
+    contributions: RecurringContribution[] = [],
+    budgets: Budget[] = []
   ): CalendarDay[][] {
     // Create calendar grid for the month
     const firstDay = new Date(year, month, 1);
@@ -57,6 +67,13 @@ export class CalendarService {
       year
     );
 
+    // Calculate budget expense dates for this month
+    const budgetEvents = this.calculateBudgetDates(
+      budgets.filter(b => b.isActive),
+      month,
+      year
+    );
+
     // Build calendar grid (6 weeks max)
     for (let week = 0; week < 6; week++) {
       currentWeek = [];
@@ -81,12 +98,17 @@ export class CalendarService {
         const dayContributions = contributionEvents
           .filter(ce => this.isSameDay(ce.date, currentDate));
 
+        // Find budget expenses for this date
+        const dayBudgets = budgetEvents
+          .filter(be => this.isSameDay(be.date, currentDate));
+
         currentWeek.push({
           date: new Date(currentDate),
           isCurrentMonth,
           paychecks: dayPaychecks,
           debtPayments: dayDebtPayments,
-          contributions: dayContributions
+          contributions: dayContributions,
+          budgets: dayBudgets
         });
 
         startDate.setDate(startDate.getDate() + 1);
@@ -206,6 +228,57 @@ export class CalendarService {
         lastDayOfMonth
       );
       events.push(...occurrences);
+    }
+
+    return events;
+  }
+
+  calculateBudgetDates(
+    budgets: Budget[],
+    month: number,
+    year: number
+  ): BudgetEvent[] {
+    const events: BudgetEvent[] = [];
+    const firstDayOfMonth = new Date(year, month, 1);
+    const lastDayOfMonth = new Date(year, month + 1, 0);
+
+    for (const budget of budgets) {
+      const occurrences = this.expandBudgetSchedule(
+        budget,
+        firstDayOfMonth,
+        lastDayOfMonth
+      );
+      events.push(...occurrences);
+    }
+
+    return events;
+  }
+
+  private expandBudgetSchedule(
+    budget: Budget,
+    startDate: Date,
+    endDate: Date
+  ): BudgetEvent[] {
+    const events: BudgetEvent[] = [];
+    const frequencyDays = this.getFrequencyDays(budget.frequency);
+    let current = new Date(budget.effectiveDate);
+
+    // Start from the first occurrence on or after startDate
+    while (current < startDate) {
+      current = this.addDaysToDate(current, frequencyDays);
+    }
+
+    // Collect all occurrences within the date range
+    while (current <= endDate) {
+      if (current >= startDate) {
+        events.push({
+          date: new Date(current),
+          categoryName: budget.categoryName,
+          amount: budget.amount,
+          frequency: budget.frequency
+        });
+      }
+      current = this.addDaysToDate(current, frequencyDays);
     }
 
     return events;
