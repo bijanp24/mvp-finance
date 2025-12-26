@@ -14,7 +14,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { ApiService } from '../../core/services/api.service';
-import { Account, FinancialEvent, CreateEventRequest, EventStatus } from '../../core/models/api.models';
+import { Account, FinancialEvent, CreateEventRequest, EventStatus, Category } from '../../core/models/api.models';
 
 @Component({
   selector: 'app-transactions',
@@ -44,6 +44,7 @@ export class TransactionsPage {
   private readonly snackBar = inject(MatSnackBar);
 
   readonly accounts = signal<Account[]>([]);
+  readonly categories = signal<Category[]>([]);
   readonly recentEvents = signal<FinancialEvent[]>([]);
   readonly loading = signal(false);
   readonly saving = signal(false);
@@ -102,7 +103,8 @@ export class TransactionsPage {
       date: [new Date(), Validators.required],
       description: [''],
       accountId: [null],
-      targetAccountId: [null]
+      targetAccountId: [null],
+      categoryId: [null]
     });
 
     // Watch type changes to update validation and signals
@@ -145,6 +147,15 @@ export class TransactionsPage {
       }
     });
 
+    this.apiService.getCategories().subscribe({
+      next: (categories) => {
+        this.categories.set(categories);
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+      }
+    });
+
     this.apiService.getRecentEvents(30).subscribe({
       next: (events) => {
         this.recentEvents.set(events);
@@ -167,7 +178,8 @@ export class TransactionsPage {
       amount: null,
       description: '',
       accountId: null,
-      targetAccountId: null
+      targetAccountId: null,
+      categoryId: null
     });
   }
 
@@ -180,7 +192,8 @@ export class TransactionsPage {
       date: new Date(event.date),
       description: event.description || '',
       accountId: event.accountId,
-      targetAccountId: event.targetAccountId
+      targetAccountId: event.targetAccountId,
+      categoryId: event.categoryId || null
     });
 
     // Scroll to form
@@ -201,7 +214,8 @@ export class TransactionsPage {
         date: this.formatDate(formValue.date),
         description: formValue.description || '',
         accountId: formValue.accountId,
-        targetAccountId: formValue.targetAccountId
+        targetAccountId: formValue.targetAccountId,
+        categoryId: formValue.categoryId || undefined
       };
 
       const apiCall = editingId 
@@ -245,6 +259,18 @@ export class TransactionsPage {
     if (!accountId) return '-';
     const account = this.accounts().find(a => a.id === accountId);
     return account?.name || '-';
+  }
+
+  getCategoryName(categoryId: number | undefined): string | undefined {
+    if (!categoryId) return undefined;
+    const category = this.categories().find(c => c.id === categoryId);
+    return category?.name;
+  }
+
+  getCategoryColor(categoryId: number | undefined): string {
+    if (!categoryId) return '#757575';
+    const category = this.categories().find(c => c.id === categoryId);
+    return category?.color || '#757575';
   }
 
   getEventTypeColor(type: string): string {

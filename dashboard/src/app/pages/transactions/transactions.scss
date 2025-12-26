@@ -181,16 +181,27 @@ form {
       flex: 1;
       display: flex;
       flex-direction: column;
+      gap: 2px;
 
       .description { font-weight: 600; color: var(--color-text-main); }
-      .account { 
-        font-size: 0.75rem; 
+      .account {
+        font-size: 0.75rem;
         color: var(--color-text-muted);
         display: flex;
         align-items: center;
         gap: 4px;
 
         .arrow { font-size: 12px; width: 12px; height: 12px; }
+      }
+      .category-tag {
+        display: inline-block;
+        width: fit-content;
+        font-size: 0.625rem;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: var(--radius-full);
+        color: white;
+        text-transform: uppercase;
       }
     }
 

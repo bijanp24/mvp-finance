@@ -72,6 +72,21 @@
             }
           </div>
 
+          <!-- Category (for Expense type) -->
+          @if (transactionForm.get('type')?.value === 'Expense' && categories().length > 0) {
+            <mat-form-field appearance="outline">
+              <mat-label>Category (optional)</mat-label>
+              <mat-select formControlName="categoryId">
+                <mat-option [value]="null">No category</mat-option>
+                @for (category of categories(); track category.id) {
+                  <mat-option [value]="category.id">
+                    {{ category.name }}
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          }
+
           <!-- Description -->
           <mat-form-field appearance="outline">
             <mat-label>Description / Notes</mat-label>
@@ -138,6 +153,11 @@
                       {{ getAccountName(event.targetAccountId) }}
                     }
                   </span>
+                  @if (event.categoryId && getCategoryName(event.categoryId)) {
+                    <span class="category-tag" [style.background-color]="getCategoryColor(event.categoryId)">
+                      {{ getCategoryName(event.categoryId) }}
+                    </span>
+                  }
                 </div>
 
                 <div class="transaction-meta">
