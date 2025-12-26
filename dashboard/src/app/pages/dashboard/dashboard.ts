@@ -9,7 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { ApiService } from '../../core/services/api.service';
 import { ProjectionService } from '../../core/services/projection.service';
-import { Account, FinancialEvent, SpendableRequest, SpendableResult, UserSettings } from '../../core/models/api.models';
+import { Account, FinancialEvent, SpendableRequest, SpendableResult, UserSettings, Budget, Category } from '../../core/models/api.models';
 import { CalendarComponent } from '../../features/calendar/calendar.component';
 import { DebtProjectionChartComponent } from '../../features/charts/debt-projection-chart.component';
 import { InvestmentProjectionChartComponent } from '../../features/charts/investment-projection-chart.component';
@@ -42,6 +42,9 @@ export class DashboardPage {
   readonly recentEvents = signal<FinancialEvent[]>([]);
   readonly spendableResult = signal<SpendableResult | null>(null);
   readonly settings = signal<UserSettings | null>(null);
+  readonly budgets = signal<Budget[]>([]);
+  readonly categories = signal<Category[]>([]);
+  readonly monthlyEvents = signal<FinancialEvent[]>([]);
   readonly loading = signal(true);
 
   // Projection chart data
@@ -71,6 +74,61 @@ export class DashboardPage {
     return (this.totalCash() + this.totalInvestments()) - this.totalDebt();
   });
 
+  // Budget vs Actual computed data
+  readonly budgetSummary = computed(() => {
+    const budgets = this.budgets().filter(b => b.isActive);
+    const events = this.monthlyEvents();
+    const categories = this.categories();
+
+    // Group spending by category
+    const spendingByCategory = new Map<number, number>();
+    events.forEach(event => {
+      if (event.categoryId && event.type === 'Expense') {
+        const current = spendingByCategory.get(event.categoryId) || 0;
+        spendingByCategory.set(event.categoryId, current + event.amount);
+      }
+    });
+
+    // Calculate budget vs actual for each budget
+    const items = budgets.map(budget => {
+      const spent = spendingByCategory.get(budget.categoryId) || 0;
+      const monthlyBudget = this.getMonthlyBudgetAmount(budget);
+      const percentage = monthlyBudget > 0 ? Math.min((spent / monthlyBudget) * 100, 100) : 0;
+      const category = categories.find(c => c.id === budget.categoryId);
+
+      return {
+        categoryId: budget.categoryId,
+        categoryName: budget.categoryName,
+        categoryColor: category?.color || '#757575',
+        budgetAmount: monthlyBudget,
+        spentAmount: spent,
+        remaining: monthlyBudget - spent,
+        percentage,
+        isOverBudget: spent > monthlyBudget
+      };
+    });
+
+    // Calculate totals
+    const totalBudget = items.reduce((sum, item) => sum + item.budgetAmount, 0);
+    const totalSpent = items.reduce((sum, item) => sum + item.spentAmount, 0);
+
+    return {
+      items: items.sort((a, b) => b.percentage - a.percentage).slice(0, 5),
+      totalBudget,
+      totalSpent,
+      totalPercentage: totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0
+    };
+  });
+
+  private getMonthlyBudgetAmount(budget: Budget): number {
+    switch (budget.frequency) {
+      case 'Weekly': return budget.amount * 4.33;
+      case 'BiWeekly': return budget.amount * 2.17;
+      case 'Monthly': return budget.amount;
+      default: return budget.amount;
+    }
+  }
+
   constructor() {
     this.loadDashboardData();
   }
@@ -78,15 +136,28 @@ export class DashboardPage {
   loadDashboardData(): void {
     this.loading.set(true);
 
+    // Calculate current month date range
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const startDate = startOfMonth.toISOString().split('T')[0];
+    const endDate = endOfMonth.toISOString().split('T')[0];
+
     forkJoin({
       accounts: this.apiService.getAccounts(),
       events: this.apiService.getRecentEvents(10),
-      settings: this.apiService.getSettings()
+      settings: this.apiService.getSettings(),
+      budgets: this.apiService.getBudgets(),
+      categories: this.apiService.getCategories(),
+      monthlyEvents: this.apiService.getEvents({ startDate, endDate })
     }).subscribe({
-      next: ({ accounts, events, settings }) => {
+      next: ({ accounts, events, settings, budgets, categories, monthlyEvents }) => {
         this.accounts.set(accounts);
         this.recentEvents.set(events);
         this.settings.set(settings);
+        this.budgets.set(budgets);
+        this.categories.set(categories);
+        this.monthlyEvents.set(monthlyEvents);
         this.calculateSpendable(accounts);
 
         // Calculate projections

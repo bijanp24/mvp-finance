@@ -78,6 +78,52 @@
       </div>
     </div>
 
+    <!-- Budget vs Actual Widget -->
+    @if (budgetSummary().items.length > 0) {
+      <section class="app-card budget-widget">
+        <div class="section-header">
+          <h2>Budget This Month</h2>
+          <a mat-button color="primary" routerLink="/budgets">Manage</a>
+        </div>
+
+        <div class="budget-summary">
+          <div class="budget-total">
+            <div class="total-spent">
+              <span class="label">Spent</span>
+              <span class="value">{{ formatCurrency(budgetSummary().totalSpent) }}</span>
+            </div>
+            <div class="total-budget">
+              <span class="label">of {{ formatCurrency(budgetSummary().totalBudget) }}</span>
+            </div>
+          </div>
+          <mat-progress-bar
+            mode="determinate"
+            [value]="budgetSummary().totalPercentage"
+            [color]="budgetSummary().totalPercentage > 100 ? 'warn' : 'primary'">
+          </mat-progress-bar>
+        </div>
+
+        <div class="budget-items">
+          @for (item of budgetSummary().items; track item.categoryId) {
+            <div class="budget-item" [class.over-budget]="item.isOverBudget">
+              <div class="item-header">
+                <span class="category-dot" [style.background-color]="item.categoryColor"></span>
+                <span class="category-name">{{ item.categoryName }}</span>
+                <span class="item-amount">
+                  {{ formatCurrency(item.spentAmount) }} / {{ formatCurrency(item.budgetAmount) }}
+                </span>
+              </div>
+              <mat-progress-bar
+                mode="determinate"
+                [value]="item.percentage"
+                [color]="item.isOverBudget ? 'warn' : 'accent'">
+              </mat-progress-bar>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
     <!-- Main Content Area -->
     <div class="dashboard-content">
       <!-- Recent Activity -->
