@@ -10,6 +10,7 @@ public class FinanceDbContext : DbContext
     }
 
     public DbSet<AccountEntity> Accounts => Set<AccountEntity>();
+    public DbSet<BudgetEntity> Budgets => Set<BudgetEntity>();
     public DbSet<CategoryEntity> Categories => Set<CategoryEntity>();
     public DbSet<FinancialEventEntity> Events => Set<FinancialEventEntity>();
     public DbSet<IncomeScheduleEntity> IncomeSchedules => Set<IncomeScheduleEntity>();
@@ -128,6 +129,27 @@ public class FinanceDbContext : DbContext
                 new CategoryEntity { Id = 14, Name = "Gifts & Donations", Type = CategoryType.OneTime, Icon = "card_giftcard", Color = "#F48FB1", SortOrder = 18, CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc), IsActive = true },
                 new CategoryEntity { Id = 15, Name = "Other", Type = CategoryType.OneTime, Icon = "more_horiz", Color = "#BDBDBD", SortOrder = 99, CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc), IsActive = true }
             );
+        });
+
+        // Budget configuration
+        modelBuilder.Entity<BudgetEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Amount).HasPrecision(18, 2);
+            entity.Property(e => e.Notes).HasMaxLength(500);
+            entity.HasIndex(e => e.CategoryId);
+            entity.HasIndex(e => e.IsActive);
+            entity.HasIndex(e => e.EffectiveDate);
+
+            entity.HasOne(e => e.Category)
+                .WithMany()
+                .HasForeignKey(e => e.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.LinkedAccount)
+                .WithMany()
+                .HasForeignKey(e => e.LinkedAccountId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 }
