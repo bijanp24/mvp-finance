@@ -56,6 +56,13 @@ public class FinanceDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(e => e.TargetAccountId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasOne(e => e.Category)
+                .WithMany()
+                .HasForeignKey(e => e.CategoryId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            entity.HasIndex(e => e.CategoryId);
         });
 
         // IncomeSchedule configuration

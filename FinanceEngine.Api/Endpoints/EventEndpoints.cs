@@ -24,11 +24,12 @@ public static class EventEndpoints
         int? accountId = null,
         string? type = null,
         string? status = null,
+        int? categoryId = null,
         DateTime? startDate = null,
         DateTime? endDate = null,
         int limit = 100)
     {
-        var query = db.Events.AsQueryable();
+        var query = db.Events.Include(e => e.Category).AsQueryable();
 
         if (accountId.HasValue)
             query = query.Where(e => e.AccountId == accountId || e.TargetAccountId == accountId);
@@ -38,6 +39,9 @@ public static class EventEndpoints
 
         if (!string.IsNullOrEmpty(status) && Enum.TryParse<EventStatus>(status, true, out var eventStatus))
             query = query.Where(e => e.Status == eventStatus);
+
+        if (categoryId.HasValue)
+            query = query.Where(e => e.CategoryId == categoryId);
 
         if (startDate.HasValue)
             query = query.Where(e => e.Date >= startDate.Value);
@@ -57,6 +61,8 @@ public static class EventEndpoints
                 e.Description,
                 e.AccountId,
                 e.TargetAccountId,
+                e.CategoryId,
+                e.Category != null ? e.Category.Name : null,
                 e.Status.ToString()
             ))
             .ToListAsync();
@@ -66,7 +72,10 @@ public static class EventEndpoints
 
     private static async Task<IResult> GetEventById(int id, FinanceDbContext db)
     {
-        var evt = await db.Events.FindAsync(id);
+        var evt = await db.Events
+            .Include(e => e.Category)
+            .FirstOrDefaultAsync(e => e.Id == id);
+
         if (evt is null)
             return Results.NotFound();
 
@@ -78,6 +87,8 @@ public static class EventEndpoints
             evt.Description,
             evt.AccountId,
             evt.TargetAccountId,
+            evt.CategoryId,
+            evt.Category?.Name,
             evt.Status.ToString()
         ));
     }
@@ -88,6 +99,18 @@ public static class EventEndpoints
             return Results.BadRequest("Invalid event type");
 
         var description = request.Description ?? string.Empty;
+
+        // Validate category if provided
+        string? categoryName = null;
+        if (request.CategoryId.HasValue)
+        {
+            var category = await db.Categories.FindAsync(request.CategoryId.Value);
+            if (category is null)
+                return Results.BadRequest("Category not found");
+            if (!category.IsActive)
+                return Results.BadRequest("Cannot assign inactive category");
+            categoryName = category.Name;
+        }
 
         bool IsTransferType(EventType type) =>
             type == EventType.DebtPayment ||
@@ -106,7 +129,8 @@ public static class EventEndpoints
                 Amount = request.Amount,
                 Description = description,
                 AccountId = request.AccountId,
-                TargetAccountId = request.TargetAccountId
+                TargetAccountId = request.TargetAccountId,
+                CategoryId = request.CategoryId
             };
 
             var creditEvent = new FinancialEventEntity
@@ -116,7 +140,8 @@ public static class EventEndpoints
                 Amount = request.Amount,
                 Description = description,
                 AccountId = request.TargetAccountId,
-                TargetAccountId = request.AccountId
+                TargetAccountId = request.AccountId,
+                CategoryId = request.CategoryId
             };
 
             db.Events.AddRange(debitEvent, creditEvent);
@@ -130,6 +155,8 @@ public static class EventEndpoints
                 debitEvent.Description,
                 debitEvent.AccountId,
                 debitEvent.TargetAccountId,
+                debitEvent.CategoryId,
+                categoryName,
                 debitEvent.Status.ToString()
             ));
         }
@@ -153,7 +180,8 @@ public static class EventEndpoints
             Amount = request.Amount,
             Description = description,
             AccountId = accountId,
-            TargetAccountId = eventType == EventType.DebtCharge ? null : request.TargetAccountId
+            TargetAccountId = eventType == EventType.DebtCharge ? null : request.TargetAccountId,
+            CategoryId = request.CategoryId
         };
 
         db.Events.Add(evt);
@@ -167,13 +195,18 @@ public static class EventEndpoints
             evt.Description,
             evt.AccountId,
             evt.TargetAccountId,
+            evt.CategoryId,
+            categoryName,
             evt.Status.ToString()
         ));
     }
 
     private static async Task<IResult> UpdateEvent(int id, UpdateEventRequest request, FinanceDbContext db)
     {
-        var evt = await db.Events.FindAsync(id);
+        var evt = await db.Events
+            .Include(e => e.Category)
+            .FirstOrDefaultAsync(e => e.Id == id);
+
         if (evt is null)
             return Results.NotFound();
 
@@ -203,6 +236,23 @@ public static class EventEndpoints
 
         if (request.TargetAccountId.HasValue)
             evt.TargetAccountId = request.TargetAccountId;
+
+        // Handle category update
+        if (request.CategoryId.HasValue)
+        {
+            var category = await db.Categories.FindAsync(request.CategoryId.Value);
+            if (category is null)
+                return Results.BadRequest("Category not found");
+            if (!category.IsActive)
+                return Results.BadRequest("Cannot assign inactive category");
+            evt.CategoryId = request.CategoryId.Value;
+            evt.Category = category;
+        }
+        else if (request.ClearCategory == true)
+        {
+            evt.CategoryId = null;
+            evt.Category = null;
+        }
 
         // Validate based on event type
         bool IsTransferType(EventType type) =>
@@ -236,6 +286,8 @@ public static class EventEndpoints
             evt.Description,
             evt.AccountId,
             evt.TargetAccountId,
+            evt.CategoryId,
+            evt.Category?.Name,
             evt.Status.ToString()
         ));
     }
@@ -254,7 +306,10 @@ public static class EventEndpoints
 
     private static async Task<IResult> UpdateEventStatus(int id, UpdateStatusRequest request, FinanceDbContext db)
     {
-        var evt = await db.Events.FindAsync(id);
+        var evt = await db.Events
+            .Include(e => e.Category)
+            .FirstOrDefaultAsync(e => e.Id == id);
+
         if (evt is null)
             return Results.NotFound();
 
@@ -272,6 +327,8 @@ public static class EventEndpoints
             evt.Description,
             evt.AccountId,
             evt.TargetAccountId,
+            evt.CategoryId,
+            evt.Category?.Name,
             evt.Status.ToString()
         ));
     }
@@ -281,6 +338,7 @@ public static class EventEndpoints
         var startDate = DateTime.UtcNow.AddDays(-days);
 
         var events = await db.Events
+            .Include(e => e.Category)
             .Where(e => e.Date >= startDate)
             .OrderByDescending(e => e.Date)
             .Select(e => new EventDto(
@@ -291,6 +349,8 @@ public static class EventEndpoints
                 e.Description,
                 e.AccountId,
                 e.TargetAccountId,
+                e.CategoryId,
+                e.Category != null ? e.Category.Name : null,
                 e.Status.ToString()
             ))
             .ToListAsync();
@@ -308,6 +368,8 @@ public record EventDto(
     string Description,
     int? AccountId,
     int? TargetAccountId,
+    int? CategoryId,
+    string? CategoryName,
     string Status
 );
 
@@ -319,7 +381,8 @@ public record CreateEventRequest(
     decimal Amount,
     string? Description = null,
     int? AccountId = null,
-    int? TargetAccountId = null
+    int? TargetAccountId = null,
+    int? CategoryId = null
 );
 
 public record UpdateEventRequest(
@@ -328,5 +391,7 @@ public record UpdateEventRequest(
     decimal? Amount = null,
     string? Description = null,
     int? AccountId = null,
-    int? TargetAccountId = null
+    int? TargetAccountId = null,
+    int? CategoryId = null,
+    bool? ClearCategory = null
 );

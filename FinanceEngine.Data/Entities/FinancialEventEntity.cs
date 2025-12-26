@@ -26,10 +26,12 @@ public class FinancialEventEntity
     public string Description { get; set; } = string.Empty;
     public int? AccountId { get; set; }
     public int? TargetAccountId { get; set; }  // For transfers (e.g., DebtPayment from Cash to Debt)
+    public int? CategoryId { get; set; }       // Optional category for expense tracking
     public EventStatus Status { get; set; } = EventStatus.Cleared;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation
     public AccountEntity? Account { get; set; }
     public AccountEntity? TargetAccount { get; set; }
+    public CategoryEntity? Category { get; set; }
 }
