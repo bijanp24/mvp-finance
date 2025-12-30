@@ -82,7 +82,7 @@
       <!-- Crossover Milestone -->
       @if (crossoverDate()) {
         <div class="app-card insight-card crossover">
-          <span class="label">Crossover Date 🎯</span>
+          <span class="label">Crossover Date</span>
           <h3 class="value">{{ formatDate(crossoverDate()!) }}</h3>
           <span class="subtext">Returns will exceed interest costs</span>
         </div>
@@ -118,6 +118,61 @@
       }
     </div>
   </section>
+
+  <!-- Step 2b: Goals Milestones -->
+  @if (upcomingGoals().length > 0) {
+    <section class="goals-section">
+      <div class="app-card">
+        <div class="section-header">
+          <h2>Goal Milestones in Timeframe</h2>
+          <div class="goals-status">
+            @if (goalsOnTrack() > 0) {
+              <span class="on-track">
+                <mat-icon>check_circle</mat-icon>
+                {{ goalsOnTrack() }} on track
+              </span>
+            }
+            @if (goalsAtRisk() > 0) {
+              <span class="at-risk">
+                <mat-icon>warning</mat-icon>
+                {{ goalsAtRisk() }} at risk
+              </span>
+            }
+          </div>
+          <a routerLink="/goals" class="view-all">View All Goals</a>
+        </div>
+        <div class="goals-timeline">
+          @for (goal of upcomingGoals(); track goal.id) {
+            <div class="goal-milestone">
+              <div class="milestone-marker" [style.background-color]="getGoalStatusColor(goal.progress.status)">
+                <mat-icon>{{ getGoalIcon(goal.type) }}</mat-icon>
+              </div>
+              <div class="milestone-content">
+                <div class="milestone-header">
+                  <span class="goal-name">{{ goal.name }}</span>
+                  <span class="goal-date">{{ formatDate(goal.targetDate) }}</span>
+                </div>
+                <div class="milestone-progress">
+                  <mat-progress-bar
+                    mode="determinate"
+                    [value]="goal.progress.progressPercentage"
+                    [class]="'progress-' + goal.progress.status.toLowerCase()">
+                  </mat-progress-bar>
+                  <div class="progress-info">
+                    <span>{{ formatCurrency(goal.progress.currentValue) }} of {{ formatCurrency(goal.progress.targetValue) }}</span>
+                    <span class="status" [style.color]="getGoalStatusColor(goal.progress.status)">
+                      {{ goal.progress.progressPercentage | number:'1.0-0' }}% - {{ goal.progress.status }}
+                    </span>
+                  </div>
+                </div>
+                <span class="time-remaining">{{ getMonthsUntilGoal(goal.targetDate) }} months remaining</span>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+  }
 
   <!-- Step 3: Detailed Charts -->
   <section class="charts-section">

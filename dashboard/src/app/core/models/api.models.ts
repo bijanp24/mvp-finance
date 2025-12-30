@@ -345,6 +345,67 @@ export interface UpdateRecurringContributionRequest {
   isActive: boolean;
 }
 
+// Goal models
+export type GoalType = 'DebtFree' | 'InvestmentTarget' | 'SavingsGoal' | 'NetWorthMilestone';
+export type GoalStatus = 'OnTrack' | 'Ahead' | 'AtRisk' | 'Behind';
+
+export interface GoalProgressSummary {
+  currentValue: number;
+  targetValue: number;
+  progressPercentage: number;
+  status: GoalStatus;
+  monthsRemaining: number;
+  statusMessage: string;
+}
+
+export interface Goal {
+  id: number;
+  name: string;
+  type: GoalType;
+  targetAmount?: number;
+  targetDate: string;
+  linkedAccountIds: number[];
+  priority: number;
+  notes?: string;
+  isActive: boolean;
+  progress: GoalProgressSummary;
+}
+
+export interface GoalProgress {
+  goalId: number;
+  goalName: string;
+  currentValue: number;
+  targetValue: number;
+  progressPercentage: number;
+  requiredMonthlyAmount: number;
+  projectedCompletionDate?: string;
+  status: GoalStatus;
+  monthsRemaining: number;
+  amountRemaining: number;
+  statusMessage: string;
+}
+
+export interface CreateGoalRequest {
+  name: string;
+  type: string;
+  targetAmount?: number;
+  targetDate: string;
+  linkedAccountIds?: number[];
+  priority?: number;
+  notes?: string;
+}
+
+export interface UpdateGoalRequest {
+  name?: string;
+  type?: string;
+  targetAmount?: number;
+  targetDate?: string;
+  linkedAccountIds?: number[];
+  priority?: number;
+  notes?: string;
+  isActive?: boolean;
+}
+
 // Chart-specific models
 export type ChartGranularity = 'Daily' | 'Weekly' | 'Monthly';
 

@@ -27,7 +27,11 @@ import {
   UpdateSettingsRequest,
   RecurringContribution,
   CreateRecurringContributionRequest,
-  UpdateRecurringContributionRequest
+  UpdateRecurringContributionRequest,
+  Goal,
+  GoalProgress,
+  CreateGoalRequest,
+  UpdateGoalRequest
 } from '../models/api.models';
 
 @Injectable({
@@ -186,5 +190,30 @@ export class ApiService {
 
   toggleRecurringContribution(id: number): Observable<RecurringContribution> {
     return this.http.patch<RecurringContribution>(`${this.baseUrl}/recurring-contributions/${id}/toggle`, {});
+  }
+
+  // Goal endpoints
+  getGoals(activeOnly: boolean = true): Observable<Goal[]> {
+    return this.http.get<Goal[]>(`${this.baseUrl}/goals`, { params: { activeOnly } });
+  }
+
+  getGoal(id: number): Observable<Goal> {
+    return this.http.get<Goal>(`${this.baseUrl}/goals/${id}`);
+  }
+
+  getGoalProgress(id: number): Observable<GoalProgress> {
+    return this.http.get<GoalProgress>(`${this.baseUrl}/goals/${id}/progress`);
+  }
+
+  createGoal(request: CreateGoalRequest): Observable<Goal> {
+    return this.http.post<Goal>(`${this.baseUrl}/goals`, request);
+  }
+
+  updateGoal(id: number, request: UpdateGoalRequest): Observable<Goal> {
+    return this.http.put<Goal>(`${this.baseUrl}/goals/${id}`, request);
+  }
+
+  deleteGoal(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/goals/${id}`);
   }
 }

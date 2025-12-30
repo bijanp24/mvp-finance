@@ -1,0 +1,346 @@
+.goals-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 32px;
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  .header-title {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 500;
+  }
+
+  .status-summary {
+    display: flex;
+    gap: 16px;
+    font-size: 14px;
+
+    span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      mat-icon {
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    .on-track {
+      color: #4CAF50;
+    }
+
+    .at-risk {
+      color: #FFC107;
+    }
+  }
+}
+
+.goals-section {
+  margin-bottom: 32px;
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+
+    h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    .count {
+      background: var(--surface-variant, #e0e0e0);
+      color: var(--text-secondary, #666);
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+  }
+
+  &.inactive-section {
+    .section-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: none;
+      border: none;
+      color: var(--text-secondary, #666);
+      cursor: pointer;
+      padding: 8px 0;
+      font-size: 14px;
+      margin-bottom: 16px;
+
+      &:hover {
+        color: var(--text-primary, #1a1a1a);
+      }
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+}
+
+.goals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.goal-card {
+  padding: 20px;
+  transition: opacity 0.2s ease;
+
+  &.inactive {
+    opacity: 0.6;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+  }
+
+  .goal-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .goal-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      color: white;
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+    }
+  }
+
+  .goal-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .goal-name {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .goal-type {
+    font-size: 13px;
+    color: var(--text-secondary, #666);
+  }
+
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .progress-section {
+    .progress-header {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .current-value {
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .target-value {
+      font-size: 14px;
+      color: var(--text-secondary, #666);
+    }
+
+    mat-progress-bar {
+      height: 8px;
+      border-radius: 4px;
+
+      &.progress-ahead ::ng-deep .mdc-linear-progress__bar-inner {
+        border-color: #4CAF50;
+      }
+
+      &.progress-on-track ::ng-deep .mdc-linear-progress__bar-inner {
+        border-color: #8BC34A;
+      }
+
+      &.progress-at-risk ::ng-deep .mdc-linear-progress__bar-inner {
+        border-color: #FFC107;
+      }
+
+      &.progress-behind ::ng-deep .mdc-linear-progress__bar-inner {
+        border-color: #F44336;
+      }
+    }
+
+    .progress-footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--text-secondary, #666);
+    }
+
+    .percentage {
+      font-weight: 500;
+    }
+  }
+
+  .status-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    width: fit-content;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  .status-message {
+    font-size: 13px;
+    color: var(--text-secondary, #666);
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .time-remaining,
+  .linked-accounts {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text-secondary, #666);
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  .notes {
+    font-size: 13px;
+    color: var(--text-secondary, #666);
+    font-style: italic;
+    padding-top: 8px;
+    border-top: 1px solid var(--border-color, #e0e0e0);
+  }
+
+  .inactive-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--surface-variant, #f5f5f5);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text-secondary, #666);
+    width: fit-content;
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 32px;
+  text-align: center;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: var(--text-disabled, #bbb);
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    margin: 0 0 8px;
+    font-size: 20px;
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0 0 24px;
+    color: var(--text-secondary, #666);
+    max-width: 400px;
+  }
+}
+
+// Skeleton loading styles
+.skeleton-container {
+  .skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+  }
+
+  .skeleton-card {
+    height: 220px;
+    background: var(--skeleton-bg, #e0e0e0);
+    border-radius: 12px;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

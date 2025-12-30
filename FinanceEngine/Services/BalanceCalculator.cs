@@ -66,3 +66,5 @@ public record FinancialEvent(EventType Type, decimal Amount);
 
 
 
+
+

@@ -1,6 +1,6 @@
 # ROADMAP-v2.md
 
-Last updated: 2025-12-25
+Last updated: 2025-12-29
 Version: 2.0 (Goal-Driven Budgeting)
 
 ## Purpose
@@ -35,12 +35,12 @@ All v1 work is complete and archived in `docs/v1-archive/`.
 ---
 
 ## Phase A: Budget Categories & Recurring Expenses
-**Status:** Planning
-**Estimated effort:** 3-4 sessions
+**Status:** COMPLETE
+**Completed:** 2025-12-29
 **Vision:** See `GOAL_DRIVEN_BUDGETING.md` Phase A section
 
 ### WI-PA-001: Category Entity and Migration
-- **Status:** [ ]
+- **Status:** [DONE]
 - **Parallelizable:** No (must be first)
 - **Depends on:** None
 - **Files:**
@@ -58,7 +58,7 @@ All v1 work is complete and archived in `docs/v1-archive/`.
 - **Acceptance:** Entity created, migration applied, defaults seeded
 
 ### WI-PA-002: Budget Entity and Migration
-- **Status:** [ ]
+- **Status:** [DONE]
 - **Parallelizable:** No
 - **Depends on:** WI-PA-001
 - **Files:**
@@ -75,7 +75,7 @@ All v1 work is complete and archived in `docs/v1-archive/`.
 - **Acceptance:** Entity created with proper relationships
 
 ### WI-PA-003: Category API Endpoints
-- **Status:** [ ]
+- **Status:** [DONE]
 - **Parallelizable:** Yes (after WI-PA-001)
 - **Depends on:** WI-PA-001
 - **Files:**
@@ -89,7 +89,7 @@ All v1 work is complete and archived in `docs/v1-archive/`.
 - **Acceptance:** Full CRUD with tests
 
 ### WI-PA-004: Budget API Endpoints
-- **Status:** [ ]
+- **Status:** [DONE]
 - **Parallelizable:** Yes (after WI-PA-002)
 - **Depends on:** WI-PA-002
 - **Files:**
@@ -103,7 +103,7 @@ All v1 work is complete and archived in `docs/v1-archive/`.
 - **Acceptance:** Full CRUD with tests
 
 ### WI-PA-005: Transaction Category Tagging
-- **Status:** [ ]
+- **Status:** [DONE]
 - **Parallelizable:** Yes (after WI-PA-001)
 - **Depends on:** WI-PA-001
 - **Files:**
@@ -118,7 +118,7 @@ All v1 work is complete and archived in `docs/v1-archive/`.
 - **Acceptance:** Events can be tagged with categories
 
 ### WI-PA-006: Budget Management UI
-- **Status:** [ ]
+- **Status:** [DONE]
 - **Parallelizable:** No
 - **Depends on:** WI-PA-003, WI-PA-004
 - **Files:**
@@ -137,7 +137,7 @@ All v1 work is complete and archived in `docs/v1-archive/`.
 - **Acceptance:** Users can manage budgets
 
 ### WI-PA-007: Transaction Category Picker UI
-- **Status:** [ ]
+- **Status:** [DONE]
 - **Parallelizable:** Yes (after WI-PA-005)
 - **Depends on:** WI-PA-005, WI-PA-006
 - **Files:**
@@ -151,7 +151,7 @@ All v1 work is complete and archived in `docs/v1-archive/`.
 - **Acceptance:** Users can tag transactions with categories
 
 ### WI-PA-008: Budget vs Actual Dashboard Widget
-- **Status:** [ ]
+- **Status:** [DONE]
 - **Parallelizable:** Yes (after WI-PA-006)
 - **Depends on:** WI-PA-006
 - **Files:**
@@ -169,7 +169,7 @@ All v1 work is complete and archived in `docs/v1-archive/`.
 - **Acceptance:** Dashboard shows spending by category
 
 ### WI-PA-009: Calendar Budget Markers
-- **Status:** [ ]
+- **Status:** [DONE]
 - **Parallelizable:** Yes (after WI-PA-004)
 - **Depends on:** WI-PA-004
 - **Files:**
@@ -189,11 +189,173 @@ All v1 work is complete and archived in `docs/v1-archive/`.
 ---
 
 ## Phase B: Financial Goals
-**Status:** Not Started
-**Depends on:** Phase A complete
-**Vision:** See `GOAL_DRIVEN_BUDGETING.md` Phase B section
+**Status:** COMPLETE
+**Completed:** 2025-12-29
+**Vision:** See `contracts/v2/GOAL_DRIVEN_BUDGETING.md` Phase B section
 
-(Work items to be defined when Phase A nears completion)
+### WI-PB-001: Goal Entity and Migration
+- **Status:** [DONE]
+- **Parallelizable:** No (must be first)
+- **Depends on:** Phase A
+- **Files:**
+  - `FinanceEngine.Data/Entities/GoalEntity.cs` (NEW)
+  - `FinanceEngine.Data/FinanceDbContext.cs`
+  - New EF migration
+- **Task:** Create database entity for financial goals
+- **Details:**
+  - Name, Type (DebtFree/InvestmentTarget/SavingsGoal/NetWorthMilestone)
+  - TargetAmount (nullable - not needed for DebtFree)
+  - TargetDate
+  - LinkedAccountIds (JSON array or junction table)
+  - Priority (int, for ordering)
+  - IsActive flag
+- **Verification:**
+  ```bash
+  dotnet build && dotnet test
+  ```
+- **Acceptance:** Entity created, migration applied
+
+### WI-PB-002: Goal Progress Calculator Service
+- **Status:** [DONE]
+- **Parallelizable:** Yes (after WI-PB-001)
+- **Depends on:** WI-PB-001
+- **Files:**
+  - `FinanceEngine/Services/GoalProgressCalculator.cs` (NEW)
+  - `FinanceEngine.Tests/Services/GoalProgressCalculatorTests.cs` (NEW)
+- **Task:** Calculate goal progress and projections
+- **Details:**
+  - CurrentValue: sum of linked account balances
+  - TargetValue: from goal definition
+  - RequiredMonthlyContribution: calculate based on remaining time
+  - ProjectedCompletionDate: at current pace
+  - Status: OnTrack/AtRisk/Behind/Ahead based on trajectory
+- **Verification:**
+  ```bash
+  dotnet test --filter "FullyQualifiedName~GoalProgressCalculator"
+  ```
+- **Acceptance:** Accurate calculations for all goal types
+
+### WI-PB-003: Goal API Endpoints
+- **Status:** [DONE]
+- **Parallelizable:** Yes (after WI-PB-001)
+- **Depends on:** WI-PB-001, WI-PB-002
+- **Files:**
+  - `FinanceEngine.Api/Endpoints/GoalEndpoints.cs` (NEW)
+  - `FinanceEngine.Tests/Endpoints/GoalEndpointsTests.cs` (NEW)
+- **Task:** CRUD endpoints for goals with progress
+- **Details:**
+  - GET /api/goals - list all with progress
+  - GET /api/goals/{id} - single goal with detailed progress
+  - POST /api/goals - create
+  - PUT /api/goals/{id} - update
+  - DELETE /api/goals/{id} - delete
+  - GET /api/goals/{id}/progress - detailed progress data
+- **Verification:**
+  ```bash
+  dotnet test --filter "FullyQualifiedName~GoalEndpoints"
+  ```
+- **Acceptance:** Full CRUD with progress calculation
+
+### WI-PB-004: Goals Page UI
+- **Status:** [DONE]
+- **Parallelizable:** No
+- **Depends on:** WI-PB-003
+- **Files:**
+  - `dashboard/src/app/pages/goals/goals.ts` (NEW)
+  - `dashboard/src/app/pages/goals/goals.html` (NEW)
+  - `dashboard/src/app/pages/goals/goals.scss` (NEW)
+  - `dashboard/src/app/core/models/api.models.ts`
+  - `dashboard/src/app/core/services/api.service.ts`
+  - `dashboard/src/app/app.routes.ts`
+- **Task:** Create goals management page
+- **Details:**
+  - List goals with progress bars
+  - Status indicators (OnTrack=green, AtRisk=yellow, Behind=red, Ahead=blue)
+  - Required monthly contribution display
+  - Projected completion date
+  - Reorder by priority (drag or buttons)
+- **Verification:**
+  ```bash
+  cd dashboard && npm run build && npm test
+  ```
+- **Acceptance:** Users can view all goals with progress
+
+### WI-PB-005: Goal Create/Edit Dialog
+- **Status:** [DONE]
+- **Parallelizable:** Yes (after WI-PB-004)
+- **Depends on:** WI-PB-004
+- **Files:**
+  - `dashboard/src/app/pages/goals/goal-dialog.component.ts` (NEW)
+  - `dashboard/src/app/pages/goals/goals.ts`
+- **Task:** Dialog for creating and editing goals
+- **Details:**
+  - Goal type selector with dynamic fields
+  - Account multi-select for linking
+  - Target date picker
+  - Target amount (when applicable)
+  - Priority setting
+- **Verification:**
+  ```bash
+  cd dashboard && npm run build
+  ```
+- **Acceptance:** Users can create/edit all goal types
+
+### WI-PB-006: Goal Detail View
+- **Status:** [DEFERRED] (progress visible in Goals page)
+- **Parallelizable:** Yes (after WI-PB-004)
+- **Depends on:** WI-PB-004
+- **Files:**
+  - `dashboard/src/app/pages/goals/goal-detail.component.ts` (NEW)
+  - `dashboard/src/app/pages/goals/goals.ts`
+- **Task:** Detailed goal view with trajectory
+- **Details:**
+  - Progress chart (current vs target over time)
+  - Contribution history
+  - Projected vs required trajectory
+  - Milestone markers
+- **Verification:**
+  ```bash
+  cd dashboard && npm run build
+  ```
+- **Acceptance:** Users can see detailed goal progress
+
+### WI-PB-007: Dashboard Goal Widget
+- **Status:** [DONE]
+- **Parallelizable:** Yes (after WI-PB-003)
+- **Depends on:** WI-PB-003
+- **Files:**
+  - `dashboard/src/app/pages/dashboard/dashboard.ts`
+  - `dashboard/src/app/pages/dashboard/dashboard.html`
+- **Task:** Add goal summary widget to dashboard
+- **Details:**
+  - Top 3 goals by priority
+  - Mini progress bars
+  - Status indicators
+  - Link to full goals page
+- **Verification:**
+  ```bash
+  cd dashboard && npm run build
+  ```
+- **Acceptance:** Dashboard shows goal overview
+
+### WI-PB-008: Projections Goal Integration
+- **Status:** [DONE]
+- **Parallelizable:** Yes (after WI-PB-003)
+- **Depends on:** WI-PB-003
+- **Files:**
+  - `dashboard/src/app/pages/projections/projections.ts`
+  - `dashboard/src/app/pages/projections/projections.html`
+  - `dashboard/src/app/core/services/projection.service.ts`
+- **Task:** Show goal milestones on projection charts
+- **Details:**
+  - Vertical lines at goal target dates
+  - Annotations showing goal name
+  - Color by goal status
+- **Verification:**
+  ```bash
+  cd dashboard && npm run build
+  ```
+- **Acceptance:** Projection charts show goal targets
 
 ---
 

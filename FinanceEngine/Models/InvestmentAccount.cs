@@ -9,3 +9,5 @@ public record InvestmentAccount(
     decimal AnnualReturnRate  // e.g., 0.07 for 7%
 );
 
+
+

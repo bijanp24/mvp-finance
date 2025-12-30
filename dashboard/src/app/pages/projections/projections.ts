@@ -5,6 +5,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { RouterLink } from '@angular/router';
 import { forkJoin, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ApiService } from '../../core/services/api.service';
@@ -12,17 +15,20 @@ import { ProjectionService } from '../../core/services/projection.service';
 import { DebtProjectionChartComponent } from '../../features/charts/debt-projection-chart.component';
 import { InvestmentProjectionChartComponent } from '../../features/charts/investment-projection-chart.component';
 import { NetWorthChartComponent } from '../../features/charts/net-worth-chart.component';
-import { Account, UserSettings, SimulationResult, ChartGranularity } from '../../core/models/api.models';
+import { Account, UserSettings, SimulationResult, ChartGranularity, Goal } from '../../core/models/api.models';
 
 @Component({
   selector: 'app-projections',
   imports: [
     CommonModule,
     FormsModule,
+    RouterLink,
     MatCardModule,
     MatButtonToggleModule,
     MatSliderModule,
     MatSlideToggleModule,
+    MatIconModule,
+    MatProgressBarModule,
     DebtProjectionChartComponent,
     InvestmentProjectionChartComponent,
     NetWorthChartComponent
@@ -38,10 +44,40 @@ export class ProjectionsPage {
   readonly timeRangeMonths = signal(12); // 1 year default
   readonly accounts = signal<Account[]>([]);
   readonly settings = signal<UserSettings | null>(null);
+  readonly goals = signal<Goal[]>([]);
   readonly extraPayment = signal(0);
   readonly debtProjectionWithExtra = signal<SimulationResult | null>(null);
-  
+
   private extraPaymentSubject = new Subject<number>();
+
+  // Goals within projection timeframe
+  readonly upcomingGoals = computed(() => {
+    const now = new Date();
+    const endDate = new Date();
+    endDate.setMonth(endDate.getMonth() + this.timeRangeMonths());
+
+    return this.goals()
+      .filter(g => g.isActive)
+      .filter(g => {
+        const targetDate = new Date(g.targetDate);
+        return targetDate >= now && targetDate <= endDate;
+      })
+      .sort((a, b) => new Date(a.targetDate).getTime() - new Date(b.targetDate).getTime());
+  });
+
+  // Goals on track or ahead
+  readonly goalsOnTrack = computed(() => {
+    return this.goals()
+      .filter(g => g.isActive && (g.progress.status === 'OnTrack' || g.progress.status === 'Ahead'))
+      .length;
+  });
+
+  // Goals at risk or behind
+  readonly goalsAtRisk = computed(() => {
+    return this.goals()
+      .filter(g => g.isActive && (g.progress.status === 'AtRisk' || g.progress.status === 'Behind'))
+      .length;
+  });
 
   // Use effective projection (scenario or baseline) for charts
   readonly effectiveDebtProjection = computed(() => {
@@ -128,10 +164,12 @@ export class ProjectionsPage {
   loadData(): void {
     forkJoin({
       accounts: this.apiService.getAccounts(),
-      settings: this.apiService.getSettings()
-    }).subscribe(({ accounts, settings }) => {
+      settings: this.apiService.getSettings(),
+      goals: this.apiService.getGoals(true)
+    }).subscribe(({ accounts, settings, goals }) => {
       this.accounts.set(accounts);
       this.settings.set(settings);
+      this.goals.set(goals);
       this.calculateProjections();
     });
   }
@@ -203,5 +241,32 @@ export class ProjectionsPage {
       year: 'numeric',
       month: 'long'
     });
+  }
+
+  getGoalIcon(type: string): string {
+    switch (type) {
+      case 'DebtFree': return 'money_off';
+      case 'InvestmentTarget': return 'trending_up';
+      case 'SavingsGoal': return 'savings';
+      case 'NetWorthMilestone': return 'account_balance';
+      default: return 'flag';
+    }
+  }
+
+  getGoalStatusColor(status: string): string {
+    switch (status) {
+      case 'Ahead': return '#4CAF50';
+      case 'OnTrack': return '#8BC34A';
+      case 'AtRisk': return '#FFC107';
+      case 'Behind': return '#F44336';
+      default: return '#9E9E9E';
+    }
+  }
+
+  getMonthsUntilGoal(targetDate: string): number {
+    const now = new Date();
+    const target = new Date(targetDate);
+    const diffMs = target.getTime() - now.getTime();
+    return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24 * 30)));
   }
 }

@@ -64,6 +64,7 @@ app.MapGroup("/api/accounts").MapAccountEndpoints();
 app.MapGroup("/api/budgets").MapBudgetEndpoints();
 app.MapGroup("/api/categories").MapCategoryEndpoints();
 app.MapGroup("/api/events").MapEventEndpoints();
+app.MapGroup("/api/goals").MapGoalEndpoints();
 app.MapGroup("/api/calculators").MapCalculatorEndpoints();
 app.MapGroup("/api/settings").MapSettingsEndpoints();
 app.MapGroup("/api/recurring-contributions").MapRecurringContributionEndpoints();

@@ -1,19 +1,19 @@
 # TODO_NEXT.md
 
-Last updated: 2025-12-25
+Last updated: 2025-12-29
 
 Read this first when resuming work.
 
 ## Top Priority Next Step
-- **Documentation Reorganized:** v1 archived, v2 structure in place.
-- **Next:** Begin Phase A implementation (Budget Categories)
-- **Start with:** WI-PA-001 (Category Entity) - see `docs/v2/ROADMAP-v2.md`
+- **Phase A Complete:** All 9 work items done (Budget Categories)
+- **Phase B Complete:** 7/8 work items done (Financial Goals)
+- **Next:** Phase C (Dynamic Safe-to-Spend) - see `docs/v2/ROADMAP-v2.md`
 
 ## Current Status
 
 **Version:** v2 (Goal-Driven Budgeting)
 **Branch:** master
-**Working tree:** dirty (reorganization in progress)
+**Tests:** 236 backend tests passing
 
 **v1 Complete:** Phases 1-9 archived in `docs/v1-archive/`
 - 156 tests (117 backend + 39 frontend)
@@ -22,23 +22,53 @@ Read this first when resuming work.
 - Recurring contributions
 - Dark theme redesign
 
-**v2 In Progress:** Phase A (Budget Categories)
-- See `GOAL_DRIVEN_BUDGETING.md` for full vision
-- See `docs/v2/ROADMAP-v2.md` for work items
+**Phase A Complete:** Budget Categories (2025-12-29)
+- Category and Budget entities with migrations
+- Full CRUD API endpoints with tests
+- Transaction category tagging
+- Budget management UI
+- Dashboard spending breakdown widget
+- Calendar budget markers
 
-## v2 Phase A Work Items
+**Phase B Complete:** Financial Goals (2025-12-29)
+- Goal entity with 4 types (DebtFree, InvestmentTarget, SavingsGoal, NetWorthMilestone)
+- Goal progress calculator with status tracking (OnTrack, Ahead, AtRisk, Behind)
+- Full CRUD API with progress endpoints
+- Goals page with progress bars and status indicators
+- Goal create/edit dialog with type-specific fields
+- Dashboard goal widget (top 3 by priority)
+- Projections goal integration (milestones in timeframe)
+- 39 new tests (19 calculator + 20 endpoints)
 
-| Work Item | Description | Status | Parallelizable |
-|-----------|-------------|--------|----------------|
-| WI-PA-001 | Category Entity | [ ] | No (start here) |
-| WI-PA-002 | Budget Entity | [ ] | No |
-| WI-PA-003 | Category API | [ ] | Yes (after 001) |
-| WI-PA-004 | Budget API | [ ] | Yes (after 002) |
-| WI-PA-005 | Transaction Tagging | [ ] | Yes (after 001) |
-| WI-PA-006 | Budget Management UI | [ ] | No |
-| WI-PA-007 | Category Picker UI | [ ] | Yes |
-| WI-PA-008 | Dashboard Widget | [ ] | Yes |
-| WI-PA-009 | Calendar Markers | [ ] | Yes |
+**v2 Next:** Phase C (Dynamic Safe-to-Spend) - TO BE DEFINED
+- See `contracts/v2/GOAL_DRIVEN_BUDGETING.md` for vision
+
+## v2 Phase B Work Items (Financial Goals) - COMPLETE
+
+| Work Item | Description | Status |
+|-----------|-------------|--------|
+| WI-PB-001 | Goal Entity | [DONE] |
+| WI-PB-002 | Goal Progress Calculator | [DONE] |
+| WI-PB-003 | Goal API | [DONE] |
+| WI-PB-004 | Goals Page UI | [DONE] |
+| WI-PB-005 | Goal Create/Edit Dialog | [DONE] |
+| WI-PB-006 | Goal Detail View | [DEFERRED] |
+| WI-PB-007 | Dashboard Goal Widget | [DONE] |
+| WI-PB-008 | Projections Goal Integration | [DONE] |
+
+## v2 Phase A Work Items (COMPLETE)
+
+| Work Item | Description | Status |
+|-----------|-------------|--------|
+| WI-PA-001 | Category Entity | [DONE] |
+| WI-PA-002 | Budget Entity | [DONE] |
+| WI-PA-003 | Category API | [DONE] |
+| WI-PA-004 | Budget API | [DONE] |
+| WI-PA-005 | Transaction Tagging | [DONE] |
+| WI-PA-006 | Budget Management UI | [DONE] |
+| WI-PA-007 | Category Picker UI | [DONE] |
+| WI-PA-008 | Dashboard Widget | [DONE] |
+| WI-PA-009 | Calendar Markers | [DONE] |
 
 ## File Structure (v2)
 

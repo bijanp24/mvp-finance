@@ -1,9 +1,9 @@
 # PROGRESS-v2.md
 
-Last updated: 2025-12-25
+Last updated: 2025-12-29
 Version: 2.0 (Goal-Driven Budgeting)
-Current commit: pending
-Working tree: dirty (reorganization in progress)
+Current commit: ecb401d
+Working tree: dirty
 
 ## Purpose
 Track v2 feature progress and provide deep dive context.
@@ -47,24 +47,35 @@ All v1 features are complete and archived in `docs/v1-archive/`.
 ## v2 Feature Status
 
 ### Phase A: Budget Categories & Recurring Expenses
-**Status:** Planning
+**Status:** COMPLETE (2025-12-29)
 **Goal:** Enable expense planning and category-based spending visibility
 
 | Work Item | Description | Status |
 |-----------|-------------|--------|
-| WI-PA-001 | Category Entity | [ ] |
-| WI-PA-002 | Budget Entity | [ ] |
-| WI-PA-003 | Category API | [ ] |
-| WI-PA-004 | Budget API | [ ] |
-| WI-PA-005 | Transaction Category Tagging | [ ] |
-| WI-PA-006 | Budget Management UI | [ ] |
-| WI-PA-007 | Transaction Category Picker | [ ] |
-| WI-PA-008 | Budget vs Actual Dashboard | [ ] |
-| WI-PA-009 | Calendar Budget Markers | [ ] |
+| WI-PA-001 | Category Entity | [DONE] |
+| WI-PA-002 | Budget Entity | [DONE] |
+| WI-PA-003 | Category API | [DONE] |
+| WI-PA-004 | Budget API | [DONE] |
+| WI-PA-005 | Transaction Category Tagging | [DONE] |
+| WI-PA-006 | Budget Management UI | [DONE] |
+| WI-PA-007 | Transaction Category Picker | [DONE] |
+| WI-PA-008 | Budget vs Actual Dashboard | [DONE] |
+| WI-PA-009 | Calendar Budget Markers | [DONE] |
 
 ### Phase B: Financial Goals
-**Status:** Not Started
+**Status:** COMPLETE (2025-12-29)
 **Goal:** Target-setting for debt payoff and investment growth
+
+| Work Item | Description | Status |
+|-----------|-------------|--------|
+| WI-PB-001 | Goal Entity | [DONE] |
+| WI-PB-002 | Goal Progress Calculator | [DONE] |
+| WI-PB-003 | Goal API | [DONE] |
+| WI-PB-004 | Goals Page UI | [DONE] |
+| WI-PB-005 | Goal Create/Edit Dialog | [DONE] |
+| WI-PB-006 | Goal Detail View | [DEFERRED] |
+| WI-PB-007 | Dashboard Goal Widget | [DONE] |
+| WI-PB-008 | Projections Goal Integration | [DONE] |
 
 ### Phase C: Dynamic Safe-to-Spend
 **Status:** Not Started

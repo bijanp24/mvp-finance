@@ -9,7 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { ApiService } from '../../core/services/api.service';
 import { ProjectionService } from '../../core/services/projection.service';
-import { Account, FinancialEvent, SpendableRequest, SpendableResult, UserSettings, Budget, Category } from '../../core/models/api.models';
+import { Account, FinancialEvent, SpendableRequest, SpendableResult, UserSettings, Budget, Category, Goal, GoalStatus } from '../../core/models/api.models';
 import { CalendarComponent } from '../../features/calendar/calendar.component';
 import { DebtProjectionChartComponent } from '../../features/charts/debt-projection-chart.component';
 import { InvestmentProjectionChartComponent } from '../../features/charts/investment-projection-chart.component';
@@ -45,6 +45,7 @@ export class DashboardPage {
   readonly budgets = signal<Budget[]>([]);
   readonly categories = signal<Category[]>([]);
   readonly monthlyEvents = signal<FinancialEvent[]>([]);
+  readonly goals = signal<Goal[]>([]);
   readonly loading = signal(true);
 
   // Projection chart data
@@ -129,6 +130,26 @@ export class DashboardPage {
     }
   }
 
+  // Top goals by priority (active only)
+  readonly topGoals = computed(() => {
+    return this.goals()
+      .filter(g => g.isActive)
+      .sort((a, b) => a.priority - b.priority)
+      .slice(0, 3);
+  });
+
+  readonly goalsOnTrack = computed(() => {
+    return this.goals()
+      .filter(g => g.isActive && (g.progress.status === 'OnTrack' || g.progress.status === 'Ahead'))
+      .length;
+  });
+
+  readonly goalsAtRisk = computed(() => {
+    return this.goals()
+      .filter(g => g.isActive && (g.progress.status === 'AtRisk' || g.progress.status === 'Behind'))
+      .length;
+  });
+
   constructor() {
     this.loadDashboardData();
   }
@@ -149,15 +170,17 @@ export class DashboardPage {
       settings: this.apiService.getSettings(),
       budgets: this.apiService.getBudgets(),
       categories: this.apiService.getCategories(),
-      monthlyEvents: this.apiService.getEvents({ startDate, endDate })
+      monthlyEvents: this.apiService.getEvents({ startDate, endDate }),
+      goals: this.apiService.getGoals(true)
     }).subscribe({
-      next: ({ accounts, events, settings, budgets, categories, monthlyEvents }) => {
+      next: ({ accounts, events, settings, budgets, categories, monthlyEvents, goals }) => {
         this.accounts.set(accounts);
         this.recentEvents.set(events);
         this.settings.set(settings);
         this.budgets.set(budgets);
         this.categories.set(categories);
         this.monthlyEvents.set(monthlyEvents);
+        this.goals.set(goals);
         this.calculateSpendable(accounts);
 
         // Calculate projections
@@ -289,5 +312,45 @@ export class DashboardPage {
   isExpense(type: string): boolean {
     return type === 'Expense' || type === 'DebtPayment' || type === 'DebtCharge' ||
            type === 'SavingsContribution' || type === 'InvestmentContribution';
+  }
+
+  getGoalIcon(type: string): string {
+    switch (type) {
+      case 'DebtFree': return 'money_off';
+      case 'InvestmentTarget': return 'trending_up';
+      case 'SavingsGoal': return 'savings';
+      case 'NetWorthMilestone': return 'account_balance';
+      default: return 'flag';
+    }
+  }
+
+  getGoalStatusColor(status: GoalStatus): string {
+    switch (status) {
+      case 'Ahead': return '#4CAF50';
+      case 'OnTrack': return '#8BC34A';
+      case 'AtRisk': return '#FFC107';
+      case 'Behind': return '#F44336';
+      default: return '#9E9E9E';
+    }
+  }
+
+  getGoalStatusIcon(status: GoalStatus): string {
+    switch (status) {
+      case 'Ahead': return 'rocket_launch';
+      case 'OnTrack': return 'check_circle';
+      case 'AtRisk': return 'warning';
+      case 'Behind': return 'error';
+      default: return 'help';
+    }
+  }
+
+  getGoalProgressClass(status: GoalStatus): string {
+    switch (status) {
+      case 'Ahead': return 'progress-ahead';
+      case 'OnTrack': return 'progress-on-track';
+      case 'AtRisk': return 'progress-at-risk';
+      case 'Behind': return 'progress-behind';
+      default: return '';
+    }
   }
 }

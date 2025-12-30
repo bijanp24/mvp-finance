@@ -13,6 +13,7 @@ public class FinanceDbContext : DbContext
     public DbSet<BudgetEntity> Budgets => Set<BudgetEntity>();
     public DbSet<CategoryEntity> Categories => Set<CategoryEntity>();
     public DbSet<FinancialEventEntity> Events => Set<FinancialEventEntity>();
+    public DbSet<GoalEntity> Goals => Set<GoalEntity>();
     public DbSet<IncomeScheduleEntity> IncomeSchedules => Set<IncomeScheduleEntity>();
     public DbSet<RecurringContributionEntity> RecurringContributions => Set<RecurringContributionEntity>();
     public DbSet<UserSettingsEntity> UserSettings => Set<UserSettingsEntity>();
@@ -157,6 +158,20 @@ public class FinanceDbContext : DbContext
                 .WithMany()
                 .HasForeignKey(e => e.LinkedAccountId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // Goal configuration
+        modelBuilder.Entity<GoalEntity>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.TargetAmount).HasPrecision(18, 2);
+            entity.Property(e => e.LinkedAccountIds).HasMaxLength(500);  // JSON array
+            entity.Property(e => e.Notes).HasMaxLength(500);
+            entity.HasIndex(e => e.Type);
+            entity.HasIndex(e => e.IsActive);
+            entity.HasIndex(e => e.Priority);
+            entity.HasIndex(e => e.TargetDate);
         });
     }
 }

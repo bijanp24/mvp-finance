@@ -124,6 +124,66 @@
       </section>
     }
 
+    <!-- Goals Widget -->
+    @if (topGoals().length > 0) {
+      <section class="app-card goals-widget">
+        <div class="section-header">
+          <h2>Financial Goals</h2>
+          <div class="goals-summary">
+            @if (goalsOnTrack() > 0) {
+              <span class="on-track">
+                <mat-icon>check_circle</mat-icon>
+                {{ goalsOnTrack() }} on track
+              </span>
+            }
+            @if (goalsAtRisk() > 0) {
+              <span class="at-risk">
+                <mat-icon>warning</mat-icon>
+                {{ goalsAtRisk() }} at risk
+              </span>
+            }
+          </div>
+          <a mat-button color="primary" routerLink="/goals">View All</a>
+        </div>
+
+        <div class="goals-list">
+          @for (goal of topGoals(); track goal.id) {
+            <div class="goal-item">
+              <div class="goal-header">
+                <div class="goal-icon" [style.background-color]="getGoalStatusColor(goal.progress.status)">
+                  <mat-icon>{{ getGoalIcon(goal.type) }}</mat-icon>
+                </div>
+                <div class="goal-info">
+                  <span class="goal-name">{{ goal.name }}</span>
+                  <span class="goal-target">
+                    @if (goal.type === 'DebtFree') {
+                      Debt-free by {{ goal.targetDate | date:'MMM yyyy' }}
+                    } @else {
+                      {{ formatCurrency(goal.targetAmount!) }} by {{ goal.targetDate | date:'MMM yyyy' }}
+                    }
+                  </span>
+                </div>
+                <div class="goal-status" [style.color]="getGoalStatusColor(goal.progress.status)">
+                  <mat-icon>{{ getGoalStatusIcon(goal.progress.status) }}</mat-icon>
+                </div>
+              </div>
+              <div class="goal-progress">
+                <mat-progress-bar
+                  mode="determinate"
+                  [value]="goal.progress.progressPercentage"
+                  [class]="getGoalProgressClass(goal.progress.status)">
+                </mat-progress-bar>
+                <div class="progress-details">
+                  <span class="progress-current">{{ formatCurrency(goal.progress.currentValue) }}</span>
+                  <span class="progress-percent">{{ goal.progress.progressPercentage | number:'1.0-0' }}%</span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
     <!-- Main Content Area -->
     <div class="dashboard-content">
       <!-- Recent Activity -->

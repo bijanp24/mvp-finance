@@ -1,0 +1,172 @@
+<div class="goals-container">
+  <header class="page-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1>Financial Goals</h1>
+        @if (activeGoals().length > 0) {
+          <div class="status-summary">
+            <span class="on-track">
+              <mat-icon>check_circle</mat-icon>
+              {{ onTrackCount() }} on track
+            </span>
+            @if (atRiskCount() > 0) {
+              <span class="at-risk">
+                <mat-icon>warning</mat-icon>
+                {{ atRiskCount() }} need attention
+              </span>
+            }
+          </div>
+        }
+      </div>
+      <button mat-flat-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon>
+        Add Goal
+      </button>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="skeleton-container" aria-busy="true">
+      <div class="skeleton-grid">
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+        <div class="skeleton-card"></div>
+      </div>
+    </div>
+  } @else if (goals().length === 0) {
+    <div class="app-card empty-state">
+      <mat-icon>flag</mat-icon>
+      <h2>No goals set</h2>
+      <p>Set financial goals to track your progress toward becoming debt-free, building investments, or hitting savings targets.</p>
+      <button mat-flat-button color="primary" (click)="openCreateDialog()">
+        <mat-icon>add</mat-icon>
+        Create Goal
+      </button>
+    </div>
+  } @else {
+    <!-- Active Goals -->
+    @if (activeGoals().length > 0) {
+      <section class="goals-section">
+        <div class="section-header">
+          <h2>Active Goals</h2>
+          <span class="count">{{ activeGoals().length }}</span>
+        </div>
+        <div class="goals-grid">
+          @for (goal of activeGoals(); track goal.id) {
+            <ng-container *ngTemplateOutlet="goalCard; context: { $implicit: goal }"></ng-container>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Inactive Goals -->
+    @if (inactiveGoals().length > 0) {
+      <section class="goals-section inactive-section">
+        <button class="section-toggle" (click)="toggleShowInactive()">
+          <mat-icon>{{ showInactive() ? 'expand_less' : 'expand_more' }}</mat-icon>
+          <span>{{ showInactive() ? 'Hide' : 'Show' }} Inactive Goals ({{ inactiveGoals().length }})</span>
+        </button>
+        @if (showInactive()) {
+          <div class="goals-grid">
+            @for (goal of inactiveGoals(); track goal.id) {
+              <ng-container *ngTemplateOutlet="goalCard; context: { $implicit: goal }"></ng-container>
+            }
+          </div>
+        }
+      </section>
+    }
+  }
+</div>
+
+<!-- Goal Card Template -->
+<ng-template #goalCard let-goal>
+  <div class="app-card goal-card" [class.inactive]="!goal.isActive">
+    <div class="card-header">
+      <div class="goal-info">
+        <div class="goal-icon" [style.background-color]="getStatusColor(goal.progress.status)">
+          <mat-icon>{{ getGoalIcon(goal.type) }}</mat-icon>
+        </div>
+        <div class="goal-text">
+          <h3 class="goal-name">{{ goal.name }}</h3>
+          <span class="goal-type">{{ getGoalTypeLabel(goal.type) }}</span>
+        </div>
+      </div>
+      <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Goal actions">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+      <mat-menu #menu="matMenu">
+        <button mat-menu-item (click)="openEditDialog(goal)">
+          <mat-icon>edit</mat-icon>
+          <span>Edit</span>
+        </button>
+        <button mat-menu-item (click)="toggleGoalActive(goal)">
+          <mat-icon>{{ goal.isActive ? 'pause' : 'play_arrow' }}</mat-icon>
+          <span>{{ goal.isActive ? 'Deactivate' : 'Activate' }}</span>
+        </button>
+        <button mat-menu-item (click)="deleteGoal(goal)">
+          <mat-icon>delete</mat-icon>
+          <span>Delete</span>
+        </button>
+      </mat-menu>
+    </div>
+
+    <div class="card-body">
+      <!-- Progress Section -->
+      <div class="progress-section">
+        <div class="progress-header">
+          <span class="current-value">{{ formatCurrency(goal.progress.currentValue) }}</span>
+          <span class="target-value">of {{ formatCurrency(goal.progress.targetValue) }}</span>
+        </div>
+        <mat-progress-bar
+          mode="determinate"
+          [value]="Math.min(goal.progress.progressPercentage, 100)"
+          [class]="getProgressClass(goal.progress.status)">
+        </mat-progress-bar>
+        <div class="progress-footer">
+          <span class="percentage">{{ goal.progress.progressPercentage | number:'1.0-0' }}%</span>
+          <span class="target-date">Target: {{ formatDate(goal.targetDate) }}</span>
+        </div>
+      </div>
+
+      <!-- Status Badge -->
+      <div class="status-badge" [style.background-color]="getStatusColor(goal.progress.status) + '20'" [style.color]="getStatusColor(goal.progress.status)">
+        <mat-icon>{{ getStatusIcon(goal.progress.status) }}</mat-icon>
+        <span>{{ goal.progress.status }}</span>
+      </div>
+
+      <!-- Status Message -->
+      <div class="status-message" [matTooltip]="goal.progress.statusMessage">
+        {{ goal.progress.statusMessage }}
+      </div>
+
+      <!-- Months Remaining -->
+      @if (goal.progress.monthsRemaining > 0) {
+        <div class="time-remaining">
+          <mat-icon>schedule</mat-icon>
+          {{ goal.progress.monthsRemaining }} months remaining
+        </div>
+      }
+
+      <!-- Linked Accounts -->
+      @if (goal.linkedAccountIds && goal.linkedAccountIds.length > 0) {
+        <div class="linked-accounts" [matTooltip]="getLinkedAccountNames(goal)">
+          <mat-icon>link</mat-icon>
+          {{ goal.linkedAccountIds.length }} linked account{{ goal.linkedAccountIds.length > 1 ? 's' : '' }}
+        </div>
+      }
+
+      <!-- Notes -->
+      @if (goal.notes) {
+        <div class="notes">{{ goal.notes }}</div>
+      }
+
+      <!-- Inactive Badge -->
+      @if (!goal.isActive) {
+        <div class="inactive-badge">
+          <mat-icon>pause_circle</mat-icon>
+          Inactive
+        </div>
+      }
+    </div>
+  </div>
+</ng-template>
