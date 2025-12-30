@@ -1,12 +1,12 @@
 # ROADMAP-v3.md
 
-Last updated: 2025-12-25
-Version: 3.0 (Data Export)
+Last updated: 2025-12-30
+Version: 3.0 (Data Import/Export)
 
 ## Purpose
 Structured work items for v3 features. Optimized for parallel agent execution.
 
-See `EXPORT_FEATURES.md` for the full v3 vision.
+See `EXPORT_FEATURES.md` for the full v3 vision (includes import and export).
 
 ## How to Use This File
 1. Pick an unclaimed work item from the current phase
@@ -312,6 +312,194 @@ v3 can proceed independently as export features don't depend on v2.
   cd dashboard && npm run build
   ```
 - **Acceptance:** Users can export all data from settings
+
+---
+
+## Phase v3.4: Transaction Import
+**Status:** Not Started
+**Depends on:** Can start independently (uses same ClosedXML package)
+**Estimated work items:** 10
+
+### WI-V34-001: Import Infrastructure
+- **Status:** [ ]
+- **Parallelizable:** No (foundation)
+- **Depends on:** None
+- **Files:**
+  - `FinanceEngine.Api/Endpoints/ImportEndpoints.cs` (NEW)
+  - `FinanceEngine.Api/Services/ImportService.cs` (NEW)
+- **Task:** Set up import endpoint structure and file upload handling
+- **Verification:**
+  ```bash
+  dotnet build
+  ```
+- **Acceptance:** Base endpoint file created, file upload handling works
+
+### WI-V34-002: CSV Parser Service
+- **Status:** [ ]
+- **Parallelizable:** No
+- **Depends on:** WI-V34-001
+- **Files:**
+  - `FinanceEngine.Api/Services/CsvImportService.cs` (NEW)
+  - `FinanceEngine.Tests/Services/CsvImportServiceTests.cs` (NEW)
+- **Task:** Parse CSV files and extract transaction data
+- **Details:**
+  - Auto-detect delimiter (comma, semicolon, tab)
+  - Handle quoted fields
+  - Return column headers and preview rows
+- **Verification:**
+  ```bash
+  dotnet test --filter "FullyQualifiedName~CsvImportService"
+  ```
+- **Acceptance:** CSV files parse correctly
+
+### WI-V34-003: Excel Parser Service
+- **Status:** [ ]
+- **Parallelizable:** Yes (after WI-V34-001)
+- **Depends on:** WI-V34-001
+- **Files:**
+  - `FinanceEngine.Api/Services/ExcelImportService.cs` (NEW)
+  - `FinanceEngine.Tests/Services/ExcelImportServiceTests.cs` (NEW)
+- **Task:** Parse Excel files and extract transaction data
+- **Details:**
+  - Support .xlsx format using ClosedXML
+  - Handle multiple sheets (let user select)
+  - Return column headers and preview rows
+- **Verification:**
+  ```bash
+  dotnet test --filter "FullyQualifiedName~ExcelImportService"
+  ```
+- **Acceptance:** Excel files parse correctly
+
+### WI-V34-004: Column Mapping Engine
+- **Status:** [ ]
+- **Parallelizable:** No
+- **Depends on:** WI-V34-002, WI-V34-003
+- **Files:**
+  - `FinanceEngine.Api/Services/ColumnMappingService.cs` (NEW)
+  - `FinanceEngine.Api/Models/ImportModels.cs` (NEW)
+- **Task:** Map source columns to transaction fields
+- **Details:**
+  - Required mappings: Date, Amount
+  - Optional mappings: Description, Category, Reference
+  - Auto-detect common bank formats (Amex, Chase, BofA patterns)
+  - Validate mapped data before import
+- **Verification:**
+  ```bash
+  dotnet build
+  ```
+- **Acceptance:** Columns map to transaction fields correctly
+
+### WI-V34-005: Duplicate Detection
+- **Status:** [ ]
+- **Parallelizable:** Yes (after WI-V34-004)
+- **Depends on:** WI-V34-004
+- **Files:**
+  - `FinanceEngine.Api/Services/DuplicateDetectionService.cs` (NEW)
+  - `FinanceEngine.Tests/Services/DuplicateDetectionTests.cs` (NEW)
+- **Task:** Detect and flag potential duplicate transactions
+- **Details:**
+  - Match on Date + Amount + Description (fuzzy)
+  - Flag duplicates in preview, let user decide
+  - Option to skip all duplicates
+- **Verification:**
+  ```bash
+  dotnet test --filter "FullyQualifiedName~DuplicateDetection"
+  ```
+- **Acceptance:** Duplicates detected and flagged
+
+### WI-V34-006: Import Preview Endpoint
+- **Status:** [ ]
+- **Parallelizable:** No
+- **Depends on:** WI-V34-004, WI-V34-005
+- **Files:**
+  - `FinanceEngine.Api/Endpoints/ImportEndpoints.cs`
+  - `FinanceEngine.Tests/Endpoints/ImportEndpointsTests.cs` (NEW)
+- **Task:** POST endpoint to preview import before committing
+- **Details:**
+  - Accept: file, column mapping, target account
+  - Return: parsed transactions with duplicate flags
+  - No database writes yet
+- **Verification:**
+  ```bash
+  dotnet test --filter "FullyQualifiedName~ImportEndpoints"
+  ```
+- **Acceptance:** Preview returns accurate transaction list
+
+### WI-V34-007: Import Commit Endpoint
+- **Status:** [ ]
+- **Parallelizable:** No
+- **Depends on:** WI-V34-006
+- **Files:**
+  - `FinanceEngine.Api/Endpoints/ImportEndpoints.cs`
+- **Task:** POST endpoint to commit previewed import
+- **Details:**
+  - Accept: preview session ID, list of transactions to import
+  - Create FinancialEvent records
+  - Return: count of imported transactions
+- **Verification:**
+  ```bash
+  dotnet test --filter "FullyQualifiedName~ImportEndpoints"
+  ```
+- **Acceptance:** Transactions saved to database
+
+### WI-V34-008: Import UI - File Upload
+- **Status:** [ ]
+- **Parallelizable:** Yes (frontend, independent)
+- **Depends on:** None
+- **Files:**
+  - `dashboard/src/app/pages/import/import.ts` (NEW)
+  - `dashboard/src/app/pages/import/import.html` (NEW)
+  - `dashboard/src/app/pages/import/import.scss` (NEW)
+  - `dashboard/src/app/app.routes.ts`
+- **Task:** Create import page with file upload
+- **Details:**
+  - Drag-and-drop file upload zone
+  - Accept .csv and .xlsx files
+  - Show file info after selection
+- **Verification:**
+  ```bash
+  cd dashboard && npm run build
+  ```
+- **Acceptance:** Users can upload files
+
+### WI-V34-009: Import UI - Column Mapping
+- **Status:** [ ]
+- **Parallelizable:** No
+- **Depends on:** WI-V34-008
+- **Files:**
+  - `dashboard/src/app/pages/import/import.ts`
+  - `dashboard/src/app/pages/import/import.html`
+- **Task:** Column mapping interface
+- **Details:**
+  - Display detected columns from file
+  - Dropdowns to map each column to transaction field
+  - Show sample data for each column
+  - Account selector for target account
+- **Verification:**
+  ```bash
+  cd dashboard && npm run build
+  ```
+- **Acceptance:** Users can map columns
+
+### WI-V34-010: Import UI - Preview and Confirm
+- **Status:** [ ]
+- **Parallelizable:** No
+- **Depends on:** WI-V34-009
+- **Files:**
+  - `dashboard/src/app/pages/import/import.ts`
+  - `dashboard/src/app/pages/import/import.html`
+- **Task:** Preview and confirm import
+- **Details:**
+  - Table showing transactions to import
+  - Highlight duplicates with warning icon
+  - Checkbox to include/exclude each row
+  - "Import Selected" button
+  - Success summary after import
+- **Verification:**
+  ```bash
+  cd dashboard && npm run build
+  ```
+- **Acceptance:** Users can review and confirm import
 
 ---
 

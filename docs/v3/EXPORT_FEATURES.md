@@ -1,26 +1,32 @@
-# v3: Data Export Features
+# v3: Data Import/Export Features
 
-Last updated: 2025-12-25
-Version: 3.0 (Data Export)
+Last updated: 2025-12-30
+Version: 3.0 (Data Import/Export)
 
 ## Vision
 
-Enable users to export their financial data and visualizations for external use. Users can download their financial plans, projections, transaction history, and charts in standard formats (CSV, Excel, PDF) for backup, sharing, or further analysis in tools like Google Sheets.
+Enable users to import and export their financial data. Users can:
+- **Import** bank statement transactions from CSV/Excel files (e.g., American Express, Chase downloads)
+- **Export** financial reports, charts, and projections in standard formats (CSV, Excel, PDF)
+
+This is the local file I/O version. Cloud integrations (Google Workspace, Microsoft 365 OAuth) are planned for v4.
 
 ## Scope
 
 **In Scope (v3):**
+- CSV/Excel import for bank transactions
 - CSV export for tabular data
 - Excel (.xlsx) export for tabular data
-- PDF export for chart visualizations
+- PDF export for chart visualizations and reports
 - Custom date range selection
-- Export from projections, accounts, transactions, recurring contributions
+- Column mapping for flexible import formats
 
-**Out of Scope (Future v4):**
-- Direct Google Sheets API integration (OAuth)
+**Out of Scope (v4 - Cloud Integrations):**
+- Direct Google Sheets/Drive API integration (OAuth)
+- Direct Microsoft OneDrive/Excel Online integration (OAuth)
+- Google Docs/Word export for reports
 - Automatic cloud sync/backup
 - Scheduled/automated exports
-- Import from external sources
 
 ---
 
@@ -51,6 +57,17 @@ Enable users to export their financial data and visualizations for external use.
 - Export recurring contribution schedules
 - Export budget data (if v2 complete)
 - Combined "full export" option (all data in one Excel workbook with multiple sheets)
+
+### v3.4: Transaction Import
+**Focus:** Import transactions from bank CSV/Excel exports
+
+**Features:**
+- Upload CSV or Excel files from bank statement downloads
+- Column mapping UI (map bank columns to our fields: Date, Description, Amount, etc.)
+- Preview imported data before committing
+- Duplicate detection (prevent re-importing same transactions)
+- Support common bank formats (American Express, Chase, Bank of America, etc.)
+- Batch import with account selection
 
 ---
 
@@ -376,9 +393,155 @@ GET /api/export/full?format=xlsx  (all data in multi-sheet workbook)
 
 ---
 
-## Future Considerations (v4+)
+---
 
-- **Google Sheets Integration:** Direct OAuth flow to export to user's Google account
-- **Scheduled Exports:** Automatic weekly/monthly exports to email or cloud storage
-- **Import:** Import transactions from bank CSV exports
-- **Templates:** Customizable export templates
+### Phase v3.4: Transaction Import
+
+#### WI-V34-001: Import Infrastructure
+- **Status:** [ ]
+- **Parallelizable:** No (foundation)
+- **Files:**
+  - `FinanceEngine.Api/Endpoints/ImportEndpoints.cs` (NEW)
+  - `FinanceEngine.Api/Services/ImportService.cs` (NEW)
+- **Task:** Set up import endpoint structure
+- **Acceptance:** Base endpoint file created, file upload handling
+
+#### WI-V34-002: CSV Parser Service
+- **Status:** [ ]
+- **Parallelizable:** No
+- **Depends on:** WI-V34-001
+- **Files:**
+  - `FinanceEngine.Api/Services/CsvImportService.cs` (NEW)
+  - `FinanceEngine.Tests/Services/CsvImportServiceTests.cs` (NEW)
+- **Task:** Parse CSV files and extract transaction data
+- **Details:**
+  - Auto-detect delimiter (comma, semicolon, tab)
+  - Handle quoted fields
+  - Return column headers and preview rows
+- **Acceptance:** CSV files parse correctly
+
+#### WI-V34-003: Excel Parser Service
+- **Status:** [ ]
+- **Parallelizable:** Yes (after WI-V34-001)
+- **Depends on:** WI-V34-001
+- **Files:**
+  - `FinanceEngine.Api/Services/ExcelImportService.cs` (NEW)
+  - `FinanceEngine.Tests/Services/ExcelImportServiceTests.cs` (NEW)
+- **Task:** Parse Excel files and extract transaction data
+- **Details:**
+  - Support .xlsx format using ClosedXML
+  - Handle multiple sheets (let user select)
+  - Return column headers and preview rows
+- **Acceptance:** Excel files parse correctly
+
+#### WI-V34-004: Column Mapping Engine
+- **Status:** [ ]
+- **Parallelizable:** No
+- **Depends on:** WI-V34-002, WI-V34-003
+- **Files:**
+  - `FinanceEngine.Api/Services/ColumnMappingService.cs` (NEW)
+  - `FinanceEngine.Api/Models/ImportModels.cs` (NEW)
+- **Task:** Map source columns to transaction fields
+- **Details:**
+  - Required mappings: Date, Amount
+  - Optional mappings: Description, Category, Reference
+  - Auto-detect common bank formats (Amex, Chase, BofA patterns)
+  - Validate mapped data before import
+- **Acceptance:** Columns map to transaction fields correctly
+
+#### WI-V34-005: Duplicate Detection
+- **Status:** [ ]
+- **Parallelizable:** Yes (after WI-V34-004)
+- **Depends on:** WI-V34-004
+- **Files:**
+  - `FinanceEngine.Api/Services/DuplicateDetectionService.cs` (NEW)
+  - `FinanceEngine.Tests/Services/DuplicateDetectionTests.cs` (NEW)
+- **Task:** Detect and flag potential duplicate transactions
+- **Details:**
+  - Match on Date + Amount + Description (fuzzy)
+  - Flag duplicates in preview, let user decide
+  - Option to skip all duplicates
+- **Acceptance:** Duplicates detected and flagged
+
+#### WI-V34-006: Import Preview Endpoint
+- **Status:** [ ]
+- **Parallelizable:** No
+- **Depends on:** WI-V34-004, WI-V34-005
+- **Files:**
+  - `FinanceEngine.Api/Endpoints/ImportEndpoints.cs`
+  - `FinanceEngine.Tests/Endpoints/ImportEndpointsTests.cs` (NEW)
+- **Task:** POST endpoint to preview import before committing
+- **Details:**
+  - Accept: file, column mapping, target account
+  - Return: parsed transactions with duplicate flags
+  - No database writes yet
+- **Acceptance:** Preview returns accurate transaction list
+
+#### WI-V34-007: Import Commit Endpoint
+- **Status:** [ ]
+- **Parallelizable:** No
+- **Depends on:** WI-V34-006
+- **Files:**
+  - `FinanceEngine.Api/Endpoints/ImportEndpoints.cs`
+- **Task:** POST endpoint to commit previewed import
+- **Details:**
+  - Accept: preview session ID, list of transactions to import
+  - Create FinancialEvent records
+  - Return: count of imported transactions
+- **Acceptance:** Transactions saved to database
+
+#### WI-V34-008: Import UI - File Upload
+- **Status:** [ ]
+- **Parallelizable:** Yes (frontend, independent)
+- **Depends on:** None
+- **Files:**
+  - `dashboard/src/app/pages/import/import.ts` (NEW)
+  - `dashboard/src/app/pages/import/import.html` (NEW)
+  - `dashboard/src/app/pages/import/import.scss` (NEW)
+  - `dashboard/src/app/app.routes.ts`
+- **Task:** Create import page with file upload
+- **Details:**
+  - Drag-and-drop file upload zone
+  - Accept .csv and .xlsx files
+  - Show file info after selection
+- **Acceptance:** Users can upload files
+
+#### WI-V34-009: Import UI - Column Mapping
+- **Status:** [ ]
+- **Parallelizable:** No
+- **Depends on:** WI-V34-008
+- **Files:**
+  - `dashboard/src/app/pages/import/import.ts`
+  - `dashboard/src/app/pages/import/import.html`
+- **Task:** Column mapping interface
+- **Details:**
+  - Display detected columns from file
+  - Dropdowns to map each column to transaction field
+  - Show sample data for each column
+  - Account selector for target account
+- **Acceptance:** Users can map columns
+
+#### WI-V34-010: Import UI - Preview and Confirm
+- **Status:** [ ]
+- **Parallelizable:** No
+- **Depends on:** WI-V34-009
+- **Files:**
+  - `dashboard/src/app/pages/import/import.ts`
+  - `dashboard/src/app/pages/import/import.html`
+- **Task:** Preview and confirm import
+- **Details:**
+  - Table showing transactions to import
+  - Highlight duplicates with warning icon
+  - Checkbox to include/exclude each row
+  - "Import Selected" button
+  - Success summary after import
+- **Acceptance:** Users can review and confirm import
+
+---
+
+## Future Considerations (v4 - Cloud Integrations)
+
+- **Google Workspace:** OAuth sign-in, export to Google Sheets/Docs/Drive
+- **Microsoft 365:** OAuth sign-in, export to Excel Online/OneDrive/Word
+- **Scheduled Exports:** Automatic weekly/monthly exports to cloud storage
+- **Templates:** Customizable export/report templates
