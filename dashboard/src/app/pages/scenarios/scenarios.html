@@ -1,0 +1,312 @@
+<div class="scenarios-container">
+  <header class="page-header">
+    <h1>Scenario Planning</h1>
+    <p class="subtitle">Adjust the sliders to see how changes affect your financial future</p>
+  </header>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="48"></mat-spinner>
+      <span>Loading scenario defaults...</span>
+    </div>
+  } @else {
+    <!-- Sliders Section -->
+    <section class="sliders-section">
+      <div class="app-card">
+        <div class="section-header">
+          <h2>What-If Adjustments</h2>
+          @if (hasChanges()) {
+            <button class="reset-btn" (click)="resetToDefaults()">
+              <mat-icon>refresh</mat-icon>
+              Reset
+            </button>
+          }
+        </div>
+
+        <div class="sliders-grid">
+          <!-- Monthly Discretionary Slider -->
+          <div class="slider-item">
+            <div class="slider-header">
+              <div class="slider-info">
+                <mat-icon class="slider-icon">shopping_bag</mat-icon>
+                <div class="slider-labels">
+                  <span class="slider-label">Monthly Discretionary</span>
+                  <span class="slider-description">Spending on wants, entertainment, etc.</span>
+                </div>
+              </div>
+              <div class="slider-value">
+                <span class="current-value">{{ formatCurrency(monthlyDiscretionary()) }}</span>
+                @if (discretionaryChange() !== 0) {
+                  <span class="value-change" [class]="discretionaryChange() < 0 ? 'positive' : 'negative'">
+                    {{ formatSignedCurrency(discretionaryChange()) }}
+                  </span>
+                }
+              </div>
+            </div>
+            <mat-slider
+              [min]="defaults()?.sliderRanges?.discretionaryMin ?? 0"
+              [max]="defaults()?.sliderRanges?.discretionaryMax ?? 1000"
+              step="25"
+              discrete
+              showTickMarks>
+              <input matSliderThumb [(ngModel)]="monthlyDiscretionary" (ngModelChange)="onSliderChange()">
+            </mat-slider>
+            <div class="slider-range">
+              <span>{{ formatCurrency(defaults()?.sliderRanges?.discretionaryMin ?? 0) }}</span>
+              <span>{{ formatCurrency(defaults()?.sliderRanges?.discretionaryMax ?? 1000) }}</span>
+            </div>
+          </div>
+
+          <!-- Extra Debt Payment Slider -->
+          <div class="slider-item">
+            <div class="slider-header">
+              <div class="slider-info">
+                <mat-icon class="slider-icon">credit_card_off</mat-icon>
+                <div class="slider-labels">
+                  <span class="slider-label">Extra Debt Payment</span>
+                  <span class="slider-description">Additional payment beyond minimums</span>
+                </div>
+              </div>
+              <div class="slider-value">
+                <span class="current-value">{{ formatCurrency(extraDebtPayment()) }}</span>
+                @if (extraDebtPayment() > 0) {
+                  <span class="value-change positive">
+                    {{ formatSignedCurrency(extraDebtPayment()) }}
+                  </span>
+                }
+              </div>
+            </div>
+            <mat-slider
+              [min]="defaults()?.sliderRanges?.extraDebtMin ?? 0"
+              [max]="defaults()?.sliderRanges?.extraDebtMax ?? 500"
+              step="25"
+              discrete
+              showTickMarks>
+              <input matSliderThumb [(ngModel)]="extraDebtPayment" (ngModelChange)="onSliderChange()">
+            </mat-slider>
+            <div class="slider-range">
+              <span>{{ formatCurrency(defaults()?.sliderRanges?.extraDebtMin ?? 0) }}</span>
+              <span>{{ formatCurrency(defaults()?.sliderRanges?.extraDebtMax ?? 500) }}</span>
+            </div>
+          </div>
+
+          <!-- Extra Investment Slider -->
+          <div class="slider-item">
+            <div class="slider-info">
+              <mat-icon class="slider-icon">trending_up</mat-icon>
+              <div class="slider-labels">
+                <span class="slider-label">Extra Investment</span>
+                <span class="slider-description">Additional monthly contributions</span>
+              </div>
+            </div>
+            <div class="slider-header">
+              <div class="slider-value">
+                <span class="current-value">{{ formatCurrency(extraInvestmentContribution()) }}</span>
+                @if (extraInvestmentContribution() > 0) {
+                  <span class="value-change positive">
+                    {{ formatSignedCurrency(extraInvestmentContribution()) }}
+                  </span>
+                }
+              </div>
+            </div>
+            <mat-slider
+              [min]="defaults()?.sliderRanges?.extraInvestmentMin ?? 0"
+              [max]="defaults()?.sliderRanges?.extraInvestmentMax ?? 500"
+              step="25"
+              discrete
+              showTickMarks>
+              <input matSliderThumb [(ngModel)]="extraInvestmentContribution" (ngModelChange)="onSliderChange()">
+            </mat-slider>
+            <div class="slider-range">
+              <span>{{ formatCurrency(defaults()?.sliderRanges?.extraInvestmentMin ?? 0) }}</span>
+              <span>{{ formatCurrency(defaults()?.sliderRanges?.extraInvestmentMax ?? 500) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary Bar -->
+        <div class="summary-bar" [class]="getStatusClass(result()?.monthlySurplus ?? 0)">
+          <div class="summary-item">
+            <span class="summary-label">Monthly Change</span>
+            <span class="summary-value" [class]="getComparisonClass(-totalMonthlyChange())">
+              {{ formatSignedCurrency(-totalMonthlyChange()) }}/mo
+            </span>
+          </div>
+          <div class="summary-divider"></div>
+          <div class="summary-item">
+            <span class="summary-label">Monthly Surplus</span>
+            <span class="summary-value" [class]="getStatusClass(result()?.monthlySurplus ?? 0)">
+              @if (calculating()) {
+                <mat-spinner diameter="16"></mat-spinner>
+              } @else {
+                {{ formatCurrency(result()?.monthlySurplus ?? 0) }}
+              }
+            </span>
+          </div>
+          <div class="summary-divider"></div>
+          <div class="summary-item">
+            <span class="summary-label">Safe to Spend</span>
+            <span class="summary-value">
+              @if (calculating()) {
+                <mat-spinner diameter="16"></mat-spinner>
+              } @else {
+                {{ formatCurrency(result()?.adjustedSafeToSpend ?? 0) }}
+              }
+            </span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results Section -->
+    @if (result(); as r) {
+      <section class="results-section">
+        <!-- Key Metrics Grid -->
+        <div class="metrics-grid">
+          <!-- Debt Payoff Card -->
+          <div class="app-card metric-card">
+            <div class="metric-header">
+              <mat-icon>credit_card_off</mat-icon>
+              <span>Debt Payoff</span>
+            </div>
+            <div class="metric-body">
+              <div class="metric-main">
+                <span class="metric-value">{{ formatMonths(r.debtProjection.monthsToPayoff) }}</span>
+                <span class="metric-label">to debt free</span>
+              </div>
+              <div class="metric-details">
+                <div class="metric-detail">
+                  <span class="detail-label">Payoff Date</span>
+                  <span class="detail-value">{{ formatDate(r.debtProjection.finalPayoffDate) }}</span>
+                </div>
+                <div class="metric-detail">
+                  <span class="detail-label">Total Interest</span>
+                  <span class="detail-value">{{ formatCurrency(r.debtProjection.totalInterestPaid) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Investment Growth Card -->
+          <div class="app-card metric-card">
+            <div class="metric-header">
+              <mat-icon>trending_up</mat-icon>
+              <span>Investment (12 mo)</span>
+            </div>
+            <div class="metric-body">
+              <div class="metric-main">
+                <span class="metric-value">{{ formatCurrency(r.investmentProjection.projectedValue) }}</span>
+                <span class="metric-label">projected value</span>
+              </div>
+              <div class="metric-details">
+                <div class="metric-detail">
+                  <span class="detail-label">Contributions</span>
+                  <span class="detail-value">{{ formatCurrency(r.investmentProjection.totalContributions) }}</span>
+                </div>
+                <div class="metric-detail">
+                  <span class="detail-label">Growth</span>
+                  <span class="detail-value positive">{{ formatCurrency(r.investmentProjection.totalGrowth) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Net Worth Card -->
+          <div class="app-card metric-card accent">
+            <div class="metric-header">
+              <mat-icon>account_balance</mat-icon>
+              <span>Net Worth (12 mo)</span>
+            </div>
+            <div class="metric-body">
+              <div class="metric-main">
+                <span class="metric-value">{{ formatCurrency(r.netWorthProjection.projectedNetWorth) }}</span>
+                <span class="metric-label">projected</span>
+              </div>
+              <div class="metric-details">
+                <div class="metric-detail">
+                  <span class="detail-label">Change</span>
+                  <span class="detail-value" [class]="getComparisonClass(r.netWorthProjection.netWorthChange)">
+                    {{ formatSignedCurrency(r.netWorthProjection.netWorthChange) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comparison with Baseline -->
+        @if (r.comparison.monthsSavedOnDebt !== 0 || r.comparison.interestSaved !== 0 || r.comparison.additionalInvestmentGrowth !== 0) {
+          <div class="app-card comparison-card">
+            <div class="section-header">
+              <h2>Compared to Current Plan</h2>
+            </div>
+            <div class="comparison-grid">
+              @if (r.comparison.monthsSavedOnDebt !== 0) {
+                <div class="comparison-item" [class]="getComparisonClass(r.comparison.monthsSavedOnDebt)">
+                  <mat-icon>schedule</mat-icon>
+                  <div class="comparison-content">
+                    <span class="comparison-value">{{ r.comparison.monthsSavedOnDebt }} months</span>
+                    <span class="comparison-label">{{ r.comparison.monthsSavedOnDebt > 0 ? 'saved' : 'added' }} on debt</span>
+                  </div>
+                </div>
+              }
+              @if (r.comparison.interestSaved !== 0) {
+                <div class="comparison-item" [class]="getComparisonClass(r.comparison.interestSaved)">
+                  <mat-icon>savings</mat-icon>
+                  <div class="comparison-content">
+                    <span class="comparison-value">{{ formatCurrency(Math.abs(r.comparison.interestSaved)) }}</span>
+                    <span class="comparison-label">{{ r.comparison.interestSaved > 0 ? 'saved' : 'more' }} in interest</span>
+                  </div>
+                </div>
+              }
+              @if (r.comparison.additionalInvestmentGrowth !== 0) {
+                <div class="comparison-item" [class]="getComparisonClass(r.comparison.additionalInvestmentGrowth)">
+                  <mat-icon>show_chart</mat-icon>
+                  <div class="comparison-content">
+                    <span class="comparison-value">{{ formatCurrency(Math.abs(r.comparison.additionalInvestmentGrowth)) }}</span>
+                    <span class="comparison-label">{{ r.comparison.additionalInvestmentGrowth > 0 ? 'extra' : 'less' }} investment growth</span>
+                  </div>
+                </div>
+              }
+              <div class="comparison-item net-benefit" [class]="getComparisonClass(r.comparison.netBenefit)">
+                <mat-icon>{{ r.comparison.netBenefit >= 0 ? 'thumb_up' : 'thumb_down' }}</mat-icon>
+                <div class="comparison-content">
+                  <span class="comparison-value">{{ formatSignedCurrency(r.comparison.netBenefit) }}</span>
+                  <span class="comparison-label">net benefit</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Timeline Snapshots -->
+        @if (r.netWorthProjection.monthlySnapshots.length > 0) {
+          <div class="app-card timeline-card">
+            <div class="section-header">
+              <h2>12-Month Net Worth Timeline</h2>
+            </div>
+            <div class="timeline-chart">
+              @for (snapshot of r.netWorthProjection.monthlySnapshots; track snapshot.month; let i = $index) {
+                @if (i % 2 === 0 || i === r.netWorthProjection.monthlySnapshots.length - 1) {
+                  <div class="timeline-point">
+                    <div class="timeline-bar"
+                         [style.height.%]="getBarHeight(snapshot.netWorth, r.netWorthProjection.monthlySnapshots)">
+                      <div class="bar-debt" [style.height.%]="getDebtRatio(snapshot, r.netWorthProjection.monthlySnapshots)"></div>
+                      <div class="bar-investments" [style.height.%]="getInvestmentRatio(snapshot, r.netWorthProjection.monthlySnapshots)"></div>
+                    </div>
+                    <span class="timeline-month">M{{ snapshot.month }}</span>
+                    <span class="timeline-value">{{ formatCurrency(snapshot.netWorth) }}</span>
+                  </div>
+                }
+              }
+            </div>
+            <div class="timeline-legend">
+              <span class="legend-item"><span class="legend-color investments"></span> Investments</span>
+              <span class="legend-item"><span class="legend-color debt"></span> Debt</span>
+            </div>
+          </div>
+        }
+      </section>
+    }
+  }
+</div>

@@ -31,7 +31,15 @@ import {
   Goal,
   GoalProgress,
   CreateGoalRequest,
-  UpdateGoalRequest
+  UpdateGoalRequest,
+  SafeToSpendResult,
+  BudgetAnalysisResult,
+  SuggestionsResult,
+  FullSafeToSpendReport,
+  TimeHorizon,
+  ScenarioRequest,
+  ScenarioResponse,
+  ScenarioDefaultsResponse
 } from '../models/api.models';
 
 @Injectable({
@@ -215,5 +223,42 @@ export class ApiService {
 
   deleteGoal(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/goals/${id}`);
+  }
+
+  // Safe-to-Spend endpoints
+  getSafeToSpend(params?: {
+    timeHorizon?: TimeHorizon;
+    nextPaycheckDate?: string;
+    minimumBuffer?: number;
+  }): Observable<SafeToSpendResult> {
+    return this.http.get<SafeToSpendResult>(`${this.baseUrl}/safe-to-spend`, { params: params as any });
+  }
+
+  getBudgetAnalysis(periodDays?: number): Observable<BudgetAnalysisResult> {
+    const params = periodDays ? { periodDays } : {};
+    return this.http.get<BudgetAnalysisResult>(`${this.baseUrl}/safe-to-spend/analysis`, { params: params as any });
+  }
+
+  getSuggestions(params?: {
+    maxSuggestions?: number;
+    timeHorizon?: TimeHorizon;
+  }): Observable<SuggestionsResult> {
+    return this.http.get<SuggestionsResult>(`${this.baseUrl}/safe-to-spend/suggestions`, { params: params as any });
+  }
+
+  getFullSafeToSpendReport(params?: {
+    timeHorizon?: TimeHorizon;
+    maxSuggestions?: number;
+  }): Observable<FullSafeToSpendReport> {
+    return this.http.get<FullSafeToSpendReport>(`${this.baseUrl}/safe-to-spend/full`, { params: params as any });
+  }
+
+  // Scenario endpoints
+  getScenarioDefaults(): Observable<ScenarioDefaultsResponse> {
+    return this.http.get<ScenarioDefaultsResponse>(`${this.baseUrl}/scenarios/defaults`);
+  }
+
+  calculateScenario(request: ScenarioRequest): Observable<ScenarioResponse> {
+    return this.http.post<ScenarioResponse>(`${this.baseUrl}/scenarios/calculate`, request);
   }
 }

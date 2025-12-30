@@ -26,7 +26,53 @@ const mockSettings = {
   payFrequency: 'BiWeekly' as const,
   paycheckAmount: 2500,
   safetyBuffer: 100,
-  nextPaycheckDate: '2025-01-31'
+  nextPaycheckDate: '2025-01-31',
+  preferredTimeHorizon: 'NextPaycheck' as const
+};
+
+const mockBudgets = [
+  { id: 1, categoryId: 1, categoryName: 'Groceries', amount: 500, frequency: 'Monthly' as const, effectiveDate: '2025-01-01', isActive: true }
+];
+
+const mockCategories = [
+  { id: 1, name: 'Groceries', type: 'Recurring' as const, icon: 'shopping_cart', color: '#4CAF50', sortOrder: 1, isActive: true }
+];
+
+const mockGoals = [
+  {
+    id: 1, name: 'Emergency Fund', type: 'SavingsGoal' as const, targetAmount: 10000, targetDate: '2025-12-31',
+    linkedAccountIds: [2], priority: 1, isActive: true,
+    progress: { currentValue: 5000, targetValue: 10000, progressPercentage: 50, status: 'OnTrack' as const, monthsRemaining: 12, statusMessage: 'On track' }
+  }
+];
+
+const mockRecurringContributions = [
+  {
+    id: 1, name: '401k Contribution', amount: 500, frequency: 'BiWeekly' as const,
+    nextContributionDate: '2025-01-15', sourceAccountId: 1, targetAccountId: 4,
+    sourceAccountName: 'Checking', targetAccountName: '401k', isActive: true, createdAt: '2025-01-01'
+  }
+];
+
+const mockSafeToSpend = {
+  safeToSpend: 1500,
+  status: 'Healthy' as const,
+  breakdown: {
+    availableCash: 15500,
+    upcomingBills: 1000,
+    requiredGoalContributions: 500,
+    minimumBuffer: 100,
+    daysInHorizon: 14
+  },
+  goalImpacts: [],
+  statusMessage: 'You have comfortable spending room',
+  horizonEndDate: '2025-01-31'
+};
+
+const mockSuggestions = {
+  suggestions: [],
+  hasUrgentSuggestions: false,
+  totalPotentialSavings: 0
 };
 
 const mockSpendableResult = {
@@ -56,6 +102,13 @@ describe('DashboardPage', () => {
     getAccounts: jest.fn().mockReturnValue(of(mockAccounts)),
     getRecentEvents: jest.fn().mockReturnValue(of(mockEvents)),
     getSettings: jest.fn().mockReturnValue(of(mockSettings)),
+    getBudgets: jest.fn().mockReturnValue(of(mockBudgets)),
+    getCategories: jest.fn().mockReturnValue(of(mockCategories)),
+    getEvents: jest.fn().mockReturnValue(of(mockEvents)),
+    getGoals: jest.fn().mockReturnValue(of(mockGoals)),
+    getRecurringContributions: jest.fn().mockReturnValue(of(mockRecurringContributions)),
+    getSafeToSpend: jest.fn().mockReturnValue(of(mockSafeToSpend)),
+    getSuggestions: jest.fn().mockReturnValue(of(mockSuggestions)),
     calculateSpendable: jest.fn().mockReturnValue(of(mockSpendableResult)),
     ...overrides
   });
@@ -156,7 +209,20 @@ describe('DashboardPage', () => {
   }));
 
   it('should handle empty accounts gracefully', fakeAsync(() => {
-    mockApiService.getAccounts = jest.fn().mockReturnValue(of([]));
+    const emptyMockService = createMockApiService({ getAccounts: jest.fn().mockReturnValue(of([])) });
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [DashboardPage],
+      providers: [
+        { provide: ApiService, useValue: emptyMockService },
+        { provide: ProjectionService, useValue: createMockProjectionService() },
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideAnimations(),
+        provideRouter([])
+      ]
+    });
 
     fixture = TestBed.createComponent(DashboardPage);
     component = fixture.componentInstance;

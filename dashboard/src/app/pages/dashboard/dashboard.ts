@@ -9,7 +9,21 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { ApiService } from '../../core/services/api.service';
 import { ProjectionService } from '../../core/services/projection.service';
-import { Account, FinancialEvent, SpendableRequest, SpendableResult, UserSettings, Budget, Category, Goal, GoalStatus } from '../../core/models/api.models';
+import {
+  Account,
+  FinancialEvent,
+  SpendableRequest,
+  SpendableResult,
+  UserSettings,
+  Budget,
+  Category,
+  Goal,
+  GoalStatus,
+  SafeToSpendResult,
+  SafeToSpendStatus,
+  SuggestionsResult,
+  Suggestion
+} from '../../core/models/api.models';
 import { CalendarComponent } from '../../features/calendar/calendar.component';
 import { DebtProjectionChartComponent } from '../../features/charts/debt-projection-chart.component';
 import { InvestmentProjectionChartComponent } from '../../features/charts/investment-projection-chart.component';
@@ -47,6 +61,10 @@ export class DashboardPage {
   readonly monthlyEvents = signal<FinancialEvent[]>([]);
   readonly goals = signal<Goal[]>([]);
   readonly loading = signal(true);
+
+  // New SafeToSpend signals
+  readonly safeToSpendResult = signal<SafeToSpendResult | null>(null);
+  readonly suggestions = signal<SuggestionsResult | null>(null);
 
   // Projection chart data
   readonly debtChartData = this.projectionService.debtChartData;
@@ -171,9 +189,11 @@ export class DashboardPage {
       budgets: this.apiService.getBudgets(),
       categories: this.apiService.getCategories(),
       monthlyEvents: this.apiService.getEvents({ startDate, endDate }),
-      goals: this.apiService.getGoals(true)
+      goals: this.apiService.getGoals(true),
+      safeToSpend: this.apiService.getSafeToSpend(),
+      suggestions: this.apiService.getSuggestions({ maxSuggestions: 3 })
     }).subscribe({
-      next: ({ accounts, events, settings, budgets, categories, monthlyEvents, goals }) => {
+      next: ({ accounts, events, settings, budgets, categories, monthlyEvents, goals, safeToSpend, suggestions }) => {
         this.accounts.set(accounts);
         this.recentEvents.set(events);
         this.settings.set(settings);
@@ -181,6 +201,8 @@ export class DashboardPage {
         this.categories.set(categories);
         this.monthlyEvents.set(monthlyEvents);
         this.goals.set(goals);
+        this.safeToSpendResult.set(safeToSpend);
+        this.suggestions.set(suggestions);
         this.calculateSpendable(accounts);
 
         // Calculate projections
@@ -351,6 +373,59 @@ export class DashboardPage {
       case 'AtRisk': return 'progress-at-risk';
       case 'Behind': return 'progress-behind';
       default: return '';
+    }
+  }
+
+  // SafeToSpend status helpers
+  getSafeToSpendStatusColor(status: SafeToSpendStatus): string {
+    switch (status) {
+      case 'Healthy': return '#4CAF50';
+      case 'Tight': return '#FFC107';
+      case 'AtRisk': return '#FF9800';
+      case 'Behind': return '#F44336';
+      default: return '#9E9E9E';
+    }
+  }
+
+  getSafeToSpendStatusIcon(status: SafeToSpendStatus): string {
+    switch (status) {
+      case 'Healthy': return 'check_circle';
+      case 'Tight': return 'warning';
+      case 'AtRisk': return 'error_outline';
+      case 'Behind': return 'error';
+      default: return 'help';
+    }
+  }
+
+  getSafeToSpendStatusClass(status: SafeToSpendStatus): string {
+    switch (status) {
+      case 'Healthy': return 'status-healthy';
+      case 'Tight': return 'status-tight';
+      case 'AtRisk': return 'status-at-risk';
+      case 'Behind': return 'status-behind';
+      default: return '';
+    }
+  }
+
+  getSuggestionIcon(category: string): string {
+    switch (category) {
+      case 'ReduceSpending': return 'trending_down';
+      case 'IncreaseContribution': return 'trending_up';
+      case 'Emergency': return 'emergency';
+      case 'Warning': return 'warning';
+      case 'Optimization': return 'lightbulb';
+      case 'Positive': return 'celebration';
+      default: return 'info';
+    }
+  }
+
+  getSuggestionPriorityColor(priority: string): string {
+    switch (priority) {
+      case 'Critical': return '#F44336';
+      case 'High': return '#FF9800';
+      case 'Medium': return '#FFC107';
+      case 'Low': return '#4CAF50';
+      default: return '#9E9E9E';
     }
   }
 }

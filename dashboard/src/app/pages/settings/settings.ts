@@ -79,6 +79,16 @@ import { RecurringContributionDialogComponent } from './recurring-contribution-d
                 <span matTextPrefix>$&nbsp;</span>
                 <mat-hint>Minimum cash cushion to maintain</mat-hint>
               </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Safe-to-Spend Time Horizon</mat-label>
+                <mat-select formControlName="preferredTimeHorizon" required>
+                  <mat-option value="NextPaycheck">Until Next Paycheck</mat-option>
+                  <mat-option value="CurrentMonth">Current Month</mat-option>
+                  <mat-option value="RollingTwoWeeks">Rolling 2 Weeks</mat-option>
+                </mat-select>
+                <mat-hint>Planning period for safe-to-spend calculations</mat-hint>
+              </mat-form-field>
             </div>
 
             <div class="form-actions">
@@ -354,7 +364,8 @@ export class SettingsPage implements OnInit {
       payFrequency: ['BiWeekly', Validators.required],
       paycheckAmount: [2500, [Validators.required, Validators.min(0.01)]],
       safetyBuffer: [100, [Validators.required, Validators.min(0)]],
-      nextPaycheckDate: [null, this.validateFutureDate.bind(this)]
+      nextPaycheckDate: [null, this.validateFutureDate.bind(this)],
+      preferredTimeHorizon: ['NextPaycheck', Validators.required]
     });
   }
 
@@ -400,7 +411,8 @@ export class SettingsPage implements OnInit {
           payFrequency: settings.payFrequency,
           paycheckAmount: settings.paycheckAmount,
           safetyBuffer: settings.safetyBuffer,
-          nextPaycheckDate: formattedDate
+          nextPaycheckDate: formattedDate,
+          preferredTimeHorizon: settings.preferredTimeHorizon || 'NextPaycheck'
         });
         this.loading.set(false);
       },
@@ -429,7 +441,8 @@ export class SettingsPage implements OnInit {
         payFrequency: formValue.payFrequency,
         paycheckAmount: formValue.paycheckAmount,
         safetyBuffer: formValue.safetyBuffer,
-        nextPaycheckDate
+        nextPaycheckDate,
+        preferredTimeHorizon: formValue.preferredTimeHorizon
       };
 
       this.apiService.updateSettings(request).subscribe({

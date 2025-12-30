@@ -16,11 +16,24 @@
     </header>
 
     <!-- Hero Band -->
-    <section class="hero-band app-card">
+    <section class="hero-band app-card" [class]="safeToSpendResult() ? getSafeToSpendStatusClass(safeToSpendResult()!.status) : ''">
       <div class="hero-content">
         <div class="hero-main">
-          <span class="label">Safe to Spend Now</span>
-          @if (spendableResult()) {
+          <div class="safe-to-spend-header">
+            <span class="label">Safe to Spend</span>
+            @if (safeToSpendResult()) {
+              <span class="status-badge" [style.background-color]="getSafeToSpendStatusColor(safeToSpendResult()!.status)">
+                <mat-icon>{{ getSafeToSpendStatusIcon(safeToSpendResult()!.status) }}</mat-icon>
+                {{ safeToSpendResult()!.status }}
+              </span>
+            }
+          </div>
+          @if (safeToSpendResult()) {
+            <h2 class="amount" [style.color]="safeToSpendResult()!.safeToSpend < 0 ? '#F44336' : 'inherit'">
+              {{ formatCurrency(safeToSpendResult()!.safeToSpend) }}
+            </h2>
+            <p class="context">{{ safeToSpendResult()!.statusMessage }}</p>
+          } @else if (spendableResult()) {
             <h2 class="amount">{{ formatCurrency(spendableResult()!.spendableNow) }}</h2>
             <p class="context">Until your next paycheck in {{ spendableResult()!.breakdown.daysUntilNextPaycheck }} days</p>
           } @else {
@@ -28,16 +41,31 @@
             <p class="context">Add accounts and settings to calculate safe-to-spend</p>
           }
         </div>
-        
+
         <div class="hero-stats">
-          <div class="stat-item">
-            <span class="stat-label">Next Paycheck</span>
-            <span class="stat-value">{{ settings()?.nextPaycheckDate ? (settings()!.nextPaycheckDate | date:'MMM d') : 'Not set' }}</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">Safety Buffer</span>
-            <span class="stat-value">{{ formatCurrency(settings()?.safetyBuffer || 0) }}</span>
-          </div>
+          @if (safeToSpendResult()) {
+            <div class="stat-item">
+              <span class="stat-label">Horizon</span>
+              <span class="stat-value">{{ safeToSpendResult()!.breakdown.daysInHorizon }} days</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Upcoming Bills</span>
+              <span class="stat-value">{{ formatCurrency(safeToSpendResult()!.breakdown.upcomingBills) }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Goal Contributions</span>
+              <span class="stat-value">{{ formatCurrency(safeToSpendResult()!.breakdown.requiredGoalContributions) }}</span>
+            </div>
+          } @else {
+            <div class="stat-item">
+              <span class="stat-label">Next Paycheck</span>
+              <span class="stat-value">{{ settings()?.nextPaycheckDate ? (settings()!.nextPaycheckDate | date:'MMM d') : 'Not set' }}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Safety Buffer</span>
+              <span class="stat-value">{{ formatCurrency(settings()?.safetyBuffer || 0) }}</span>
+            </div>
+          }
         </div>
 
         <div class="hero-actions">
@@ -48,6 +76,41 @@
         </div>
       </div>
     </section>
+
+    <!-- Suggestions Panel -->
+    @if (suggestions() && suggestions()!.suggestions.length > 0) {
+      <section class="app-card suggestions-widget">
+        <div class="section-header">
+          <h2>
+            @if (suggestions()!.hasUrgentSuggestions) {
+              <mat-icon class="urgent-icon">priority_high</mat-icon>
+            }
+            Smart Suggestions
+          </h2>
+          @if (suggestions()!.totalPotentialSavings > 0) {
+            <span class="savings-badge">
+              Save up to {{ formatCurrency(suggestions()!.totalPotentialSavings) }}
+            </span>
+          }
+        </div>
+        <div class="suggestions-list">
+          @for (suggestion of suggestions()!.suggestions; track suggestion.id) {
+            <div class="suggestion-item" [class.urgent]="suggestion.priority === 'Critical' || suggestion.priority === 'High'">
+              <div class="suggestion-icon" [style.background-color]="getSuggestionPriorityColor(suggestion.priority)">
+                <mat-icon>{{ getSuggestionIcon(suggestion.category) }}</mat-icon>
+              </div>
+              <div class="suggestion-content">
+                <span class="suggestion-title">{{ suggestion.title }}</span>
+                <span class="suggestion-description">{{ suggestion.description }}</span>
+              </div>
+              @if (suggestion.potentialSavings) {
+                <span class="suggestion-savings">{{ formatCurrency(suggestion.potentialSavings) }}</span>
+              }
+            </div>
+          }
+        </div>
+      </section>
+    }
 
     <!-- Metrics Grid -->
     <div class="metrics-grid">

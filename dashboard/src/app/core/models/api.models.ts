@@ -217,11 +217,14 @@ export interface DebtPayment {
 }
 
 // Settings models
+export type TimeHorizon = 'NextPaycheck' | 'CurrentMonth' | 'RollingTwoWeeks';
+
 export interface UserSettings {
   payFrequency: 'Weekly' | 'BiWeekly' | 'SemiMonthly' | 'Monthly';
   paycheckAmount: number;
   safetyBuffer: number;
   nextPaycheckDate?: string;
+  preferredTimeHorizon: TimeHorizon;
 }
 
 export interface UpdateSettingsRequest {
@@ -229,6 +232,7 @@ export interface UpdateSettingsRequest {
   paycheckAmount: number;
   safetyBuffer: number;
   nextPaycheckDate?: string;
+  preferredTimeHorizon?: string;
 }
 
 // Investment Projection Models
@@ -426,4 +430,173 @@ export interface NetWorthChartData {
   netWorth: number[];
   investments: number[];
   debt: number[];
+}
+
+// Safe-to-Spend Models
+export type SafeToSpendStatus = 'Healthy' | 'Tight' | 'AtRisk' | 'Behind';
+
+export interface SafeToSpendResult {
+  safeToSpend: number;
+  status: SafeToSpendStatus;
+  breakdown: SafeToSpendBreakdown;
+  goalImpacts: GoalImpact[];
+  statusMessage: string;
+  horizonEndDate: string;
+}
+
+export interface SafeToSpendBreakdown {
+  availableCash: number;
+  upcomingBills: number;
+  requiredGoalContributions: number;
+  minimumBuffer: number;
+  daysInHorizon: number;
+}
+
+export interface GoalImpact {
+  goalId: number;
+  goalName: string;
+  goalType: string;
+  currentStatus: string;
+  requiredMonthlyContribution: number;
+  currentMonthlyContribution: number;
+  contributionGap: number;
+  delayedMonths?: number;
+  impactMessage: string;
+}
+
+export interface BudgetAnalysisResult {
+  overspentCategories: BudgetOverspend[];
+  totalOverspend: number;
+  overallGoalImpacts: GoalImpact[];
+  hasOverspending: boolean;
+}
+
+export interface BudgetOverspend {
+  categoryId: number;
+  categoryName: string;
+  budgetAmount: number;
+  spentAmount: number;
+  overspendAmount: number;
+  goalImpacts: GoalImpact[];
+}
+
+export interface SuggestionsResult {
+  suggestions: Suggestion[];
+  hasUrgentSuggestions: boolean;
+  totalPotentialSavings: number;
+}
+
+export type SuggestionCategory = 'ReduceSpending' | 'IncreaseContribution' | 'Emergency' | 'Warning' | 'Optimization' | 'Positive';
+export type SuggestionPriority = 'Low' | 'Medium' | 'High' | 'Critical';
+export type SuggestionActionType = 'None' | 'ReduceBudgetCategory' | 'IncreaseGoalContribution' | 'ReviewBudgets' | 'IncreaseBuffer' | 'Monitor';
+
+export interface Suggestion {
+  id: string;
+  category: SuggestionCategory;
+  title: string;
+  description: string;
+  priority: SuggestionPriority;
+  potentialSavings?: number;
+  actionType: SuggestionActionType;
+  actionTarget?: string;
+  impactOnGoals: string[];
+}
+
+export interface FullSafeToSpendReport {
+  safeToSpend: SafeToSpendResult;
+  budgetAnalysis: BudgetAnalysisResult;
+  suggestions: SuggestionsResult;
+  calculatedAt: string;
+}
+
+// Scenario Planning Models
+export interface ScenarioRequest {
+  monthlyDiscretionary: number;
+  extraDebtPayment: number;
+  extraInvestmentContribution: number;
+}
+
+export interface ScenarioDefaultsResponse {
+  baseDiscretionary: number;
+  baseDebtPayment: number;
+  baseInvestmentContribution: number;
+  sliderRanges: SliderRanges;
+}
+
+export interface SliderRanges {
+  discretionaryMin: number;
+  discretionaryMax: number;
+  extraDebtMin: number;
+  extraDebtMax: number;
+  extraInvestmentMin: number;
+  extraInvestmentMax: number;
+}
+
+export interface ScenarioResponse {
+  adjustedSafeToSpend: number;
+  monthlySurplus: number;
+  debtProjection: ScenarioDebtProjection;
+  investmentProjection: ScenarioInvestmentProjection;
+  netWorthProjection: ScenarioNetWorthProjection;
+  comparison: ScenarioComparison;
+  sliderSummary: SliderSummary;
+}
+
+export interface ScenarioDebtProjection {
+  monthsToPayoff: number | null;
+  totalInterestPaid: number;
+  finalPayoffDate: string | null;
+  monthlySnapshots: ScenarioDebtSnapshot[];
+}
+
+export interface ScenarioDebtSnapshot {
+  month: number;
+  date: string;
+  remainingBalance: number;
+  interestPaid: number;
+  principalPaid: number;
+}
+
+export interface ScenarioInvestmentProjection {
+  projectedValue: number;
+  totalContributions: number;
+  totalGrowth: number;
+  monthlySnapshots: ScenarioInvestmentSnapshot[];
+}
+
+export interface ScenarioInvestmentSnapshot {
+  month: number;
+  date: string;
+  value: number;
+  contributions: number;
+  growth: number;
+}
+
+export interface ScenarioNetWorthProjection {
+  projectedNetWorth: number;
+  netWorthChange: number;
+  monthlySnapshots: ScenarioNetWorthSnapshot[];
+}
+
+export interface ScenarioNetWorthSnapshot {
+  month: number;
+  date: string;
+  cash: number;
+  debt: number;
+  investments: number;
+  netWorth: number;
+}
+
+export interface ScenarioComparison {
+  monthsSavedOnDebt: number;
+  interestSaved: number;
+  additionalInvestmentGrowth: number;
+  netBenefit: number;
+}
+
+export interface SliderSummary {
+  monthlyDiscretionary: number;
+  extraDebtPayment: number;
+  extraInvestmentContribution: number;
+  totalMonthlyChange: number;
 }

@@ -28,7 +28,8 @@ public static class SettingsEndpoints
                 PayFrequency: "BiWeekly",
                 PaycheckAmount: 2500m,
                 SafetyBuffer: 100m,
-                NextPaycheckDate: null
+                NextPaycheckDate: null,
+                PreferredTimeHorizon: "NextPaycheck"
             ));
         }
 
@@ -36,15 +37,24 @@ public static class SettingsEndpoints
             PayFrequency: settings.PayFrequency.ToString(),
             PaycheckAmount: settings.PaycheckAmount,
             SafetyBuffer: settings.SafetyBuffer,
-            NextPaycheckDate: settings.NextPaycheckDate
+            NextPaycheckDate: settings.NextPaycheckDate,
+            PreferredTimeHorizon: settings.PreferredTimeHorizon.ToString()
         ));
     }
 
     private static async Task<IResult> UpdateSettings(UpdateSettingsRequest request, FinanceDbContext db)
     {
-        // Validate enum
+        // Validate pay frequency enum
         if (!Enum.TryParse<PayFrequency>(request.PayFrequency, true, out var payFrequency))
-            return Results.BadRequest("Invalid pay frequency");
+            return Results.BadRequest("Invalid pay frequency. Must be 'Weekly', 'BiWeekly', or 'Monthly'");
+
+        // Validate time horizon enum if provided
+        var timeHorizon = TimeHorizon.NextPaycheck;
+        if (!string.IsNullOrWhiteSpace(request.PreferredTimeHorizon))
+        {
+            if (!Enum.TryParse<TimeHorizon>(request.PreferredTimeHorizon, true, out timeHorizon))
+                return Results.BadRequest("Invalid time horizon. Must be 'NextPaycheck', 'CurrentMonth', or 'RollingTwoWeeks'");
+        }
 
         // Validate amounts
         if (request.PaycheckAmount <= 0)
@@ -70,6 +80,7 @@ public static class SettingsEndpoints
             PaycheckAmount = request.PaycheckAmount,
             SafetyBuffer = request.SafetyBuffer,
             NextPaycheckDate = request.NextPaycheckDate,
+            PreferredTimeHorizon = timeHorizon,
             IsActive = true
         };
 
@@ -80,7 +91,8 @@ public static class SettingsEndpoints
             PayFrequency: newSettings.PayFrequency.ToString(),
             PaycheckAmount: newSettings.PaycheckAmount,
             SafetyBuffer: newSettings.SafetyBuffer,
-            NextPaycheckDate: newSettings.NextPaycheckDate
+            NextPaycheckDate: newSettings.NextPaycheckDate,
+            PreferredTimeHorizon: newSettings.PreferredTimeHorizon.ToString()
         ));
     }
 }
@@ -90,12 +102,14 @@ public record SettingsDto(
     string PayFrequency,
     decimal PaycheckAmount,
     decimal SafetyBuffer,
-    DateTime? NextPaycheckDate
+    DateTime? NextPaycheckDate,
+    string PreferredTimeHorizon
 );
 
 public record UpdateSettingsRequest(
     string PayFrequency,
     decimal PaycheckAmount,
     decimal SafetyBuffer,
-    DateTime? NextPaycheckDate
+    DateTime? NextPaycheckDate,
+    string? PreferredTimeHorizon
 );

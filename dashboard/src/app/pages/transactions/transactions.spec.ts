@@ -20,6 +20,31 @@ const mockEvents = [
   { id: 3, date: '2025-01-13', type: 'DebtPayment', amount: 200, description: 'Card payment', accountId: 1, targetAccountId: 3, status: 'Cleared' as const }
 ];
 
+const mockCategories = [
+  { id: 1, name: 'Groceries', type: 'Recurring' as const, icon: 'shopping_cart', color: '#4CAF50', sortOrder: 1, isActive: true },
+  { id: 2, name: 'Entertainment', type: 'OneTime' as const, icon: 'movie', color: '#2196F3', sortOrder: 2, isActive: true }
+];
+
+const mockBudgets = [
+  { id: 1, categoryId: 1, categoryName: 'Groceries', amount: 500, frequency: 'Monthly' as const, effectiveDate: '2025-01-01', isActive: true }
+];
+
+const mockRecurringContributions = [
+  {
+    id: 1, name: '401k Contribution', amount: 500, frequency: 'BiWeekly' as const,
+    nextContributionDate: '2025-01-15', sourceAccountId: 1, targetAccountId: 4,
+    sourceAccountName: 'Checking', targetAccountName: '401k', isActive: true, createdAt: '2025-01-01'
+  }
+];
+
+const mockSettings = {
+  payFrequency: 'BiWeekly' as const,
+  paycheckAmount: 2500,
+  safetyBuffer: 100,
+  nextPaycheckDate: '2025-01-31',
+  preferredTimeHorizon: 'NextPaycheck' as const
+};
+
 describe('TransactionsPage', () => {
   let component: TransactionsPage;
   let fixture: ComponentFixture<TransactionsPage>;
@@ -28,6 +53,10 @@ describe('TransactionsPage', () => {
   const createMockApiService = (overrides = {}) => ({
     getAccounts: jest.fn().mockReturnValue(of(mockAccounts)),
     getRecentEvents: jest.fn().mockReturnValue(of(mockEvents)),
+    getCategories: jest.fn().mockReturnValue(of(mockCategories)),
+    getBudgets: jest.fn().mockReturnValue(of(mockBudgets)),
+    getRecurringContributions: jest.fn().mockReturnValue(of(mockRecurringContributions)),
+    getSettings: jest.fn().mockReturnValue(of(mockSettings)),
     createEvent: jest.fn().mockReturnValue(of({ id: 99, ...mockEvents[0] })),
     updateEvent: jest.fn().mockReturnValue(of(mockEvents[0])),
     deleteEvent: jest.fn().mockReturnValue(of(undefined)),

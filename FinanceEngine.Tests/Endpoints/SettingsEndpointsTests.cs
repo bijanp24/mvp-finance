@@ -47,13 +47,14 @@ public class SettingsEndpointsTests : IClassFixture<WebApplicationFactory<Progra
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        
+
         var settings = await response.Content.ReadFromJsonAsync<SettingsDto>();
         Assert.NotNull(settings);
         Assert.Equal("BiWeekly", settings.PayFrequency);
         Assert.Equal(2500m, settings.PaycheckAmount);
         Assert.Equal(100m, settings.SafetyBuffer);
         Assert.Null(settings.NextPaycheckDate);
+        Assert.Equal("NextPaycheck", settings.PreferredTimeHorizon);
     }
 
     [Fact]
@@ -65,7 +66,8 @@ public class SettingsEndpointsTests : IClassFixture<WebApplicationFactory<Progra
             PayFrequency: "Weekly",
             PaycheckAmount: 1500m,
             SafetyBuffer: 200m,
-            NextPaycheckDate: DateTime.UtcNow.AddDays(7)
+            NextPaycheckDate: DateTime.UtcNow.AddDays(7),
+            PreferredTimeHorizon: "CurrentMonth"
         );
 
         // Act
@@ -80,6 +82,7 @@ public class SettingsEndpointsTests : IClassFixture<WebApplicationFactory<Progra
         Assert.Equal(1500m, settings.PaycheckAmount);
         Assert.Equal(200m, settings.SafetyBuffer);
         Assert.NotNull(settings.NextPaycheckDate);
+        Assert.Equal("CurrentMonth", settings.PreferredTimeHorizon);
     }
 
     [Fact]
@@ -91,7 +94,28 @@ public class SettingsEndpointsTests : IClassFixture<WebApplicationFactory<Progra
             PayFrequency: "InvalidFrequency",
             PaycheckAmount: 1500m,
             SafetyBuffer: 200m,
-            NextPaycheckDate: null
+            NextPaycheckDate: null,
+            PreferredTimeHorizon: null
+        );
+
+        // Act
+        var response = await client.PutAsJsonAsync("/api/settings", request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task UpdateSettings_InvalidTimeHorizon_ReturnsBadRequest()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+        var request = new UpdateSettingsRequest(
+            PayFrequency: "BiWeekly",
+            PaycheckAmount: 1500m,
+            SafetyBuffer: 200m,
+            NextPaycheckDate: null,
+            PreferredTimeHorizon: "InvalidHorizon"
         );
 
         // Act
@@ -110,7 +134,8 @@ public class SettingsEndpointsTests : IClassFixture<WebApplicationFactory<Progra
             PayFrequency: "BiWeekly",
             PaycheckAmount: -100m,
             SafetyBuffer: 200m,
-            NextPaycheckDate: null
+            NextPaycheckDate: null,
+            PreferredTimeHorizon: null
         );
 
         // Act
@@ -129,7 +154,8 @@ public class SettingsEndpointsTests : IClassFixture<WebApplicationFactory<Progra
             PayFrequency: "BiWeekly",
             PaycheckAmount: 2500m,
             SafetyBuffer: -100m,
-            NextPaycheckDate: null
+            NextPaycheckDate: null,
+            PreferredTimeHorizon: null
         );
 
         // Act
@@ -150,7 +176,8 @@ public class SettingsEndpointsTests : IClassFixture<WebApplicationFactory<Progra
             PayFrequency: "Weekly",
             PaycheckAmount: 1500m,
             SafetyBuffer: 200m,
-            NextPaycheckDate: null
+            NextPaycheckDate: null,
+            PreferredTimeHorizon: "CurrentMonth"
         );
         await client.PutAsJsonAsync("/api/settings", request1);
 
@@ -159,7 +186,8 @@ public class SettingsEndpointsTests : IClassFixture<WebApplicationFactory<Progra
             PayFrequency: "BiWeekly",
             PaycheckAmount: 2500m,
             SafetyBuffer: 100m,
-            NextPaycheckDate: null
+            NextPaycheckDate: null,
+            PreferredTimeHorizon: "RollingTwoWeeks"
         );
         await client.PutAsJsonAsync("/api/settings", request2);
 
@@ -168,12 +196,13 @@ public class SettingsEndpointsTests : IClassFixture<WebApplicationFactory<Progra
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        
+
         var settings = await response.Content.ReadFromJsonAsync<SettingsDto>();
         Assert.NotNull(settings);
         Assert.Equal("BiWeekly", settings.PayFrequency);
         Assert.Equal(2500m, settings.PaycheckAmount);
         Assert.Equal(100m, settings.SafetyBuffer);
+        Assert.Equal("RollingTwoWeeks", settings.PreferredTimeHorizon);
     }
 
     [Fact]
@@ -187,14 +216,16 @@ public class SettingsEndpointsTests : IClassFixture<WebApplicationFactory<Progra
             PayFrequency: "Weekly",
             PaycheckAmount: 1000m,
             SafetyBuffer: 50m,
-            NextPaycheckDate: null
+            NextPaycheckDate: null,
+            PreferredTimeHorizon: "NextPaycheck"
         ));
 
         await client.PutAsJsonAsync("/api/settings", new UpdateSettingsRequest(
             PayFrequency: "Monthly",
             PaycheckAmount: 5000m,
             SafetyBuffer: 500m,
-            NextPaycheckDate: null
+            NextPaycheckDate: null,
+            PreferredTimeHorizon: "CurrentMonth"
         ));
 
         // Act
@@ -202,17 +233,42 @@ public class SettingsEndpointsTests : IClassFixture<WebApplicationFactory<Progra
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        
+
         var settings = await response.Content.ReadFromJsonAsync<SettingsDto>();
         Assert.NotNull(settings);
         // Should return the most recent (Monthly)
         Assert.Equal("Monthly", settings.PayFrequency);
         Assert.Equal(5000m, settings.PaycheckAmount);
         Assert.Equal(500m, settings.SafetyBuffer);
+        Assert.Equal("CurrentMonth", settings.PreferredTimeHorizon);
+    }
+
+    [Fact]
+    public async Task UpdateSettings_WithAllTimeHorizons_WorksCorrectly()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+        var timeHorizons = new[] { "NextPaycheck", "CurrentMonth", "RollingTwoWeeks" };
+
+        foreach (var horizon in timeHorizons)
+        {
+            var request = new UpdateSettingsRequest(
+                PayFrequency: "BiWeekly",
+                PaycheckAmount: 2500m,
+                SafetyBuffer: 100m,
+                NextPaycheckDate: null,
+                PreferredTimeHorizon: horizon
+            );
+
+            // Act
+            var response = await client.PutAsJsonAsync("/api/settings", request);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var settings = await response.Content.ReadFromJsonAsync<SettingsDto>();
+            Assert.NotNull(settings);
+            Assert.Equal(horizon, settings.PreferredTimeHorizon);
+        }
     }
 }
-
-
-
-
-

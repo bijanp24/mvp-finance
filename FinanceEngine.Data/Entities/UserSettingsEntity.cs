@@ -8,6 +8,13 @@ public enum PayFrequency
     Monthly = 30
 }
 
+public enum TimeHorizon
+{
+    NextPaycheck,       // Calculate until next income event
+    CurrentMonth,       // Calculate for remainder of current calendar month
+    RollingTwoWeeks     // Calculate for fixed 14-day rolling window
+}
+
 public class UserSettingsEntity
 {
     public int Id { get; set; }
@@ -15,6 +22,7 @@ public class UserSettingsEntity
     public decimal PaycheckAmount { get; set; } = 2500m;
     public decimal SafetyBuffer { get; set; } = 100m;
     public DateTime? NextPaycheckDate { get; set; }  // Anchor for calculating future paychecks
+    public TimeHorizon PreferredTimeHorizon { get; set; } = TimeHorizon.NextPaycheck;  // Safe-to-spend calculation window
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsActive { get; set; } = true;
 }

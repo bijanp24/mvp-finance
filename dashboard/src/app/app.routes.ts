@@ -37,5 +37,9 @@ export const routes: Routes = [
   {
     path: 'projections',
     loadComponent: () => import('./pages/projections/projections').then(m => m.ProjectionsPage)
+  },
+  {
+    path: 'scenarios',
+    loadComponent: () => import('./pages/scenarios/scenarios').then(m => m.ScenariosPage)
   }
 ];
