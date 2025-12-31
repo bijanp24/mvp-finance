@@ -36,6 +36,7 @@ export class AccountsPage {
 
   readonly accounts = signal<Account[]>([]);
   readonly loading = signal(false);
+  readonly exporting = signal(false);
 
   readonly cashAccounts = computed(() => this.accounts().filter(a => a.type === 'Cash'));
   readonly debtAccounts = computed(() => this.accounts().filter(a => a.type === 'Debt'));
@@ -134,5 +135,32 @@ export class AccountsPage {
       return isPromo ? `${rate}% (promo)` : `${rate}%`;
     }
     return '-';
+  }
+
+  exportAccounts(format: 'csv' | 'xlsx'): void {
+    this.exporting.set(true);
+    this.apiService.exportAccounts(format).subscribe({
+      next: (blob) => {
+        this.downloadFile(blob, `accounts.${format}`);
+        this.snackBar.open('Export downloaded successfully', 'Close', { duration: 3000 });
+        this.exporting.set(false);
+      },
+      error: (error) => {
+        console.error('Export failed:', error);
+        this.snackBar.open('Export failed', 'Close', { duration: 3000 });
+        this.exporting.set(false);
+      }
+    });
+  }
+
+  private downloadFile(blob: Blob, filename: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   }
 }

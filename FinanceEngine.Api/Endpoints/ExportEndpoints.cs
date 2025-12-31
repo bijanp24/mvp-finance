@@ -25,6 +25,8 @@ public static class ExportEndpoints
         group.MapGet("/projections", ExportProjections);
         group.MapGet("/transactions", ExportTransactions);
         group.MapGet("/accounts", ExportAccounts);
+        group.MapGet("/recurring", ExportRecurringContributions);
+        group.MapGet("/full", ExportFullData);
         group.MapPost("/chart-pdf", ExportChartPdf);
 
         return group;
@@ -184,6 +186,267 @@ public static class ExportEndpoints
             "xlsx" or "excel" => GenerateExcelFile(rows, "Accounts", "accounts.xlsx"),
             _ => GenerateCsvFile(rows, "accounts.csv")
         };
+    }
+
+    /// <summary>
+    /// Export recurring contributions to CSV or Excel.
+    /// </summary>
+    private static async Task<IResult> ExportRecurringContributions(
+        FinanceDbContext db,
+        string format = "csv")
+    {
+        var contributions = await db.RecurringContributions
+            .Include(r => r.SourceAccount)
+            .Include(r => r.TargetAccount)
+            .ToListAsync();
+
+        var rows = contributions.Select(r => new RecurringContributionExportRow
+        {
+            Name = r.Name,
+            FromAccount = r.SourceAccount?.Name ?? "N/A",
+            ToAccount = r.TargetAccount?.Name ?? "Unknown",
+            Amount = r.Amount,
+            Frequency = r.Frequency.ToString(),
+            NextDate = r.NextContributionDate.ToString("yyyy-MM-dd"),
+            IsActive = r.IsActive ? "Yes" : "No"
+        }).ToList();
+
+        return format.ToLowerInvariant() switch
+        {
+            "xlsx" or "excel" => GenerateExcelFile(rows, "RecurringContributions", "recurring-contributions.xlsx"),
+            _ => GenerateCsvFile(rows, "recurring-contributions.csv")
+        };
+    }
+
+    /// <summary>
+    /// Export all financial data to a multi-sheet Excel workbook.
+    /// </summary>
+    private static async Task<IResult> ExportFullData(FinanceDbContext db)
+    {
+        // Gather all data
+        var accounts = await db.Accounts.ToListAsync();
+        var events = await db.Events.Include(e => e.Account).Include(e => e.Category).ToListAsync();
+        var contributions = await db.RecurringContributions
+            .Include(r => r.SourceAccount)
+            .Include(r => r.TargetAccount)
+            .ToListAsync();
+        var categories = await db.Categories.ToListAsync();
+        var budgets = await db.Budgets.Include(b => b.Category).ToListAsync();
+        var goals = await db.Goals.ToListAsync();
+
+        // Build account rows with balances
+        var accountRows = accounts.Select(a =>
+        {
+            var accountEvents = events
+                .Where(e => e.AccountId == a.Id)
+                .Select(e => new FinancialEvent(MapEventType(e.Type), e.Amount));
+
+            var balance = BalanceCalculator.Calculate(
+                MapAccountType(a.Type),
+                a.InitialBalance,
+                accountEvents
+            );
+
+            return new AccountExportRow
+            {
+                Name = a.Name,
+                Type = a.Type.ToString(),
+                CurrentBalance = balance,
+                InitialBalance = a.InitialBalance,
+                IsActive = a.IsActive ? "Yes" : "No",
+                CreatedAt = a.CreatedAt.ToString("yyyy-MM-dd")
+            };
+        }).ToList();
+
+        // Build transaction rows
+        var transactionRows = events
+            .OrderByDescending(e => e.Date)
+            .Select(t => new TransactionExportRow
+            {
+                Date = t.Date.ToString("yyyy-MM-dd"),
+                Type = t.Type.ToString(),
+                Description = t.Description ?? "",
+                Amount = t.Amount,
+                Account = t.Account?.Name ?? "Unknown",
+                Category = t.Category?.Name ?? "",
+                Status = t.Status.ToString()
+            }).ToList();
+
+        // Build recurring contribution rows
+        var recurringRows = contributions.Select(r => new RecurringContributionExportRow
+        {
+            Name = r.Name,
+            FromAccount = r.SourceAccount?.Name ?? "N/A",
+            ToAccount = r.TargetAccount?.Name ?? "Unknown",
+            Amount = r.Amount,
+            Frequency = r.Frequency.ToString(),
+            NextDate = r.NextContributionDate.ToString("yyyy-MM-dd"),
+            IsActive = r.IsActive ? "Yes" : "No"
+        }).ToList();
+
+        // Build category rows
+        var categoryRows = categories.Select(c => new CategoryExportRow
+        {
+            Name = c.Name,
+            Color = c.Color ?? "",
+            IsActive = c.IsActive ? "Yes" : "No"
+        }).ToList();
+
+        // Build budget rows
+        var budgetRows = budgets.Select(b => new BudgetExportRow
+        {
+            Category = b.Category?.Name ?? "Unknown",
+            Amount = b.Amount,
+            Frequency = b.Frequency.ToString(),
+            EffectiveDate = b.EffectiveDate.ToString("yyyy-MM-dd"),
+            EndDate = b.EndDate?.ToString("yyyy-MM-dd") ?? "Ongoing",
+            IsActive = b.IsActive ? "Yes" : "No"
+        }).ToList();
+
+        // Build goal rows
+        var goalRows = goals.Select(g => new GoalExportRow
+        {
+            Name = g.Name,
+            Type = g.Type.ToString(),
+            TargetAmount = g.TargetAmount ?? 0m,
+            TargetDate = g.TargetDate.ToString("yyyy-MM-dd"),
+            Priority = g.Priority,
+            IsActive = g.IsActive ? "Yes" : "No"
+        }).ToList();
+
+        // Build summary
+        var totalAssets = accountRows.Where(a => a.Type != "Debt").Sum(a => a.CurrentBalance);
+        var totalDebt = accountRows.Where(a => a.Type == "Debt").Sum(a => Math.Abs(a.CurrentBalance));
+        var netWorth = totalAssets - totalDebt;
+
+        // Generate multi-sheet Excel
+        return GenerateMultiSheetExcel(
+            accountRows,
+            transactionRows,
+            recurringRows,
+            categoryRows,
+            budgetRows,
+            goalRows,
+            totalAssets,
+            totalDebt,
+            netWorth
+        );
+    }
+
+    private static IResult GenerateMultiSheetExcel(
+        List<AccountExportRow> accounts,
+        List<TransactionExportRow> transactions,
+        List<RecurringContributionExportRow> recurring,
+        List<CategoryExportRow> categories,
+        List<BudgetExportRow> budgets,
+        List<GoalExportRow> goals,
+        decimal totalAssets,
+        decimal totalDebt,
+        decimal netWorth)
+    {
+        using var workbook = new XLWorkbook();
+
+        // Summary sheet
+        var summary = workbook.Worksheets.Add("Summary");
+        summary.Cell(1, 1).Value = "Finance Dashboard - Full Data Export";
+        summary.Cell(1, 1).Style.Font.Bold = true;
+        summary.Cell(1, 1).Style.Font.FontSize = 16;
+
+        summary.Cell(3, 1).Value = "Export Date:";
+        summary.Cell(3, 2).Value = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+
+        summary.Cell(5, 1).Value = "Financial Summary";
+        summary.Cell(5, 1).Style.Font.Bold = true;
+
+        summary.Cell(6, 1).Value = "Total Assets:";
+        summary.Cell(6, 2).Value = totalAssets;
+        summary.Cell(6, 2).Style.NumberFormat.Format = "$#,##0.00";
+
+        summary.Cell(7, 1).Value = "Total Debt:";
+        summary.Cell(7, 2).Value = totalDebt;
+        summary.Cell(7, 2).Style.NumberFormat.Format = "$#,##0.00";
+
+        summary.Cell(8, 1).Value = "Net Worth:";
+        summary.Cell(8, 2).Value = netWorth;
+        summary.Cell(8, 2).Style.NumberFormat.Format = "$#,##0.00";
+        summary.Cell(8, 2).Style.Font.Bold = true;
+
+        summary.Cell(10, 1).Value = "Data Counts";
+        summary.Cell(10, 1).Style.Font.Bold = true;
+
+        summary.Cell(11, 1).Value = "Accounts:";
+        summary.Cell(11, 2).Value = accounts.Count;
+
+        summary.Cell(12, 1).Value = "Transactions:";
+        summary.Cell(12, 2).Value = transactions.Count;
+
+        summary.Cell(13, 1).Value = "Recurring Contributions:";
+        summary.Cell(13, 2).Value = recurring.Count;
+
+        summary.Cell(14, 1).Value = "Categories:";
+        summary.Cell(14, 2).Value = categories.Count;
+
+        summary.Cell(15, 1).Value = "Budgets:";
+        summary.Cell(15, 2).Value = budgets.Count;
+
+        summary.Cell(16, 1).Value = "Goals:";
+        summary.Cell(16, 2).Value = goals.Count;
+
+        summary.Columns().AdjustToContents();
+
+        // Add data sheets
+        AddDataSheet(workbook, "Accounts", accounts);
+        AddDataSheet(workbook, "Transactions", transactions);
+        AddDataSheet(workbook, "Recurring", recurring);
+        AddDataSheet(workbook, "Categories", categories);
+        AddDataSheet(workbook, "Budgets", budgets);
+        AddDataSheet(workbook, "Goals", goals);
+
+        using var memoryStream = new MemoryStream();
+        workbook.SaveAs(memoryStream);
+        var bytes = memoryStream.ToArray();
+
+        var timestamp = DateTime.Now.ToString("yyyy-MM-dd");
+        return Results.File(bytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", $"finance-export-{timestamp}.xlsx");
+    }
+
+    private static void AddDataSheet<T>(XLWorkbook workbook, string sheetName, List<T> data)
+    {
+        var worksheet = workbook.Worksheets.Add(sheetName);
+        var properties = typeof(T).GetProperties();
+
+        // Write headers
+        for (int i = 0; i < properties.Length; i++)
+        {
+            worksheet.Cell(1, i + 1).Value = properties[i].Name;
+            worksheet.Cell(1, i + 1).Style.Font.Bold = true;
+        }
+
+        // Write data
+        for (int row = 0; row < data.Count; row++)
+        {
+            for (int col = 0; col < properties.Length; col++)
+            {
+                var value = properties[col].GetValue(data[row]);
+                var cell = worksheet.Cell(row + 2, col + 1);
+
+                if (value is decimal decimalValue)
+                {
+                    cell.Value = decimalValue;
+                    cell.Style.NumberFormat.Format = "#,##0.00";
+                }
+                else if (value is int intValue)
+                {
+                    cell.Value = intValue;
+                }
+                else
+                {
+                    cell.Value = value?.ToString() ?? "";
+                }
+            }
+        }
+
+        worksheet.Columns().AdjustToContents();
     }
 
     #region Projection Data Generation
@@ -454,6 +717,44 @@ public class ChartPdfExportRequest
     public string? Description { get; set; }
     public string? DateRange { get; set; }
     public required string ChartImage { get; set; }
+}
+
+public class RecurringContributionExportRow
+{
+    public string Name { get; set; } = "";
+    public string FromAccount { get; set; } = "";
+    public string ToAccount { get; set; } = "";
+    public decimal Amount { get; set; }
+    public string Frequency { get; set; } = "";
+    public string NextDate { get; set; } = "";
+    public string IsActive { get; set; } = "";
+}
+
+public class CategoryExportRow
+{
+    public string Name { get; set; } = "";
+    public string Color { get; set; } = "";
+    public string IsActive { get; set; } = "";
+}
+
+public class BudgetExportRow
+{
+    public string Category { get; set; } = "";
+    public decimal Amount { get; set; }
+    public string Frequency { get; set; } = "";
+    public string EffectiveDate { get; set; } = "";
+    public string EndDate { get; set; } = "";
+    public string IsActive { get; set; } = "";
+}
+
+public class GoalExportRow
+{
+    public string Name { get; set; } = "";
+    public string Type { get; set; } = "";
+    public decimal TargetAmount { get; set; }
+    public string TargetDate { get; set; } = "";
+    public int Priority { get; set; }
+    public string IsActive { get; set; } = "";
 }
 
 #endregion

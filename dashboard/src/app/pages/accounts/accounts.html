@@ -2,10 +2,26 @@
   <header class="page-header">
     <div class="header-content">
       <h1>Accounts</h1>
-      <button mat-flat-button color="primary" (click)="openCreateDialog()">
-        <mat-icon>add</mat-icon>
-        Add Account
-      </button>
+      <div class="header-actions">
+        <button mat-stroked-button [matMenuTriggerFor]="exportMenu" [disabled]="exporting()">
+          <mat-icon>{{ exporting() ? 'sync' : 'download' }}</mat-icon>
+          {{ exporting() ? 'Exporting...' : 'Export' }}
+        </button>
+        <mat-menu #exportMenu="matMenu">
+          <button mat-menu-item (click)="exportAccounts('csv')">
+            <mat-icon>description</mat-icon>
+            <span>Export as CSV</span>
+          </button>
+          <button mat-menu-item (click)="exportAccounts('xlsx')">
+            <mat-icon>table_chart</mat-icon>
+            <span>Export as Excel</span>
+          </button>
+        </mat-menu>
+        <button mat-flat-button color="primary" (click)="openCreateDialog()">
+          <mat-icon>add</mat-icon>
+          Add Account
+        </button>
+      </div>
     </div>
   </header>
 

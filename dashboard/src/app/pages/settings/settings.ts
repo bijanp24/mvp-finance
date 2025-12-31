@@ -162,16 +162,35 @@ import { RecurringContributionDialogComponent } from './recurring-contribution-d
         }
       </div>
 
-      <div class="app-card danger-zone">
+      <div class="app-card data-section">
         <div class="section-header">
           <h2>Data Management</h2>
-          <p class="section-description">Manage your account data and persistence.</p>
+          <p class="section-description">Export or manage your financial data.</p>
         </div>
-        <p class="info-text">Automatic cloud sync is currently enabled for your account.</p>
-        <button mat-stroked-button color="warn" disabled>
-          <mat-icon>delete_forever</mat-icon>
-          Reset All Data
-        </button>
+
+        <div class="data-actions">
+          <div class="action-item">
+            <div class="action-info">
+              <h3>Export All Data</h3>
+              <p>Download a complete Excel workbook with all your accounts, transactions, goals, budgets, and recurring contributions.</p>
+            </div>
+            <button mat-flat-button color="primary" (click)="exportFullData()" [disabled]="exporting()">
+              <mat-icon>{{ exporting() ? 'sync' : 'download' }}</mat-icon>
+              {{ exporting() ? 'Exporting...' : 'Export All Data' }}
+            </button>
+          </div>
+
+          <div class="action-item danger">
+            <div class="action-info">
+              <h3>Reset All Data</h3>
+              <p>Permanently delete all your financial data. This action cannot be undone.</p>
+            </div>
+            <button mat-stroked-button color="warn" disabled>
+              <mat-icon>delete_forever</mat-icon>
+              Reset All Data
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   `,
@@ -314,13 +333,47 @@ import { RecurringContributionDialogComponent } from './recurring-contribution-d
       }
     }
 
-    .danger-zone {
-      border-left: 4px solid var(--color-warn);
-      
-      .info-text {
-        font-size: 0.875rem;
-        color: var(--color-text-main);
-        margin-bottom: var(--spacing-lg);
+    .data-section {
+      .data-actions {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-lg);
+      }
+
+      .action-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: var(--spacing-lg);
+        padding: var(--spacing-lg);
+        border: 1px solid var(--color-divider);
+        border-radius: var(--radius-md);
+        background: var(--color-surface);
+
+        &.danger {
+          border-color: var(--color-warn);
+          border-left-width: 4px;
+        }
+
+        .action-info {
+          flex: 1;
+
+          h3 {
+            margin: 0 0 4px 0;
+            font-size: 1rem;
+            font-weight: 600;
+          }
+
+          p {
+            margin: 0;
+            font-size: 0.875rem;
+            color: var(--color-text-muted);
+          }
+        }
+
+        button {
+          flex-shrink: 0;
+        }
       }
     }
 
@@ -353,7 +406,8 @@ export class SettingsPage implements OnInit {
   readonly loading = signal(true);
   readonly saving = signal(false);
   readonly loadingContributions = signal(true);
-  
+  readonly exporting = signal(false);
+
   readonly contributions = signal<RecurringContribution[]>([]);
   readonly accounts = signal<Account[]>([]);
 
@@ -545,10 +599,37 @@ export class SettingsPage implements OnInit {
 
   formatDate(dateString: string): string {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
     });
+  }
+
+  exportFullData(): void {
+    this.exporting.set(true);
+    this.apiService.exportFullData().subscribe({
+      next: (blob) => {
+        this.downloadFile(blob, `finance-export-${new Date().toISOString().split('T')[0]}.xlsx`);
+        this.snackBar.open('Export downloaded successfully', 'Close', { duration: 3000 });
+        this.exporting.set(false);
+      },
+      error: (error) => {
+        console.error('Export failed:', error);
+        this.snackBar.open('Export failed', 'Close', { duration: 3000 });
+        this.exporting.set(false);
+      }
+    });
+  }
+
+  private downloadFile(blob: Blob, filename: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   }
 }

@@ -295,6 +295,19 @@ export class ApiService {
       responseType: 'blob'
     });
   }
+
+  exportRecurring(format: 'csv' | 'xlsx'): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/export/recurring`, {
+      params: { format },
+      responseType: 'blob'
+    });
+  }
+
+  exportFullData(): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/export/full`, {
+      responseType: 'blob'
+    });
+  }
 }
 
 export interface ChartPdfExportRequest {

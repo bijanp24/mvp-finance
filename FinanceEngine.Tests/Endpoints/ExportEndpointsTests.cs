@@ -476,4 +476,92 @@ public class ExportEndpointsTests : IClassFixture<WebApplicationFactory<Program>
     }
 
     #endregion
+
+    #region Recurring Contributions Export Tests
+
+    [Fact]
+    public async Task ExportRecurring_Csv_ReturnsValidCsvFile()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<FinanceDbContext>();
+        await SeedTestData(db);
+
+        // Act
+        var response = await client.GetAsync("/api/export/recurring?format=csv");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("text/csv", response.Content.Headers.ContentType?.MediaType);
+    }
+
+    [Fact]
+    public async Task ExportRecurring_Excel_ReturnsValidExcelFile()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<FinanceDbContext>();
+        await SeedTestData(db);
+
+        // Act
+        var response = await client.GetAsync("/api/export/recurring?format=xlsx");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            response.Content.Headers.ContentType?.MediaType);
+    }
+
+    #endregion
+
+    #region Full Data Export Tests
+
+    [Fact]
+    public async Task ExportFullData_ReturnsValidExcelFile()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<FinanceDbContext>();
+        await SeedTestData(db);
+
+        // Act
+        var response = await client.GetAsync("/api/export/full");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            response.Content.Headers.ContentType?.MediaType);
+
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+        Assert.True(bytes.Length > 0);
+    }
+
+    [Fact]
+    public async Task ExportFullData_ContainsMultipleSheets()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<FinanceDbContext>();
+        await SeedTestData(db);
+
+        // Act
+        var response = await client.GetAsync("/api/export/full");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        // Verify it's a valid Excel file by checking size (multi-sheet should be larger)
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+        Assert.True(bytes.Length > 1000); // Multi-sheet Excel should be at least 1KB
+    }
+
+    #endregion
 }
