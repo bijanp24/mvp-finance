@@ -13,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatMenuModule } from '@angular/material/menu';
 import { ApiService } from '../../core/services/api.service';
 import { Account, FinancialEvent, CreateEventRequest, EventStatus, Category } from '../../core/models/api.models';
 
@@ -32,7 +33,8 @@ import { Account, FinancialEvent, CreateEventRequest, EventStatus, Category } fr
     MatIconModule,
     MatSnackBarModule,
     MatTableModule,
-    MatChipsModule
+    MatChipsModule,
+    MatMenuModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './transactions.html',
@@ -48,6 +50,7 @@ export class TransactionsPage {
   readonly recentEvents = signal<FinancialEvent[]>([]);
   readonly loading = signal(false);
   readonly saving = signal(false);
+  readonly exporting = signal(false);
   readonly editingEventId = signal<number | null>(null);
   readonly statusFilter = signal<'All' | EventStatus>('All');
   readonly selectedType = signal<string>('Expense');
@@ -349,5 +352,33 @@ export class TransactionsPage {
 
   setStatusFilter(filter: 'All' | EventStatus): void {
     this.statusFilter.set(filter);
+  }
+
+  exportTransactions(format: 'csv' | 'xlsx'): void {
+    this.exporting.set(true);
+
+    this.apiService.exportTransactions(format).subscribe({
+      next: (blob) => {
+        this.downloadFile(blob, `transactions.${format}`);
+        this.snackBar.open('Export downloaded successfully', 'Close', { duration: 3000 });
+        this.exporting.set(false);
+      },
+      error: (error) => {
+        console.error('Export failed:', error);
+        this.snackBar.open('Export failed', 'Close', { duration: 3000 });
+        this.exporting.set(false);
+      }
+    });
+  }
+
+  private downloadFile(blob: Blob, filename: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   }
 }

@@ -7,6 +7,9 @@ import { MatSliderModule } from '@angular/material/slider';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 import { forkJoin, Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
@@ -29,6 +32,9 @@ import { Account, UserSettings, SimulationResult, ChartGranularity, Goal } from 
     MatSlideToggleModule,
     MatIconModule,
     MatProgressBarModule,
+    MatButtonModule,
+    MatMenuModule,
+    MatSnackBarModule,
     DebtProjectionChartComponent,
     InvestmentProjectionChartComponent,
     NetWorthChartComponent
@@ -40,8 +46,10 @@ import { Account, UserSettings, SimulationResult, ChartGranularity, Goal } from 
 export class ProjectionsPage {
   private readonly apiService = inject(ApiService);
   private readonly projectionService = inject(ProjectionService);
+  private readonly snackBar = inject(MatSnackBar);
 
   readonly timeRangeMonths = signal(12); // 1 year default
+  readonly exporting = signal(false);
   readonly accounts = signal<Account[]>([]);
   readonly settings = signal<UserSettings | null>(null);
   readonly goals = signal<Goal[]>([]);
@@ -268,5 +276,37 @@ export class ProjectionsPage {
     const target = new Date(targetDate);
     const diffMs = target.getTime() - now.getTime();
     return Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24 * 30)));
+  }
+
+  exportProjections(format: 'csv' | 'xlsx'): void {
+    this.exporting.set(true);
+    const startDate = new Date().toISOString().split('T')[0];
+    const endDate = new Date();
+    endDate.setMonth(endDate.getMonth() + this.timeRangeMonths());
+    const endDateStr = endDate.toISOString().split('T')[0];
+
+    this.apiService.exportProjections(format, startDate, endDateStr).subscribe({
+      next: (blob) => {
+        this.downloadFile(blob, `projections.${format}`);
+        this.snackBar.open('Export downloaded successfully', 'Close', { duration: 3000 });
+        this.exporting.set(false);
+      },
+      error: (error) => {
+        console.error('Export failed:', error);
+        this.snackBar.open('Export failed', 'Close', { duration: 3000 });
+        this.exporting.set(false);
+      }
+    });
+  }
+
+  private downloadFile(blob: Blob, filename: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   }
 }

@@ -360,20 +360,63 @@ All v1 work is complete and archived in `docs/v1-archive/`.
 ---
 
 ## Phase C: Dynamic Safe-to-Spend
-**Status:** Not Started
+**Status:** COMPLETE
+**Completed:** 2025-12-30 (discovered already implemented)
 **Depends on:** Phase B complete
 **Vision:** See `GOAL_DRIVEN_BUDGETING.md` Phase C section
 
-(Work items to be defined when Phase B nears completion)
+### Design Decisions
+- **Time Horizon:** Until next paycheck (configurable: NextPaycheck/CurrentMonth/RollingTwoWeeks)
+- **Overspending:** Warning only (user decides how to handle)
+- **Suggestions:** Informational only (no auto-apply)
+- **Buffer:** User-configurable amount (SafetyBuffer in settings)
+
+### Implementation Summary
+All Phase C functionality was already implemented:
+
+**Backend:**
+- `FinanceEngine.Data/Entities/UserSettingsEntity.cs` - PayFrequency, PaycheckAmount, SafetyBuffer, NextPaycheckDate, PreferredTimeHorizon
+- `FinanceEngine.Api/Endpoints/SettingsEndpoints.cs` - GET/PUT /api/settings
+- `FinanceEngine/Calculators/SafeToSpendCalculator.cs` - Core calculation engine
+- `FinanceEngine/Calculators/BudgetAnalysisCalculator.cs` - Budget overspending analysis
+- `FinanceEngine/Calculators/AdjustmentSuggestionCalculator.cs` - Suggestion generation
+- `FinanceEngine.Api/Endpoints/SafeToSpendEndpoints.cs` - GET /, /analysis, /suggestions, /full
+
+**Frontend:**
+- `dashboard/src/app/pages/settings/settings.ts` - Full settings form with all fields
+- `dashboard/src/app/pages/dashboard/dashboard.ts` - Safe-to-Spend hero widget, suggestions panel
+- `dashboard/src/app/pages/dashboard/dashboard.html` - Full UI with breakdown stats
+
+**Tests:** 58 tests passing for SafeToSpend, BudgetAnalysis, AdjustmentSuggestion, Settings
 
 ---
 
 ## Phase D: Scenario Planning
-**Status:** Not Started
+**Status:** COMPLETE
+**Completed:** 2025-12-30 (discovered already implemented)
 **Depends on:** Phase C complete
 **Vision:** See `GOAL_DRIVEN_BUDGETING.md` Phase D section
 
-(Work items to be defined when Phase C nears completion)
+### Implementation Summary
+All Phase D functionality was already implemented:
+
+**Backend:**
+- `FinanceEngine/Calculators/ScenarioCalculator.cs` - Scenario calculation engine
+- `FinanceEngine.Tests/Calculators/ScenarioCalculatorTests.cs` - Tests
+- `FinanceEngine.Api/Endpoints/ScenarioEndpoints.cs` - API endpoints
+
+**Frontend:**
+- `dashboard/src/app/pages/scenarios/scenarios.ts` - Scenario planning page
+- `dashboard/src/app/pages/scenarios/scenarios.html` - UI with sliders
+- `dashboard/src/app/pages/scenarios/scenarios.scss` - Styling
+
+**Features:**
+- Monthly discretionary spending slider
+- Extra debt payment slider
+- Extra investment contribution slider
+- Debounced real-time recalculation
+- Timeline chart visualization
+- Net worth projections
 
 ---
 

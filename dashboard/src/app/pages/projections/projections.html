@@ -1,6 +1,20 @@
 <div class="projections-container">
   <header class="page-header">
     <h1>Projections</h1>
+    <button mat-flat-button [matMenuTriggerFor]="exportMenu" [disabled]="exporting()">
+      <mat-icon>{{ exporting() ? 'sync' : 'download' }}</mat-icon>
+      {{ exporting() ? 'Exporting...' : 'Export' }}
+    </button>
+    <mat-menu #exportMenu="matMenu">
+      <button mat-menu-item (click)="exportProjections('csv')">
+        <mat-icon>description</mat-icon>
+        <span>Export as CSV</span>
+      </button>
+      <button mat-menu-item (click)="exportProjections('xlsx')">
+        <mat-icon>table_chart</mat-icon>
+        <span>Export as Excel</span>
+      </button>
+    </mat-menu>
   </header>
 
   <!-- Step 1: Inputs & Scenarios -->

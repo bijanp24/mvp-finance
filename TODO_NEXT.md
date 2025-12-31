@@ -5,22 +5,21 @@ Last updated: 2025-12-30
 Read this first when resuming work.
 
 ## Top Priority Next Step
-- **v2 Phases A+B Complete:** Budget Categories + Financial Goals done
-- **v2 Next:** Phase C (Dynamic Safe-to-Spend) - see `docs/v2/ROADMAP-v2.md`
+- **v2 COMPLETE:** All phases (A-D) fully implemented
 - **v3 Available:** Data Import/Export - see `docs/v3/ROADMAP-v3.md`
 - **v4 Planned:** Cloud Integrations - see `docs/v4/ROADMAP-v4.md`
 
 ## Current Status
 
 **Branch:** master
-**Tests:** 236 backend tests passing
+**Tests:** 316 backend tests passing
 
 ## Version Summary
 
 | Version | Focus | Status |
 |---------|-------|--------|
 | v1 | Core Transaction Tracking | COMPLETE (archived) |
-| v2 | Goal-Driven Budgeting | Phases A+B done, C+D pending |
+| v2 | Goal-Driven Budgeting | COMPLETE (Phases A-D) |
 | v3 | Data Import/Export | Planned (v3.1-v3.4) |
 | v4 | Cloud Integrations | Planned (Google + Microsoft) |
 
@@ -42,8 +41,20 @@ Read this first when resuming work.
 - Dashboard goal widget (top 3 by priority)
 - Projections goal integration
 
-**Phase C:** Dynamic Safe-to-Spend - TO BE DEFINED
-**Phase D:** Scenario Planning - TO BE DEFINED
+**Phase C Complete:** Dynamic Safe-to-Spend (2025-12-30)
+- SafeToSpendCalculator with status determination (Healthy/Tight/AtRisk/Behind)
+- BudgetAnalysisCalculator for overspending detection
+- AdjustmentSuggestionCalculator for smart recommendations
+- Dashboard hero widget with live Safe-to-Spend display
+- Settings page with buffer, time horizon configuration
+- Suggestions panel with potential savings
+
+**Phase D Complete:** Scenario Planning (2025-12-30)
+- ScenarioCalculator for what-if analysis
+- Scenarios page with interactive sliders
+- Monthly discretionary, extra debt payment, extra investment sliders
+- Real-time timeline chart visualization
+- Net worth projections
 
 ## v3: Data Import/Export
 

@@ -70,6 +70,7 @@ app.MapGroup("/api/settings").MapSettingsEndpoints();
 app.MapGroup("/api/recurring-contributions").MapRecurringContributionEndpoints();
 app.MapGroup("/api/safe-to-spend").MapSafeToSpendEndpoints();
 app.MapGroup("/api/scenarios").MapScenarioEndpoints();
+app.MapGroup("/api/export").MapExportEndpoints();
 
 app.Run();
 

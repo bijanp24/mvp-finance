@@ -1,6 +1,20 @@
 <div class="transactions-container">
   <header class="page-header">
     <h1>Transactions</h1>
+    <button mat-flat-button [matMenuTriggerFor]="exportMenu" [disabled]="exporting()">
+      <mat-icon>{{ exporting() ? 'sync' : 'download' }}</mat-icon>
+      {{ exporting() ? 'Exporting...' : 'Export' }}
+    </button>
+    <mat-menu #exportMenu="matMenu">
+      <button mat-menu-item (click)="exportTransactions('csv')">
+        <mat-icon>description</mat-icon>
+        <span>Export as CSV</span>
+      </button>
+      <button mat-menu-item (click)="exportTransactions('xlsx')">
+        <mat-icon>table_chart</mat-icon>
+        <span>Export as Excel</span>
+      </button>
+    </mat-menu>
   </header>
 
   <div class="transactions-layout">

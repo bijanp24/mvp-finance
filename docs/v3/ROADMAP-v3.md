@@ -31,8 +31,9 @@ v3 can proceed independently as export features don't depend on v2.
 ---
 
 ## Phase v3.1: Core Spreadsheet Exports
-**Status:** Not Started
-**Estimated work items:** 7
+**Status:** COMPLETE
+**Completed:** 2025-12-30
+**Work items:** 7
 
 ### WI-V31-001: Export Infrastructure
 - **Status:** [ ]

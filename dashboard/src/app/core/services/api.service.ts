@@ -261,4 +261,32 @@ export class ApiService {
   calculateScenario(request: ScenarioRequest): Observable<ScenarioResponse> {
     return this.http.post<ScenarioResponse>(`${this.baseUrl}/scenarios/calculate`, request);
   }
+
+  // Export endpoints
+  exportProjections(format: 'csv' | 'xlsx', startDate?: string, endDate?: string): Observable<Blob> {
+    let params: any = { format };
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    return this.http.get(`${this.baseUrl}/export/projections`, {
+      params,
+      responseType: 'blob'
+    });
+  }
+
+  exportTransactions(format: 'csv' | 'xlsx', startDate?: string, endDate?: string): Observable<Blob> {
+    let params: any = { format };
+    if (startDate) params.startDate = startDate;
+    if (endDate) params.endDate = endDate;
+    return this.http.get(`${this.baseUrl}/export/transactions`, {
+      params,
+      responseType: 'blob'
+    });
+  }
+
+  exportAccounts(format: 'csv' | 'xlsx'): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/export/accounts`, {
+      params: { format },
+      responseType: 'blob'
+    });
+  }
 }
