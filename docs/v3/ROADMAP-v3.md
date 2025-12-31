@@ -1,6 +1,6 @@
 # ROADMAP-v3.md
 
-Last updated: 2025-12-30
+Last updated: 2025-12-31
 Version: 3.0 (Data Import/Export)
 
 ## Purpose
@@ -156,9 +156,9 @@ v3 can proceed independently as export features don't depend on v2.
 ---
 
 ## Phase v3.2: PDF Chart Export
-**Status:** Not Started
-**Depends on:** Can start after WI-V31-001
-**Estimated work items:** 4
+**Status:** COMPLETE
+**Completed:** 2025-12-30
+**Work items:** 4
 
 ### WI-V32-001: PDF Generation Service
 - **Status:** [ ]
@@ -230,9 +230,9 @@ v3 can proceed independently as export features don't depend on v2.
 ---
 
 ## Phase v3.3: Extended Data Exports
-**Status:** Not Started
-**Depends on:** Phase v3.1 complete
-**Estimated work items:** 5
+**Status:** COMPLETE
+**Completed:** 2025-12-30
+**Work items:** 5
 
 ### WI-V33-001: Account Summary Export
 - **Status:** [ ]
@@ -317,9 +317,9 @@ v3 can proceed independently as export features don't depend on v2.
 ---
 
 ## Phase v3.4: Transaction Import
-**Status:** Not Started
-**Depends on:** Can start independently (uses same ClosedXML package)
-**Estimated work items:** 10
+**Status:** COMPLETE
+**Completed:** 2025-12-31
+**Work items:** 10
 
 ### WI-V34-001: Import Infrastructure
 - **Status:** [ ]
