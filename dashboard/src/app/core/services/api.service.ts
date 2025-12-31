@@ -289,4 +289,17 @@ export class ApiService {
       responseType: 'blob'
     });
   }
+
+  exportChartPdf(request: ChartPdfExportRequest): Observable<Blob> {
+    return this.http.post(`${this.baseUrl}/export/chart-pdf`, request, {
+      responseType: 'blob'
+    });
+  }
+}
+
+export interface ChartPdfExportRequest {
+  title: string;
+  description?: string;
+  dateRange?: string;
+  chartImage: string;
 }

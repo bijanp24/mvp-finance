@@ -1,6 +1,6 @@
-import { Component, ChangeDetectionStrategy, input, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, computed } from '@angular/core';
 import { NgxEchartsModule } from 'ngx-echarts';
-import type { EChartsOption } from 'echarts';
+import type { EChartsOption, ECharts } from 'echarts';
 import { DebtChartData, ChartGranularity } from '../../core/models/api.models';
 
 @Component({
@@ -11,6 +11,7 @@ import { DebtChartData, ChartGranularity } from '../../core/models/api.models';
     <div echarts
          [options]="chartOptions()"
          [style.height]="height()"
+         (chartInit)="onChartInit($event)"
          role="img"
          [attr.aria-label]="'Debt projection chart showing balance over time'"
          class="chart-container">
@@ -27,6 +28,11 @@ export class DebtProjectionChartComponent {
   readonly height = input<string>('400px');
   readonly compact = input<boolean>(false);
   readonly granularity = input<ChartGranularity>('Monthly');
+  readonly chartInit = output<ECharts>();
+
+  onChartInit(chart: ECharts): void {
+    this.chartInit.emit(chart);
+  }
 
   readonly chartOptions = computed<EChartsOption>(() => {
     const chartData = this.data();

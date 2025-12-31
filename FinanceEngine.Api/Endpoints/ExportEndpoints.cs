@@ -3,6 +3,7 @@ using System.Text;
 using ClosedXML.Excel;
 using CsvHelper;
 using CsvHelper.Configuration;
+using FinanceEngine.Api.Services;
 using FinanceEngine.Calculators;
 using FinanceEngine.Data;
 using FinanceEngine.Data.Entities;
@@ -24,8 +25,54 @@ public static class ExportEndpoints
         group.MapGet("/projections", ExportProjections);
         group.MapGet("/transactions", ExportTransactions);
         group.MapGet("/accounts", ExportAccounts);
+        group.MapPost("/chart-pdf", ExportChartPdf);
 
         return group;
+    }
+
+    /// <summary>
+    /// Export a chart as a PDF document.
+    /// </summary>
+    private static IResult ExportChartPdf(ChartPdfExportRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Title))
+            return Results.BadRequest("Title is required");
+
+        if (string.IsNullOrWhiteSpace(request.ChartImage))
+            return Results.BadRequest("Chart image is required");
+
+        try
+        {
+            // Parse base64 image (may include data URI prefix)
+            var base64Data = request.ChartImage;
+            if (base64Data.Contains(','))
+            {
+                base64Data = base64Data.Split(',')[1];
+            }
+
+            var imageBytes = Convert.FromBase64String(base64Data);
+
+            var pdfService = new PdfExportService();
+            var pdfBytes = pdfService.GenerateChartPdf(new ChartPdfRequest
+            {
+                Title = request.Title,
+                Description = request.Description,
+                DateRange = request.DateRange,
+                ChartImageBytes = imageBytes
+            });
+
+            return Results.File(pdfBytes, "application/pdf", $"{SanitizeFilename(request.Title)}.pdf");
+        }
+        catch (FormatException)
+        {
+            return Results.BadRequest("Invalid base64 image data");
+        }
+    }
+
+    private static string SanitizeFilename(string filename)
+    {
+        var invalid = Path.GetInvalidFileNameChars();
+        return string.Join("_", filename.Split(invalid, StringSplitOptions.RemoveEmptyEntries)).Trim();
     }
 
     /// <summary>
@@ -399,6 +446,14 @@ public class AccountExportRow
     public decimal InitialBalance { get; set; }
     public string IsActive { get; set; } = "";
     public string CreatedAt { get; set; } = "";
+}
+
+public class ChartPdfExportRequest
+{
+    public required string Title { get; set; }
+    public string? Description { get; set; }
+    public string? DateRange { get; set; }
+    public required string ChartImage { get; set; }
 }
 
 #endregion

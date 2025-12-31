@@ -1,6 +1,6 @@
-import { Component, ChangeDetectionStrategy, input, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output, computed } from '@angular/core';
 import { NgxEchartsModule } from 'ngx-echarts';
-import type { EChartsOption } from 'echarts';
+import type { EChartsOption, ECharts } from 'echarts';
 import { InvestmentChartData } from '../../core/models/api.models';
 
 @Component({
@@ -11,6 +11,7 @@ import { InvestmentChartData } from '../../core/models/api.models';
     <div echarts
          [options]="chartOptions()"
          [style.height]="height()"
+         (chartInit)="onChartInit($event)"
          role="img"
          [attr.aria-label]="'Investment projection chart showing portfolio growth over time'"
          class="chart-container">
@@ -26,6 +27,11 @@ export class InvestmentProjectionChartComponent {
   readonly data = input.required<InvestmentChartData | null>();
   readonly height = input<string>('400px');
   readonly compact = input<boolean>(false);
+  readonly chartInit = output<ECharts>();
+
+  onChartInit(chart: ECharts): void {
+    this.chartInit.emit(chart);
+  }
 
   readonly chartOptions = computed<EChartsOption>(() => {
     const chartData = this.data();

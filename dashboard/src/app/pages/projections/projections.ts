@@ -9,6 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatDividerModule } from '@angular/material/divider';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { RouterLink } from '@angular/router';
 import { forkJoin, Subject } from 'rxjs';
@@ -19,6 +20,8 @@ import { DebtProjectionChartComponent } from '../../features/charts/debt-project
 import { InvestmentProjectionChartComponent } from '../../features/charts/investment-projection-chart.component';
 import { NetWorthChartComponent } from '../../features/charts/net-worth-chart.component';
 import { Account, UserSettings, SimulationResult, ChartGranularity, Goal } from '../../core/models/api.models';
+import { captureEChartsImage } from '../../shared/utils/chart-capture';
+import type { ECharts } from 'echarts';
 
 @Component({
   selector: 'app-projections',
@@ -34,6 +37,7 @@ import { Account, UserSettings, SimulationResult, ChartGranularity, Goal } from 
     MatProgressBarModule,
     MatButtonModule,
     MatMenuModule,
+    MatDividerModule,
     MatSnackBarModule,
     DebtProjectionChartComponent,
     InvestmentProjectionChartComponent,
@@ -55,6 +59,11 @@ export class ProjectionsPage {
   readonly goals = signal<Goal[]>([]);
   readonly extraPayment = signal(0);
   readonly debtProjectionWithExtra = signal<SimulationResult | null>(null);
+
+  // Chart instances for PDF export
+  netWorthChart: ECharts | null = null;
+  debtChart: ECharts | null = null;
+  investmentChart: ECharts | null = null;
 
   private extraPaymentSubject = new Subject<number>();
 
@@ -308,5 +317,73 @@ export class ProjectionsPage {
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
+  }
+
+  // Chart init handlers for PDF export
+  onNetWorthChartInit(chart: ECharts): void {
+    this.netWorthChart = chart;
+  }
+
+  onDebtChartInit(chart: ECharts): void {
+    this.debtChart = chart;
+  }
+
+  onInvestmentChartInit(chart: ECharts): void {
+    this.investmentChart = chart;
+  }
+
+  exportChartPdf(chartType: 'networth' | 'debt' | 'investment'): void {
+    let chart: ECharts | null = null;
+    let title = '';
+    let description = '';
+
+    switch (chartType) {
+      case 'networth':
+        chart = this.netWorthChart;
+        title = 'Net Worth Trajectory';
+        description = 'Combined portfolio value minus debt over time';
+        break;
+      case 'debt':
+        chart = this.debtChart;
+        title = 'Debt Payoff Curve';
+        description = 'Projected debt balance over time';
+        break;
+      case 'investment':
+        chart = this.investmentChart;
+        title = 'Investment Growth';
+        description = 'Projected portfolio growth over time';
+        break;
+    }
+
+    if (!chart) {
+      this.snackBar.open('Chart not available', 'Close', { duration: 3000 });
+      return;
+    }
+
+    this.exporting.set(true);
+
+    const chartImage = captureEChartsImage(chart, { backgroundColor: '#1e293b' });
+    const startDate = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    const endDate = new Date();
+    endDate.setMonth(endDate.getMonth() + this.timeRangeMonths());
+    const endDateStr = endDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+
+    this.apiService.exportChartPdf({
+      title,
+      description,
+      dateRange: `${startDate} - ${endDateStr}`,
+      chartImage
+    }).subscribe({
+      next: (blob) => {
+        this.downloadFile(blob, `${chartType}-projection.pdf`);
+        this.snackBar.open('PDF downloaded successfully', 'Close', { duration: 3000 });
+        this.exporting.set(false);
+      },
+      error: (error) => {
+        console.error('PDF export failed:', error);
+        this.snackBar.open('PDF export failed', 'Close', { duration: 3000 });
+        this.exporting.set(false);
+      }
+    });
   }
 }

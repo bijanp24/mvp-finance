@@ -359,4 +359,121 @@ public class ExportEndpointsTests : IClassFixture<WebApplicationFactory<Program>
     }
 
     #endregion
+
+    #region PDF Export Tests
+
+    [Fact]
+    public async Task ExportChartPdf_ValidRequest_ReturnsPdfFile()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+
+        // Create a simple 1x1 white PNG as base64
+        var whitePixelPng = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+
+        var request = new
+        {
+            title = "Test Chart Export",
+            description = "A test description",
+            dateRange = "Jan 2025 - Dec 2025",
+            chartImage = whitePixelPng
+        };
+
+        // Act
+        var response = await client.PostAsJsonAsync("/api/export/chart-pdf", request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("application/pdf", response.Content.Headers.ContentType?.MediaType);
+
+        var bytes = await response.Content.ReadAsByteArrayAsync();
+        Assert.True(bytes.Length > 0);
+        // PDF files start with %PDF
+        Assert.Equal(0x25, bytes[0]); // %
+        Assert.Equal(0x50, bytes[1]); // P
+        Assert.Equal(0x44, bytes[2]); // D
+        Assert.Equal(0x46, bytes[3]); // F
+    }
+
+    [Fact]
+    public async Task ExportChartPdf_WithDataUriPrefix_ReturnsPdfFile()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+
+        // Create a simple 1x1 white PNG with data URI prefix
+        var whitePixelPng = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+
+        var request = new
+        {
+            title = "Chart with Data URI",
+            chartImage = whitePixelPng
+        };
+
+        // Act
+        var response = await client.PostAsJsonAsync("/api/export/chart-pdf", request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal("application/pdf", response.Content.Headers.ContentType?.MediaType);
+    }
+
+    [Fact]
+    public async Task ExportChartPdf_MissingTitle_ReturnsBadRequest()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+
+        var request = new
+        {
+            title = "",
+            chartImage = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+        };
+
+        // Act
+        var response = await client.PostAsJsonAsync("/api/export/chart-pdf", request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ExportChartPdf_MissingChartImage_ReturnsBadRequest()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+
+        var request = new
+        {
+            title = "Test Chart",
+            chartImage = ""
+        };
+
+        // Act
+        var response = await client.PostAsJsonAsync("/api/export/chart-pdf", request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task ExportChartPdf_InvalidBase64_ReturnsBadRequest()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+
+        var request = new
+        {
+            title = "Test Chart",
+            chartImage = "not-valid-base64!!!"
+        };
+
+        // Act
+        var response = await client.PostAsJsonAsync("/api/export/chart-pdf", request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    #endregion
 }

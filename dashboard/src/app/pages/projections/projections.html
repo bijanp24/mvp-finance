@@ -8,11 +8,24 @@
     <mat-menu #exportMenu="matMenu">
       <button mat-menu-item (click)="exportProjections('csv')">
         <mat-icon>description</mat-icon>
-        <span>Export as CSV</span>
+        <span>Export Data as CSV</span>
       </button>
       <button mat-menu-item (click)="exportProjections('xlsx')">
         <mat-icon>table_chart</mat-icon>
-        <span>Export as Excel</span>
+        <span>Export Data as Excel</span>
+      </button>
+      <mat-divider></mat-divider>
+      <button mat-menu-item (click)="exportChartPdf('networth')" [disabled]="!netWorthChart">
+        <mat-icon>picture_as_pdf</mat-icon>
+        <span>Net Worth Chart as PDF</span>
+      </button>
+      <button mat-menu-item (click)="exportChartPdf('debt')" [disabled]="!debtChart">
+        <mat-icon>picture_as_pdf</mat-icon>
+        <span>Debt Chart as PDF</span>
+      </button>
+      <button mat-menu-item (click)="exportChartPdf('investment')" [disabled]="!investmentChart">
+        <mat-icon>picture_as_pdf</mat-icon>
+        <span>Investment Chart as PDF</span>
       </button>
     </mat-menu>
   </header>
@@ -205,7 +218,8 @@
           <app-net-worth-chart
             [data]="netWorthChartData()"
             [height]="'400px'"
-            [compact]="false">
+            [compact]="false"
+            (chartInit)="onNetWorthChartInit($event)">
           </app-net-worth-chart>
         </div>
       }
@@ -220,7 +234,8 @@
             [data]="debtChartData()"
             [height]="'400px'"
             [compact]="false"
-            [granularity]="granularity()">
+            [granularity]="granularity()"
+            (chartInit)="onDebtChartInit($event)">
           </app-debt-projection-chart>
         </div>
       }
@@ -234,7 +249,8 @@
           <app-investment-projection-chart
             [data]="investmentChartData()"
             [height]="'400px'"
-            [compact]="false">
+            [compact]="false"
+            (chartInit)="onInvestmentChartInit($event)">
           </app-investment-projection-chart>
         </div>
       }
