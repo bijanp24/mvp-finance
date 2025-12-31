@@ -600,3 +600,62 @@ export interface SliderSummary {
   extraInvestmentContribution: number;
   totalMonthlyChange: number;
 }
+
+// Import Models
+export interface ImportPreviewRequest {
+  fileName: string;
+  fileContent: string; // Base64 encoded
+  accountId?: number;
+  mapping?: ColumnMapping;
+}
+
+export interface ColumnMapping {
+  dateColumn: number;
+  descriptionColumn: number;
+  amountColumn: number;
+  debitColumn?: number;
+  creditColumn?: number;
+  categoryColumn?: number;
+  dateFormat: string;
+  hasHeaderRow: boolean;
+}
+
+export interface ImportPreviewResponse {
+  sessionId: string;
+  headers: string[];
+  sampleRows: string[][];
+  totalRows: number;
+  detectedMapping?: ColumnMapping;
+  previewTransactions: ImportPreviewRow[];
+  warnings: string[];
+  errors: string[];
+}
+
+export interface ImportPreviewRow {
+  rowNumber: number;
+  date: string;
+  description: string;
+  amount: number;
+  category?: string;
+  isDuplicate: boolean;
+  existingTransactionId?: number;
+  isValid: boolean;
+  validationError?: string;
+  selected: boolean;
+}
+
+export interface ImportCommitRequest {
+  sessionId: string;
+  accountId: number;
+  mapping: ColumnMapping;
+  selectedRows?: number[];
+  includeDuplicates: boolean;
+}
+
+export interface ImportCommitResponse {
+  importedCount: number;
+  skippedCount: number;
+  duplicateCount: number;
+  errorCount: number;
+  errors: string[];
+}

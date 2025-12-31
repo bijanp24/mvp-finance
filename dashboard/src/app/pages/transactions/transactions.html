@@ -1,10 +1,16 @@
 <div class="transactions-container">
   <header class="page-header">
     <h1>Transactions</h1>
-    <button mat-flat-button [matMenuTriggerFor]="exportMenu" [disabled]="exporting()">
-      <mat-icon>{{ exporting() ? 'sync' : 'download' }}</mat-icon>
-      {{ exporting() ? 'Exporting...' : 'Export' }}
-    </button>
+    <div class="header-actions">
+      <button mat-stroked-button (click)="openImportDialog()">
+        <mat-icon>upload_file</mat-icon>
+        Import
+      </button>
+      <button mat-flat-button [matMenuTriggerFor]="exportMenu" [disabled]="exporting()">
+        <mat-icon>{{ exporting() ? 'sync' : 'download' }}</mat-icon>
+        {{ exporting() ? 'Exporting...' : 'Export' }}
+      </button>
+    </div>
     <mat-menu #exportMenu="matMenu">
       <button mat-menu-item (click)="exportTransactions('csv')">
         <mat-icon>description</mat-icon>
@@ -201,4 +207,142 @@
       </div>
     </main>
   </div>
+
+  <!-- Import Dialog Overlay -->
+  @if (showImportDialog()) {
+    <div class="dialog-overlay" (click)="closeImportDialog()">
+      <div class="import-dialog" (click)="$event.stopPropagation()">
+        <header class="dialog-header">
+          <h2>Import Transactions</h2>
+          <button mat-icon-button (click)="closeImportDialog()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </header>
+
+        <div class="dialog-content">
+          @if (importing()) {
+            <div class="loading-state">
+              <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+              <p>{{ importStep() === 0 ? 'Parsing file...' : 'Importing transactions...' }}</p>
+            </div>
+          }
+
+          <!-- Step 1: File Upload -->
+          @if (importStep() === 0 && !importing()) {
+            <div class="import-step upload-step">
+              <div class="upload-area">
+                <mat-icon>upload_file</mat-icon>
+                <p>Drop a CSV or Excel file here, or click to browse</p>
+                <span class="file-types">Supported: .csv, .xlsx, .xls</span>
+                <input type="file" #fileInput accept=".csv,.xlsx,.xls" (change)="onFileSelected($event)" hidden>
+                <button mat-flat-button color="primary" (click)="fileInput.click()">
+                  <mat-icon>folder_open</mat-icon>
+                  Choose File
+                </button>
+              </div>
+
+              <mat-form-field appearance="outline" class="account-select">
+                <mat-label>Import to Account</mat-label>
+                <mat-select [value]="importAccountId()" (selectionChange)="importAccountId.set($event.value)">
+                  @for (account of cashAccounts(); track account.id) {
+                    <mat-option [value]="account.id">{{ account.name }}</mat-option>
+                  }
+                </mat-select>
+                <mat-hint>Select the account these transactions belong to</mat-hint>
+              </mat-form-field>
+            </div>
+          }
+
+          <!-- Step 2: Preview & Confirm -->
+          @if (importStep() === 1 && !importing() && importPreview()) {
+            <div class="import-step preview-step">
+              <div class="preview-header">
+                <div class="file-info">
+                  <mat-icon>description</mat-icon>
+                  <span>{{ importFileName() }}</span>
+                  <span class="row-count">{{ importPreview()!.totalRows }} rows</span>
+                </div>
+                <div class="selection-actions">
+                  <button mat-button (click)="selectAllImportRows()">Select All</button>
+                  <button mat-button (click)="deselectAllImportRows()">Deselect All</button>
+                </div>
+              </div>
+
+              @if (importPreview()!.warnings.length > 0) {
+                <div class="import-warnings">
+                  @for (warning of importPreview()!.warnings; track warning) {
+                    <div class="warning-item">
+                      <mat-icon>warning</mat-icon>
+                      <span>{{ warning }}</span>
+                    </div>
+                  }
+                </div>
+              }
+
+              <div class="preview-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th class="checkbox-col"></th>
+                      <th>Date</th>
+                      <th>Description</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (row of importPreview()!.previewTransactions; track row.rowNumber) {
+                      <tr [class.invalid]="!row.isValid" [class.duplicate]="row.isDuplicate">
+                        <td class="checkbox-col">
+                          <mat-checkbox
+                            [checked]="importSelectedRows().has(row.rowNumber)"
+                            [disabled]="!row.isValid"
+                            (change)="toggleImportRow(row.rowNumber)">
+                          </mat-checkbox>
+                        </td>
+                        <td>{{ formatImportDate(row.date) }}</td>
+                        <td class="description-cell">{{ row.description }}</td>
+                        <td [class.positive]="row.amount >= 0" [class.negative]="row.amount < 0">
+                          {{ formatCurrency(row.amount) }}
+                        </td>
+                        <td>
+                          @if (!row.isValid) {
+                            <span class="status-badge error" [title]="row.validationError">Invalid</span>
+                          } @else if (row.isDuplicate) {
+                            <span class="status-badge warning">Duplicate</span>
+                          } @else {
+                            <span class="status-badge success">Ready</span>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="import-summary">
+                <span>{{ importSelectedRows().size }} of {{ importPreview()!.previewTransactions.length }} transactions selected</span>
+              </div>
+            </div>
+          }
+        </div>
+
+        <footer class="dialog-footer">
+          <button mat-button (click)="closeImportDialog()">Cancel</button>
+          @if (importStep() === 1) {
+            <button mat-button (click)="importStep.set(0)">
+              <mat-icon>arrow_back</mat-icon>
+              Back
+            </button>
+            <button mat-flat-button color="primary"
+                    [disabled]="importSelectedRows().size === 0 || !importAccountId() || importing()"
+                    (click)="commitImport()">
+              <mat-icon>check</mat-icon>
+              Import {{ importSelectedRows().size }} Transactions
+            </button>
+          }
+        </footer>
+      </div>
+    </div>
+  }
 </div>

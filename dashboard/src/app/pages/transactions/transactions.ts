@@ -14,8 +14,11 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatStepperModule } from '@angular/material/stepper';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ApiService } from '../../core/services/api.service';
-import { Account, FinancialEvent, CreateEventRequest, EventStatus, Category } from '../../core/models/api.models';
+import { Account, FinancialEvent, CreateEventRequest, EventStatus, Category, ImportPreviewResponse, ImportPreviewRow, ColumnMapping } from '../../core/models/api.models';
 
 @Component({
   selector: 'app-transactions',
@@ -34,7 +37,10 @@ import { Account, FinancialEvent, CreateEventRequest, EventStatus, Category } fr
     MatSnackBarModule,
     MatTableModule,
     MatChipsModule,
-    MatMenuModule
+    MatMenuModule,
+    MatCheckboxModule,
+    MatStepperModule,
+    MatProgressBarModule
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './transactions.html',
@@ -55,6 +61,15 @@ export class TransactionsPage {
   readonly statusFilter = signal<'All' | EventStatus>('All');
   readonly selectedType = signal<string>('Expense');
   readonly displayedColumns = ['date', 'type', 'description', 'account', 'amount', 'status', 'actions'];
+
+  // Import state
+  readonly showImportDialog = signal(false);
+  readonly importStep = signal(0);
+  readonly importing = signal(false);
+  readonly importPreview = signal<ImportPreviewResponse | null>(null);
+  readonly importSelectedRows = signal<Set<number>>(new Set());
+  readonly importAccountId = signal<number | null>(null);
+  readonly importFileName = signal<string>('');
 
   readonly filteredEvents = computed(() => {
     const events = this.recentEvents();
@@ -380,5 +395,148 @@ export class TransactionsPage {
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
+  }
+
+  // Import methods
+  openImportDialog(): void {
+    this.showImportDialog.set(true);
+    this.importStep.set(0);
+    this.importPreview.set(null);
+    this.importSelectedRows.set(new Set());
+    this.importFileName.set('');
+    // Set default account if only one cash account
+    const cashAccounts = this.cashAccounts();
+    if (cashAccounts.length === 1) {
+      this.importAccountId.set(cashAccounts[0].id);
+    } else {
+      this.importAccountId.set(null);
+    }
+  }
+
+  closeImportDialog(): void {
+    this.showImportDialog.set(false);
+    this.importPreview.set(null);
+    this.importSelectedRows.set(new Set());
+    this.importFileName.set('');
+    this.importing.set(false);
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+
+    const file = input.files[0];
+    this.importFileName.set(file.name);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = (reader.result as string).split(',')[1];
+      this.previewImport(file.name, base64);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  private previewImport(fileName: string, base64Content: string): void {
+    this.importing.set(true);
+    const accountId = this.importAccountId();
+
+    this.apiService.previewImport({
+      fileName,
+      fileContent: base64Content,
+      accountId: accountId ?? undefined
+    }).subscribe({
+      next: (response) => {
+        this.importPreview.set(response);
+        // Select all valid non-duplicate rows by default
+        const selected = new Set<number>();
+        response.previewTransactions
+          .filter(t => t.isValid && !t.isDuplicate)
+          .forEach(t => selected.add(t.rowNumber));
+        this.importSelectedRows.set(selected);
+        this.importStep.set(1);
+        this.importing.set(false);
+      },
+      error: (error) => {
+        console.error('Preview failed:', error);
+        this.snackBar.open(error.error?.errors?.[0] || 'Failed to preview file', 'Close', { duration: 5000 });
+        this.importing.set(false);
+      }
+    });
+  }
+
+  toggleImportRow(rowNumber: number): void {
+    const selected = new Set(this.importSelectedRows());
+    if (selected.has(rowNumber)) {
+      selected.delete(rowNumber);
+    } else {
+      selected.add(rowNumber);
+    }
+    this.importSelectedRows.set(selected);
+  }
+
+  selectAllImportRows(): void {
+    const preview = this.importPreview();
+    if (!preview) return;
+
+    const selected = new Set<number>();
+    preview.previewTransactions
+      .filter(t => t.isValid)
+      .forEach(t => selected.add(t.rowNumber));
+    this.importSelectedRows.set(selected);
+  }
+
+  deselectAllImportRows(): void {
+    this.importSelectedRows.set(new Set());
+  }
+
+  commitImport(): void {
+    const preview = this.importPreview();
+    const accountId = this.importAccountId();
+
+    if (!preview || !accountId || !preview.detectedMapping) {
+      this.snackBar.open('Please select an account', 'Close', { duration: 3000 });
+      return;
+    }
+
+    const selectedRows = Array.from(this.importSelectedRows());
+    if (selectedRows.length === 0) {
+      this.snackBar.open('No transactions selected', 'Close', { duration: 3000 });
+      return;
+    }
+
+    this.importing.set(true);
+
+    this.apiService.commitImport({
+      sessionId: preview.sessionId,
+      accountId,
+      mapping: preview.detectedMapping,
+      selectedRows,
+      includeDuplicates: false
+    }).subscribe({
+      next: (response) => {
+        this.importing.set(false);
+        this.closeImportDialog();
+        this.loadData();
+        this.snackBar.open(
+          `Imported ${response.importedCount} transactions` +
+          (response.skippedCount > 0 ? `, ${response.skippedCount} skipped` : ''),
+          'Close',
+          { duration: 5000 }
+        );
+      },
+      error: (error) => {
+        console.error('Import failed:', error);
+        this.snackBar.open(error.error?.errors?.[0] || 'Import failed', 'Close', { duration: 5000 });
+        this.importing.set(false);
+      }
+    });
+  }
+
+  formatImportDate(dateStr: string): string {
+    const date = new Date(dateStr);
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric'
+    }).format(date);
   }
 }

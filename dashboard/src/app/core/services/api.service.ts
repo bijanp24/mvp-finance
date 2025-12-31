@@ -39,7 +39,11 @@ import {
   TimeHorizon,
   ScenarioRequest,
   ScenarioResponse,
-  ScenarioDefaultsResponse
+  ScenarioDefaultsResponse,
+  ImportPreviewRequest,
+  ImportPreviewResponse,
+  ImportCommitRequest,
+  ImportCommitResponse
 } from '../models/api.models';
 
 @Injectable({
@@ -307,6 +311,15 @@ export class ApiService {
     return this.http.get(`${this.baseUrl}/export/full`, {
       responseType: 'blob'
     });
+  }
+
+  // Import endpoints
+  previewImport(request: ImportPreviewRequest): Observable<ImportPreviewResponse> {
+    return this.http.post<ImportPreviewResponse>(`${this.baseUrl}/import/preview`, request);
+  }
+
+  commitImport(request: ImportCommitRequest): Observable<ImportCommitResponse> {
+    return this.http.post<ImportCommitResponse>(`${this.baseUrl}/import/commit`, request);
   }
 }
 
