@@ -4,6 +4,7 @@ obj/
 *.db
 *.db-shm
 *.db-wal
+*.db.backup
 
 # Angular
 dashboard/node_modules/
