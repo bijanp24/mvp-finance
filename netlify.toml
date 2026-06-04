@@ -1,0 +1,19 @@
+# Netlify deploy config for the Angular dashboard.
+# The app lives in dashboard/ and the @angular/build:application builder emits to
+# dist/dashboard/browser/ (note the browser/ subfolder - a common 404 cause).
+
+[build]
+  base = "dashboard"
+  command = "npm run build"
+  publish = "dist/dashboard/browser"
+
+[build.environment]
+  # Angular 21 requires a modern Node runtime.
+  NODE_VERSION = "22"
+
+# Single-page-app fallback: serve index.html for client-side routes
+# (e.g. /credit-plan, /transactions) so deep links and refreshes don't 404.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
