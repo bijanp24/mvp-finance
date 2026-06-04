@@ -431,6 +431,27 @@ form {
   }
 }
 
+.convention-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+  flex-wrap: wrap;
+
+  .convention-label {
+    font-size: 0.8125rem;
+    color: var(--color-text-muted);
+  }
+
+  .convention-hint {
+    color: var(--color-text-muted);
+    cursor: help;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
 .import-warnings {
   background: rgba(241, 196, 15, 0.1);
   border: 1px solid rgba(241, 196, 15, 0.3);

@@ -117,7 +117,7 @@ public class ImportService
         return result;
     }
 
-    public ColumnMapping? DetectColumnMapping(ParsedFile file)
+    public ColumnMapping? DetectColumnMapping(ParsedFile file, AccountType? accountType = null)
     {
         if (file.Headers.Count == 0) return null;
 
@@ -126,7 +126,12 @@ public class ImportService
             DateColumn = -1,
             DescriptionColumn = -1,
             AmountColumn = -1,
-            HasHeaderRow = file.HasHeaderRow
+            HasHeaderRow = file.HasHeaderRow,
+            // Debt accounts (credit cards) almost always report charges as positive
+            // amounts; default to the credit-card convention so they import as expenses.
+            AmountConvention = accountType == AccountType.Debt
+                ? AmountConvention.CreditCard
+                : AmountConvention.Standard
         };
 
         for (int i = 0; i < file.Headers.Count; i++)
@@ -254,6 +259,14 @@ public class ImportService
                     preview.ValidationError = $"Invalid amount: {amountStr}";
                     result.Add(preview);
                     continue;
+                }
+
+                // Credit-card statements report charges as positive and payments as
+                // negative - the opposite of a bank account. Flip the sign so a charge
+                // becomes a negative amount (Expense) and a payment becomes positive.
+                if (mapping.AmountConvention == AmountConvention.CreditCard)
+                {
+                    amount = -amount;
                 }
             }
             preview.Amount = amount;

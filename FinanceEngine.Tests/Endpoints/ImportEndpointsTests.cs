@@ -53,6 +53,24 @@ public class ImportEndpointsTests : IClassFixture<WebApplicationFactory<Program>
         }
     }
 
+    private async Task<AccountEntity> SeedCreditCard(FinanceDbContext db)
+    {
+        var existing = db.Accounts.FirstOrDefault(a => a.Name == "Test Credit Card");
+        if (existing != null) return existing;
+
+        var card = new AccountEntity
+        {
+            Name = "Test Credit Card",
+            Type = AccountType.Debt,
+            InitialBalance = 0m,
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        };
+        db.Accounts.Add(card);
+        await db.SaveChangesAsync();
+        return card;
+    }
+
     #region Preview Tests
 
     [Fact]
@@ -183,6 +201,119 @@ public class ImportEndpointsTests : IClassFixture<WebApplicationFactory<Program>
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    [Fact]
+    public async Task PreviewImport_DebtAccount_DefaultsToCreditCardConvention()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<FinanceDbContext>();
+        var card = await SeedCreditCard(db);
+
+        // Credit-card statement: a charge is reported as a positive amount.
+        var csv = "Date,Description,Amount\n01/15/2025,Grocery Store,45.00\n01/20/2025,Payment Thank You,-200.00";
+        var request = new
+        {
+            fileName = "statement.csv",
+            fileContent = CreateCsvBase64(csv),
+            accountId = card.Id
+        };
+
+        // Act
+        var response = await client.PostAsJsonAsync("/api/import/preview", request);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var result = await response.Content.ReadFromJsonAsync<PreviewResponse>();
+        Assert.NotNull(result);
+        Assert.NotNull(result.DetectedMapping);
+        Assert.Equal("CreditCard", result.DetectedMapping.AmountConvention);
+
+        // The $45 charge should be flipped to a negative amount (an expense),
+        // and the payment flipped to positive.
+        var charge = result.PreviewTransactions.First(t => t.Description == "Grocery Store");
+        var payment = result.PreviewTransactions.First(t => t.Description == "Payment Thank You");
+        Assert.Equal(-45.00m, charge.Amount);
+        Assert.Equal(200.00m, payment.Amount);
+    }
+
+    [Fact]
+    public async Task PreviewImport_CashAccount_DefaultsToStandardConvention()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<FinanceDbContext>();
+        await SeedTestAccount(db);
+        var account = db.Accounts.First(a => a.Name == "Test Checking");
+
+        var csv = "Date,Description,Amount\n01/15/2025,Coffee Shop,-5.50\n01/16/2025,Paycheck,2500.00";
+        var request = new
+        {
+            fileName = "bank.csv",
+            fileContent = CreateCsvBase64(csv),
+            accountId = account.Id
+        };
+
+        // Act
+        var response = await client.PostAsJsonAsync("/api/import/preview", request);
+
+        // Assert
+        var result = await response.Content.ReadFromJsonAsync<PreviewResponse>();
+        Assert.NotNull(result);
+        Assert.NotNull(result.DetectedMapping);
+        Assert.Equal("Standard", result.DetectedMapping.AmountConvention);
+        var coffee = result.PreviewTransactions.First(t => t.Description == "Coffee Shop");
+        Assert.Equal(-5.50m, coffee.Amount); // Unchanged
+    }
+
+    [Fact]
+    public async Task CommitImport_CreditCardConvention_ImportsChargesAsExpenses()
+    {
+        // Arrange
+        var client = _factory.CreateClient();
+
+        using var scope = _factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<FinanceDbContext>();
+        var card = await SeedCreditCard(db);
+
+        var csv = "Date,Description,Amount\n02/15/2025,Restaurant Charge,75.00\n02/20/2025,Card Payment,-300.00";
+        var previewRequest = new
+        {
+            fileName = "statement.csv",
+            fileContent = CreateCsvBase64(csv),
+            accountId = card.Id
+        };
+        var previewResponse = await client.PostAsJsonAsync("/api/import/preview", previewRequest);
+        var preview = await previewResponse.Content.ReadFromJsonAsync<PreviewResponse>();
+
+        var commitRequest = new
+        {
+            sessionId = preview!.SessionId,
+            accountId = card.Id,
+            mapping = preview.DetectedMapping
+        };
+
+        // Act
+        var response = await client.PostAsJsonAsync("/api/import/commit", commitRequest);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var result = await response.Content.ReadFromJsonAsync<CommitResponse>();
+        Assert.NotNull(result);
+        Assert.Equal(2, result.ImportedCount);
+
+        using var verifyScope = _factory.Services.CreateScope();
+        var verifyDb = verifyScope.ServiceProvider.GetRequiredService<FinanceDbContext>();
+        var charge = verifyDb.Events.First(e => e.Description == "Restaurant Charge");
+        var payment = verifyDb.Events.First(e => e.Description == "Card Payment");
+        Assert.Equal(EventType.Expense, charge.Type);   // Charge -> Expense
+        Assert.Equal(75.00m, charge.Amount);            // Stored as positive magnitude
+        Assert.Equal(EventType.Income, payment.Type);   // Payment -> Income (credit)
+    }
+
     #endregion
 
     #region Commit Tests
@@ -283,6 +414,7 @@ public class ImportEndpointsTests : IClassFixture<WebApplicationFactory<Program>
         public int? CategoryColumn { get; set; }
         public string DateFormat { get; set; } = "";
         public bool HasHeaderRow { get; set; }
+        public string AmountConvention { get; set; } = "";
     }
 
     private class PreviewRowDto

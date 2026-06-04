@@ -609,6 +609,8 @@ export interface ImportPreviewRequest {
   mapping?: ColumnMapping;
 }
 
+export type AmountConvention = 'Standard' | 'CreditCard';
+
 export interface ColumnMapping {
   dateColumn: number;
   descriptionColumn: number;
@@ -618,6 +620,8 @@ export interface ColumnMapping {
   categoryColumn?: number;
   dateFormat: string;
   hasHeaderRow: boolean;
+  // 'Standard' = positive is income (bank account); 'CreditCard' = positive is a charge.
+  amountConvention?: AmountConvention;
 }
 
 export interface ImportPreviewResponse {
