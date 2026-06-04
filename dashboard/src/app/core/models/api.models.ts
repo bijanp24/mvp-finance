@@ -663,3 +663,62 @@ export interface ImportCommitResponse {
   errorCount: number;
   errors: string[];
 }
+
+// Credit Action Plan Models
+export type DebtStrategy = 'Avalanche' | 'Snowball' | 'Hybrid';
+
+export interface CreditActionPlanRequest {
+  windfall: number;
+  emergencyFundMonths?: number;
+  monthlyEssentialExpenses?: number;
+  strategy?: DebtStrategy;
+}
+
+export interface PlanDebtSummary {
+  name: string;
+  balance: number;
+  effectiveAPR: number;
+  minimumPayment: number;
+}
+
+export interface CreditActionPlanDefaultsResponse {
+  suggestedWindfall: number;
+  monthlyEssentialExpenses: number;
+  monthlyIncome: number;
+  defaultEmergencyFundMonths: number;
+  debts: PlanDebtSummary[];
+}
+
+export interface DebtActionStep {
+  order: number;
+  debtName: string;
+  effectiveAPR: number;
+  startingBalance: number;
+  minimumPayment: number;
+  lumpSumApplied: number;
+  balanceAfterLumpSum: number;
+  isFullyPaid: boolean;
+  monthsToPayoffBefore: number | null;
+  monthsToPayoffAfter: number | null;
+  interestBefore: number;
+  interestAfter: number;
+  interestSaved: number;
+}
+
+export interface CreditActionPlanResponse {
+  strategy: DebtStrategy;
+  emergencyFundTarget: number;
+  emergencyFundReserved: number;
+  isEmergencyFundFunded: boolean;
+  monthsOfExpensesCovered: number;
+  windfallTotal: number;
+  windfallToDebt: number;
+  windfallRemaining: number;
+  totalDebtBefore: number;
+  totalDebtAfter: number;
+  totalInterestSaved: number;
+  monthsToDebtFreeBefore: number;
+  monthsToDebtFreeAfter: number;
+  steps: DebtActionStep[];
+  recommendations: string[];
+}

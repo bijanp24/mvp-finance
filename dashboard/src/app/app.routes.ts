@@ -41,5 +41,9 @@ export const routes: Routes = [
   {
     path: 'scenarios',
     loadComponent: () => import('./pages/scenarios/scenarios').then(m => m.ScenariosPage)
+  },
+  {
+    path: 'credit-plan',
+    loadComponent: () => import('./pages/credit-plan/credit-plan').then(m => m.CreditPlanPage)
   }
 ];
