@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 using ClosedXML.Excel;
 using CsvHelper;
 using CsvHelper.Configuration;
@@ -7,6 +8,8 @@ using FinanceEngine.Api.Models;
 using FinanceEngine.Data;
 using FinanceEngine.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using UglyToad.PdfPig;
+using UglyToad.PdfPig.Content;
 
 namespace FinanceEngine.Api.Services;
 
@@ -29,6 +32,7 @@ public class ImportService
         {
             ".csv" => ParseCsv(bytes),
             ".xlsx" or ".xls" => ParseExcel(bytes),
+            ".pdf" => ParsePdf(bytes),
             _ => throw new ArgumentException($"Unsupported file type: {extension}")
         };
     }
@@ -115,6 +119,152 @@ public class ImportService
         }
 
         return result;
+    }
+
+    // Matches a statement transaction line: a leading date, a description, and a
+    // trailing money amount (optionally negative via parentheses, a leading/trailing
+    // minus, or a "CR" credit suffix). Issuer layouts vary, so this is deliberately
+    // forgiving; the preview lets the user deselect anything misread.
+    private static readonly Regex TransactionLine = new(
+        @"^\s*(?<date>\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?)\s+(?<desc>.+?)\s+(?<amt>\(?-?\$?[\d,]+\.\d{2}\)?)\s*(?<suffix>CR|-)?\s*$",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+    private static readonly Regex LeadingSecondDate = new(
+        @"^\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?\s+", RegexOptions.Compiled);
+
+    private ParsedFile ParsePdf(byte[] bytes)
+    {
+        var lines = new List<string>();
+        var totalWords = 0;
+
+        using (var document = PdfDocument.Open(bytes))
+        {
+            foreach (var page in document.GetPages())
+            {
+                var words = page.GetWords().ToList();
+                totalWords += words.Count;
+                lines.AddRange(ReconstructLines(words));
+            }
+        }
+
+        if (totalWords == 0)
+        {
+            throw new ArgumentException(
+                "This PDF has no readable text layer - it may be a scan or image. " +
+                "Try downloading a CSV/Excel statement from your card's website instead.");
+        }
+
+        return ExtractTransactionsFromLines(lines);
+    }
+
+    /// <summary>
+    /// Reconstructs visual text lines from positioned words by clustering words
+    /// with a near-identical vertical position, then ordering each line left to right.
+    /// </summary>
+    private static IEnumerable<string> ReconstructLines(IReadOnlyList<Word> words)
+    {
+        const double yTolerance = 3.0;
+
+        var ordered = words
+            .Where(w => !string.IsNullOrWhiteSpace(w.Text))
+            .OrderByDescending(w => w.BoundingBox.Top)
+            .ToList();
+
+        var current = new List<Word>();
+        double? currentY = null;
+
+        foreach (var word in ordered)
+        {
+            var y = word.BoundingBox.Top;
+            if (currentY is null || Math.Abs(y - currentY.Value) <= yTolerance)
+            {
+                current.Add(word);
+                currentY ??= y;
+            }
+            else
+            {
+                yield return JoinLine(current);
+                current = new List<Word> { word };
+                currentY = y;
+            }
+        }
+
+        if (current.Count > 0)
+            yield return JoinLine(current);
+
+        static string JoinLine(List<Word> ws) =>
+            string.Join(" ", ws.OrderBy(w => w.BoundingBox.Left).Select(w => w.Text));
+    }
+
+    /// <summary>
+    /// Turns reconstructed text lines into a normalized [Date, Description, Amount]
+    /// table so the rest of the import pipeline (column detection, sign convention,
+    /// duplicate detection) works exactly as it does for CSV/Excel.
+    /// </summary>
+    public ParsedFile ExtractTransactionsFromLines(IEnumerable<string> lines)
+    {
+        var file = new ParsedFile { HasHeaderRow = true };
+        file.Headers.AddRange(new[] { "Date", "Description", "Amount" });
+
+        var rowNumber = 0;
+        foreach (var rawLine in lines)
+        {
+            var match = TransactionLine.Match(rawLine);
+            if (!match.Success) continue;
+
+            var date = NormalizeDate(match.Groups["date"].Value);
+            if (date is null) continue; // not a plausible date - skip
+
+            var description = LeadingSecondDate.Replace(match.Groups["desc"].Value, "").Trim();
+            if (string.IsNullOrWhiteSpace(description)) continue;
+
+            var negative = match.Groups["suffix"].Value.Length > 0   // trailing "-" or "CR"
+                || match.Groups["amt"].Value.Contains('(');           // accounting parentheses
+            var amount = NormalizeAmount(match.Groups["amt"].Value, negative);
+            if (amount is null) continue;
+
+            rowNumber++;
+            file.Rows.Add(new ParsedRow
+            {
+                RowNumber = rowNumber,
+                Values = { date, description, amount }
+            });
+        }
+
+        return file;
+    }
+
+    private static string? NormalizeDate(string token)
+    {
+        var parts = token.Split('/', '-');
+        if (parts.Length < 2) return null;
+        if (!int.TryParse(parts[0], out var month) || !int.TryParse(parts[1], out var day))
+            return null;
+        if (month is < 1 or > 12 || day is < 1 or > 31) return null;
+
+        int year;
+        if (parts.Length >= 3 && int.TryParse(parts[2], out var parsedYear))
+        {
+            year = parsedYear < 100 ? 2000 + parsedYear : parsedYear;
+        }
+        else
+        {
+            // Bare MM/DD with no year - assume the current year.
+            year = DateTime.Today.Year;
+        }
+
+        return $"{month:D2}/{day:D2}/{year:D4}";
+    }
+
+    private static string? NormalizeAmount(string token, bool forceNegative)
+    {
+        var cleaned = token.Replace("$", "").Replace(",", "").Replace("(", "").Replace(")", "").Trim();
+        if (!decimal.TryParse(cleaned, NumberStyles.Any, CultureInfo.InvariantCulture, out var value))
+            return null;
+
+        value = Math.Abs(value);
+        if (forceNegative) value = -value;
+        return value.ToString(CultureInfo.InvariantCulture);
     }
 
     public ColumnMapping? DetectColumnMapping(ParsedFile file, AccountType? accountType = null)

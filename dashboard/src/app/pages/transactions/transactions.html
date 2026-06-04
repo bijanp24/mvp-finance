@@ -232,9 +232,9 @@
             <div class="import-step upload-step">
               <div class="upload-area">
                 <mat-icon>upload_file</mat-icon>
-                <p>Drop a CSV or Excel file here, or click to browse</p>
-                <span class="file-types">Supported: .csv, .xlsx, .xls</span>
-                <input type="file" #fileInput accept=".csv,.xlsx,.xls" (change)="onFileSelected($event)" hidden>
+                <p>Drop a CSV, Excel, or PDF statement here, or click to browse</p>
+                <span class="file-types">Supported: .csv, .xlsx, .xls, .pdf</span>
+                <input type="file" #fileInput accept=".csv,.xlsx,.xls,.pdf" (change)="onFileSelected($event)" hidden>
                 <button mat-flat-button color="primary" (click)="fileInput.click()">
                   <mat-icon>folder_open</mat-icon>
                   Choose File
