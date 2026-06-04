@@ -1,0 +1,167 @@
+<div class="credit-plan-page">
+  <header class="page-header">
+    <div>
+      <h1>Credit Action Plan</h1>
+      <p class="subtitle">Turn a lump sum into an emergency reserve and a debt-payoff plan.</p>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Loading your accounts...</p>
+    </div>
+  } @else {
+    <!-- Inputs -->
+    <mat-card class="inputs-card">
+      <div class="inputs-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Windfall to deploy</mat-label>
+          <span matTextPrefix>$&nbsp;</span>
+          <input matInput type="number" min="0" [ngModel]="windfall()" (ngModelChange)="windfall.set($event)">
+          <mat-hint>Lump sum you can put to work now</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Monthly essential expenses</mat-label>
+          <span matTextPrefix>$&nbsp;</span>
+          <input matInput type="number" min="0" [ngModel]="monthlyEssentialExpenses()" (ngModelChange)="monthlyEssentialExpenses.set($event)">
+          <mat-hint>Rent, food, utilities - the must-pays</mat-hint>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Emergency fund (months)</mat-label>
+          <input matInput type="number" min="0" max="24" [ngModel]="emergencyFundMonths()" (ngModelChange)="emergencyFundMonths.set($event)">
+          <mat-hint>Set aside before paying debt</mat-hint>
+        </mat-form-field>
+
+        <div class="strategy-field">
+          <span class="field-label">Payoff strategy</span>
+          <mat-button-toggle-group [value]="strategy()" (change)="strategy.set($event.value)">
+            <mat-button-toggle value="Avalanche">Avalanche (highest APR)</mat-button-toggle>
+            <mat-button-toggle value="Snowball">Snowball (smallest first)</mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
+      </div>
+
+      <div class="inputs-actions">
+        <button mat-flat-button color="primary" (click)="generatePlan()" [disabled]="calculating()">
+          <mat-icon>auto_awesome</mat-icon>
+          Generate plan
+        </button>
+        @if (defaults()?.debts?.length === 0) {
+          <span class="no-debt-hint">No credit-card debt found. Add credit cards under Accounts and import statements to populate this.</span>
+        }
+      </div>
+    </mat-card>
+
+    @if (calculating()) {
+      <div class="loading-state">
+        <mat-spinner diameter="32"></mat-spinner>
+        <p>Building your plan...</p>
+      </div>
+    }
+
+    @if (result(); as plan) {
+      <!-- Headline metrics -->
+      <div class="metrics-grid">
+        <mat-card class="metric">
+          <span class="metric-label">Emergency reserve</span>
+          <span class="metric-value">{{ formatCurrency(plan.emergencyFundReserved) }}</span>
+          <span class="metric-sub" [class.warn]="!plan.isEmergencyFundFunded">
+            @if (plan.isEmergencyFundFunded) {
+              {{ plan.monthsOfExpensesCovered | number:'1.0-1' }} months covered
+            } @else {
+              Underfunded - target {{ formatCurrency(plan.emergencyFundTarget) }}
+            }
+          </span>
+        </mat-card>
+
+        <mat-card class="metric">
+          <span class="metric-label">Applied to debt</span>
+          <span class="metric-value">{{ formatCurrency(plan.windfallToDebt) }}</span>
+          <span class="metric-sub">of {{ formatCurrency(plan.totalDebtBefore) }} total debt</span>
+        </mat-card>
+
+        <mat-card class="metric highlight">
+          <span class="metric-label">Interest saved</span>
+          <span class="metric-value">{{ formatCurrency(plan.totalInterestSaved) }}</span>
+          <span class="metric-sub">vs. paying minimums</span>
+        </mat-card>
+
+        <mat-card class="metric">
+          <span class="metric-label">Debt-free in</span>
+          <span class="metric-value">{{ formatMonths(plan.monthsToDebtFreeAfter) }}</span>
+          <span class="metric-sub">was {{ formatMonths(plan.monthsToDebtFreeBefore) }}</span>
+        </mat-card>
+      </div>
+
+      <!-- Recommendations -->
+      @if (plan.recommendations.length > 0) {
+        <mat-card class="recommendations-card">
+          <h2><mat-icon>tips_and_updates</mat-icon> Your action steps</h2>
+          <ol class="recommendations">
+            @for (rec of plan.recommendations; track rec) {
+              <li>{{ rec }}</li>
+            }
+          </ol>
+        </mat-card>
+      }
+
+      <!-- Per-card breakdown -->
+      @if (plan.steps.length > 0) {
+        <mat-card class="steps-card">
+          <h2>Payoff order ({{ plan.strategy }})</h2>
+          <div class="steps-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Card</th>
+                  <th class="num">APR</th>
+                  <th class="num">Balance</th>
+                  <th class="num">Lump sum</th>
+                  <th class="num">After</th>
+                  <th class="num">Interest saved</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (step of plan.steps; track step.debtName) {
+                  <tr [class.paid]="step.isFullyPaid">
+                    <td>{{ step.order }}</td>
+                    <td class="name">{{ step.debtName }}</td>
+                    <td class="num">{{ formatPercent(step.effectiveAPR) }}</td>
+                    <td class="num">{{ formatCurrency(step.startingBalance) }}</td>
+                    <td class="num applied">{{ formatCurrency(step.lumpSumApplied) }}</td>
+                    <td class="num">{{ formatCurrency(step.balanceAfterLumpSum) }}</td>
+                    <td class="num saved">{{ formatCurrency(step.interestSaved) }}</td>
+                    <td>
+                      @if (step.isFullyPaid) {
+                        <span class="badge paid">Paid off</span>
+                      } @else if (step.lumpSumApplied > 0) {
+                        <span class="badge partial">Reduced</span>
+                      } @else {
+                        <span class="badge none">Minimums</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          @if (plan.windfallRemaining > 0) {
+            <p class="leftover">
+              <mat-icon>savings</mat-icon>
+              {{ formatCurrency(plan.windfallRemaining) }} left over after clearing all debt.
+            </p>
+          }
+        </mat-card>
+      }
+
+      <p class="disclaimer">
+        Estimates only, not financial advice. Payoff times assume current minimum payments and APRs continue unchanged.
+      </p>
+    }
+  }
+</div>

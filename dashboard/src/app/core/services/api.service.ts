@@ -43,7 +43,10 @@ import {
   ImportPreviewRequest,
   ImportPreviewResponse,
   ImportCommitRequest,
-  ImportCommitResponse
+  ImportCommitResponse,
+  CreditActionPlanRequest,
+  CreditActionPlanResponse,
+  CreditActionPlanDefaultsResponse
 } from '../models/api.models';
 
 @Injectable({
@@ -320,6 +323,15 @@ export class ApiService {
 
   commitImport(request: ImportCommitRequest): Observable<ImportCommitResponse> {
     return this.http.post<ImportCommitResponse>(`${this.baseUrl}/import/commit`, request);
+  }
+
+  // Credit action plan endpoints
+  getCreditActionPlanDefaults(): Observable<CreditActionPlanDefaultsResponse> {
+    return this.http.get<CreditActionPlanDefaultsResponse>(`${this.baseUrl}/credit-action-plan/defaults`);
+  }
+
+  calculateCreditActionPlan(request: CreditActionPlanRequest): Observable<CreditActionPlanResponse> {
+    return this.http.post<CreditActionPlanResponse>(`${this.baseUrl}/credit-action-plan/calculate`, request);
   }
 }
 

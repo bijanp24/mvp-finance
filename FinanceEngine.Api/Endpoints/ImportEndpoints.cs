@@ -45,8 +45,18 @@ public static class ImportEndpoints
                 .ToList();
             response.TotalRows = parsedFile.Rows.Count;
 
-            // Detect or use provided mapping
-            var mapping = request.Mapping ?? _importService.DetectColumnMapping(parsedFile);
+            // Detect or use provided mapping. When an account is specified, pass its
+            // type so a Debt account (credit card) defaults to the credit-card sign convention.
+            AccountType? accountType = null;
+            if (request.AccountId.HasValue)
+            {
+                accountType = await db.Accounts
+                    .Where(a => a.Id == request.AccountId.Value)
+                    .Select(a => (AccountType?)a.Type)
+                    .FirstOrDefaultAsync();
+            }
+
+            var mapping = request.Mapping ?? _importService.DetectColumnMapping(parsedFile, accountType);
 
             if (mapping == null)
             {

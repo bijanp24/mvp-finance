@@ -18,7 +18,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { ApiService } from '../../core/services/api.service';
-import { Account, FinancialEvent, CreateEventRequest, EventStatus, Category, ImportPreviewResponse, ImportPreviewRow, ColumnMapping } from '../../core/models/api.models';
+import { Account, FinancialEvent, CreateEventRequest, EventStatus, Category, ImportPreviewResponse, ImportPreviewRow, ColumnMapping, AmountConvention } from '../../core/models/api.models';
 
 @Component({
   selector: 'app-transactions',
@@ -70,6 +70,8 @@ export class TransactionsPage {
   readonly importSelectedRows = signal<Set<number>>(new Set());
   readonly importAccountId = signal<number | null>(null);
   readonly importFileName = signal<string>('');
+  readonly importFileContent = signal<string>(''); // Base64, kept so we can re-preview
+  readonly importConvention = signal<AmountConvention>('Standard');
 
   readonly filteredEvents = computed(() => {
     const events = this.recentEvents();
@@ -112,6 +114,11 @@ export class TransactionsPage {
 
   readonly cashAccounts = computed(() => {
     return this.accounts().filter(a => a.type === 'Cash');
+  });
+
+  // Accounts you can import a statement into: bank/cash accounts and credit cards (Debt).
+  readonly importAccounts = computed(() => {
+    return this.accounts().filter(a => a.type === 'Cash' || a.type === 'Debt');
   });
 
   constructor() {
@@ -404,10 +411,12 @@ export class TransactionsPage {
     this.importPreview.set(null);
     this.importSelectedRows.set(new Set());
     this.importFileName.set('');
-    // Set default account if only one cash account
-    const cashAccounts = this.cashAccounts();
-    if (cashAccounts.length === 1) {
-      this.importAccountId.set(cashAccounts[0].id);
+    this.importFileContent.set('');
+    this.importConvention.set('Standard');
+    // Set default account if only one importable account
+    const accounts = this.importAccounts();
+    if (accounts.length === 1) {
+      this.importAccountId.set(accounts[0].id);
     } else {
       this.importAccountId.set(null);
     }
@@ -418,6 +427,7 @@ export class TransactionsPage {
     this.importPreview.set(null);
     this.importSelectedRows.set(new Set());
     this.importFileName.set('');
+    this.importFileContent.set('');
     this.importing.set(false);
   }
 
@@ -431,22 +441,38 @@ export class TransactionsPage {
     const reader = new FileReader();
     reader.onload = () => {
       const base64 = (reader.result as string).split(',')[1];
+      this.importFileContent.set(base64);
       this.previewImport(file.name, base64);
     };
     reader.readAsDataURL(file);
   }
 
-  private previewImport(fileName: string, base64Content: string): void {
+  // Re-run the preview with a different sign convention (e.g. user marks the file
+  // as a credit-card statement). Reuses the already-loaded file content.
+  changeConvention(convention: AmountConvention): void {
+    this.importConvention.set(convention);
+    const base64 = this.importFileContent();
+    const preview = this.importPreview();
+    if (!base64 || !preview?.detectedMapping) return;
+
+    const mapping: ColumnMapping = { ...preview.detectedMapping, amountConvention: convention };
+    this.previewImport(this.importFileName(), base64, mapping);
+  }
+
+  private previewImport(fileName: string, base64Content: string, mapping?: ColumnMapping): void {
     this.importing.set(true);
     const accountId = this.importAccountId();
 
     this.apiService.previewImport({
       fileName,
       fileContent: base64Content,
-      accountId: accountId ?? undefined
+      accountId: accountId ?? undefined,
+      mapping
     }).subscribe({
       next: (response) => {
         this.importPreview.set(response);
+        // Track the convention the backend actually used so the UI reflects it.
+        this.importConvention.set(response.detectedMapping?.amountConvention ?? 'Standard');
         // Select all valid non-duplicate rows by default
         const selected = new Set<number>();
         response.previewTransactions

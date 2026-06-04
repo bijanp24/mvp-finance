@@ -1,4 +1,26 @@
+using System.Text.Json.Serialization;
+
 namespace FinanceEngine.Api.Models;
+
+/// <summary>
+/// How to interpret the sign of a single amount column.
+/// Bank statements and credit-card statements use opposite conventions.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum AmountConvention
+{
+    /// <summary>
+    /// Standard bank/checking convention: positive = money in (income/deposit),
+    /// negative = money out (expense). This is the default.
+    /// </summary>
+    Standard,
+
+    /// <summary>
+    /// Credit-card statement convention: positive = a charge you made (expense),
+    /// negative = a payment/credit/refund. The amount sign is flipped on import.
+    /// </summary>
+    CreditCard
+}
 
 public class ImportPreviewRequest
 {
@@ -18,6 +40,14 @@ public class ColumnMapping
     public int? CategoryColumn { get; set; }
     public string DateFormat { get; set; } = "MM/dd/yyyy";
     public bool HasHeaderRow { get; set; } = true;
+
+    /// <summary>
+    /// Sign convention for the single amount column. Ignored when separate
+    /// debit/credit columns are used (those are already unambiguous).
+    /// Defaults to <see cref="AmountConvention.CreditCard"/> when importing into a
+    /// Debt account, otherwise <see cref="AmountConvention.Standard"/>.
+    /// </summary>
+    public AmountConvention AmountConvention { get; set; } = AmountConvention.Standard;
 }
 
 public class ImportPreviewResponse
