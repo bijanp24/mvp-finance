@@ -73,6 +73,7 @@ app.MapGroup("/api/scenarios").MapScenarioEndpoints();
 app.MapGroup("/api/export").MapExportEndpoints();
 app.MapGroup("/api/import").MapImportEndpoints();
 app.MapGroup("/api/credit-action-plan").MapCreditActionPlanEndpoints();
+app.MapGroup("/api/options").MapOptionsEndpoints();
 
 app.Run();
 
