@@ -45,5 +45,9 @@ export const routes: Routes = [
   {
     path: 'credit-plan',
     loadComponent: () => import('./pages/credit-plan/credit-plan').then(m => m.CreditPlanPage)
+  },
+  {
+    path: 'options',
+    loadChildren: () => import('./features/options-trading/options-trading.routes').then(m => m.OPTIONS_TRADING_ROUTES)
   }
 ];
