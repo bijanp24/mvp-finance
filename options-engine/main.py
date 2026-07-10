@@ -28,6 +28,9 @@ def calc_greeks(params: OptionParams):
     sigma = params.sigma
     
     # Calculate d1 and d2
+    if T <= 0 or sigma <= 0:
+        return { "error": "T and sigma must be greater than zero." }
+
     d1 = (np.log(S / K) + (r + 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))
     d2 = (np.log(S / K) + (r - 0.5 * sigma ** 2) * T) / (sigma * np.sqrt(T))
     
@@ -42,9 +45,9 @@ def calc_greeks(params: OptionParams):
     return {
         "delta": float(delta),
         "gamma": float(gamma),
-        "theta": 0.0, # Placeholder
+        "theta": 0.0, # placeholder
         "vega": float(vega),
-        "rho": 0.0 # Placeholder
+        "rho": 0.0 # placeholder
     }
 
 @app.post("/api/viz/payoff")

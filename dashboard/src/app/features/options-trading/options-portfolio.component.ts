@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { OptionsService, OptionParams, Greeks, PayoffPoint } from './options.service';
 
@@ -6,6 +6,7 @@ import { OptionsService, OptionParams, Greeks, PayoffPoint } from './options.ser
   selector: 'app-options-portfolio',
   standalone: true,
   imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="p-4">
       <h1 class="text-2xl font-bold mb-4">Options Trading</h1>
@@ -14,22 +15,32 @@ import { OptionsService, OptionParams, Greeks, PayoffPoint } from './options.ser
       <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="border rounded shadow p-4">
           <h2 class="text-xl font-semibold mb-2">Greeks Widget</h2>
-          <div id="greeks-container" *ngIf="greeks()">
-            <p>Delta: {{ greeks()?.delta | number:'1.4-4' }}</p>
-            <p>Gamma: {{ greeks()?.gamma | number:'1.4-4' }}</p>
-            <p>Vega: {{ greeks()?.vega | number:'1.4-4' }}</p>
-          </div>
-          <div *ngIf="!greeks() && !error()">Loading Greeks from Python engine...</div>
-          <div *ngIf="error()" class="text-red-500">{{ error() }}</div>
+          @if (greeks()) {
+            <div id="greeks-container">
+              <p>Delta: {{ greeks()?.delta | number:'1.4-4' }}</p>
+              <p>Gamma: {{ greeks()?.gamma | number:'1.4-4' }}</p>
+              <p>Vega: {{ greeks()?.vega | number:'1.4-4' }}</p>
+            </div>
+          }
+          @if (!greeks() && !error()) {
+            <div>Loading Greeks from Python engine...</div>
+          }
+          @if (error()) {
+            <div class="text-red-500">{{ error() }}</div>
+          }
         </div>
         
         <div class="border rounded shadow p-4">
           <h2 class="text-xl font-semibold mb-2">Payoff Chart</h2>
-          <div id="payoff-chart-container" *ngIf="payoffData().length > 0">
-            <p class="text-sm text-gray-500">Data points generated: {{ payoffData().length }}</p>
-            <!-- Chart implementation goes here -->
-          </div>
-          <div *ngIf="payoffData().length === 0 && !error()">Loading visualization...</div>
+          @if (payoffData().length > 0) {
+            <div id="payoff-chart-container">
+              <p class="text-sm text-gray-500">Data points generated: {{ payoffData().length }}</p>
+              <!-- Chart implementation goes here -->
+            </div>
+          }
+          @if (payoffData().length === 0 && !error()) {
+            <div>Loading visualization...</div>
+          }
         </div>
       </div>
     </div>
@@ -54,7 +65,7 @@ export class OptionsPortfolioComponent implements OnInit {
   ngOnInit() {
     this.optionsService.getGreeks(this.defaultParams).subscribe({
       next: (data) => this.greeks.set(data),
-      error: (err) => this.error.set('Failed to connect to Python Engine')
+      error: (err) => this.error.set('Failed to connect to Python Engine. Ensure the service is running on port 8000.')
     });
     
     this.optionsService.getPayoff(this.defaultParams).subscribe({
