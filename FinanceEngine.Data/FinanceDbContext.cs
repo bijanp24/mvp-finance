@@ -17,6 +17,8 @@ public class FinanceDbContext : DbContext
     public DbSet<IncomeScheduleEntity> IncomeSchedules => Set<IncomeScheduleEntity>();
     public DbSet<RecurringContributionEntity> RecurringContributions => Set<RecurringContributionEntity>();
     public DbSet<UserSettingsEntity> UserSettings => Set<UserSettingsEntity>();
+    public DbSet<OptionContract> OptionContracts => Set<OptionContract>();
+    public DbSet<OptionTransaction> OptionTransactions => Set<OptionTransaction>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -172,6 +174,26 @@ public class FinanceDbContext : DbContext
             entity.HasIndex(e => e.IsActive);
             entity.HasIndex(e => e.Priority);
             entity.HasIndex(e => e.TargetDate);
+        });
+
+        // OptionContract configuration
+        modelBuilder.Entity<OptionContract>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.TickerSymbol).IsRequired().HasMaxLength(20);
+            entity.Property(e => e.StrikePrice).HasPrecision(18, 2);
+            entity.Property(e => e.Premium).HasPrecision(18, 2);
+        });
+
+        // OptionTransaction configuration
+        modelBuilder.Entity<OptionTransaction>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Price).HasPrecision(18, 2);
+            entity.HasOne(e => e.Contract)
+                  .WithMany()
+                  .HasForeignKey(e => e.OptionContractId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }
